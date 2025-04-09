@@ -16,6 +16,7 @@ import {logout} from '../../redux/slices/authSlice';
 
 import {ROUTES} from '../../constants/routes';
 import {useNavigation} from '@react-navigation/native';
+import { fallbackImg } from '../../utils/images';
 
 const MenuItem = ({title, onPress}) => {
   return (
@@ -56,7 +57,7 @@ const Profile = () => {
           <View style={styles.profileHeader}>
             <Image
               source={{
-                uri: 'https://s3-alpha-sig.figma.com/img/9153/e528/226e9714d86e9909ec7a7afbb487e6f4?Expires=1742169600&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=Ju5708~~du1MFBfTBMUJCXylWkupwwj~LkOtnGrmiNO-htDfMWhJyVGM1u6FVPIjqGmz506XWeXSI7NIHDnC8LJ3ThsMPrn8HCfoELG~cWMeK0Yz4zhpJphgAsxi04VZjHaJ2Ur1zXvmpInxpT0b-GatZl13gE5au2xQrCMZrnwgblTwpgcYLogvFeaWhui8vp49gl6QssPmS9j5wZWKevdiZkJpAgtVvr7YfdJvoPJ7WYMCWBGPPZfjz0M58GrYjfNVXLFeNqJ3cyworsc~-c71D3hhCPkOYbWBkHLF~3Mlmc~uoemnpUP8RPEWe6mto-OsM6a1cGFEecsLtwJHIQ__',
+                uri: fallbackImg(),
               }}
               style={styles.profileAvatar}
             />

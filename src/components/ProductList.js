@@ -12,6 +12,7 @@ import {ROUTES} from '../constants/routes';
 import CustomText from '../CustomText';
 import {setCategoryName} from '../redux/slices/productSlice';
 import {useDispatch} from 'react-redux';
+import { fallbackImg } from '../utils/images';
 
 const ProductList = ({title, products, onViewAll, idx}) => {
   const navigation = useNavigation();
@@ -62,7 +63,7 @@ const ProductList = ({title, products, onViewAll, idx}) => {
               ) : (
                 <Image
                   source={{
-                    uri: 'https://s3-alpha-sig.figma.com/img/d947/c1cf/3875c5a4423e670d6ff4add7f266f106?Expires=1742169600&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=GrXSLhPHDiBrOXgh~kF2RZMNiI0zHLzDAeWR6KPafZweSmCHIQUh1zyO3jyrbUOfetpCvu9YWbLNDRVnmvPRBAEAkTh6DIFwY9Xsuajt8G6Gy7k7h84RdgL9ATyzh~T1BpR5ez3CzbxedtIW6bj3a9deITbFy9wYQxTZpaoHSTm93kBG0KK6MeykuPzeqzSlEqiKp8SdX2k3OSn5~C4tnPtwO8m6MM36RVMXWF4PnNb6Gso3D0tItYQUnQblz8AgMhyGSPZjRCmwbJJc~yqLKo9do5AHE7BGf9jsiieDOix1QDYIdYIeKVZR4QwkZyj22qq3W61sOR0tHS7yJSxQsw__',
+                    uri: fallbackImg(),
                   }}
                   style={styles.productImage}
                 />

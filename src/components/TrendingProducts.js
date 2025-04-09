@@ -9,6 +9,7 @@ import {
   Dimensions,
   Platform,
 } from 'react-native';
+import { fallbackImg } from '../utils/images';
 
 const {width} = Dimensions.get('window');
 const cardWidth = width * 0.45;
@@ -19,26 +20,22 @@ const TrendingProducts = ({products}) => {
     {
       id: '1',
       name: 'Textile Auxiliaries',
-      image:
-        'https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1972&q=80',
+      image: fallbackImg(),
     },
     {
       id: '2',
       name: 'Rotary Screen Printing',
-      image:
-        'https://images.unsplash.com/photo-1583364493238-248032147fbd?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1974&q=80',
+      image:fallbackImg(),
     },
     {
       id: '3',
       name: 'Dyeing Chemicals',
-      image:
-        'https://images.unsplash.com/photo-1635405074683-96d6921a2a68?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1974&q=80',
+      image:fallbackImg(),
     },
     {
       id: '4',
       name: 'Finishing Agents',
-      image:
-        'https://images.unsplash.com/photo-1618220179428-22790b461013?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1974&q=80',
+      image:fallbackImg(),
     },
   ];
 

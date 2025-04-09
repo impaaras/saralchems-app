@@ -27,7 +27,7 @@ const HomeScreen = () => {
     setError(null);
     try {
       const response = await axios.get(
-        `http://172.20.10.3:4000/category`,
+        `https://api.saraldyechems.com/category`,
         // `https://95ae-2401-4900-1c72-8070-dce3-2227-b42b-cdfd.ngrok-free.app/category`,
         {
           headers: {

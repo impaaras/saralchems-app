@@ -21,6 +21,7 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 import OrderTrackModal from '../components/OrderTrackModal';
 import ProductModal from './ProductDetails/ProductModal';
 import DashboardHeader from '../components/DashBoardHeader';
+import { fallbackImg } from '../utils/images';
 
 const {width} = Dimensions.get('window');
 
@@ -108,7 +109,7 @@ const OrderTracking = ({order = sampleOrder}) => {
                 <View style={styles.orderItem}>
                   <Image
                     source={{
-                      uri: `https://s3-alpha-sig.figma.com/img/4f5a/8713/fa4ef7fec5ff73309653f4bd9e47df47?Expires=1742774400&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=ucFgTbikmyISCqC0oAY1bqTrA0DlMo5L~0VBEozWD0DPsl50eOWFAa0pNcyIge-V~2wyql0NIivL8baESabavtyal3APkS2qYYK~RiQWb-6jIm-z8hX2XwdlX15fve1aXx0LSVoKxJ2n6eoBPXDxSXFz7bp7q8tq4X8p08hl1ysUGsAnPgCS3DVCobsU1dlRNNgfai1deNACDHqY9V9HWrjn3eoqp0KekA3xqE8vO6aVf52stOB7PwaMSaNOhNkfTbNQ~u1-04k9~mHjCiLHTnXYN2QUjwQOwsn6LccjUwUudxRYY-SX2gDfMoXKQq6CfK1FpS0EXS2E5hNFd2vaBQ__`,
+                      uri: fallbackImg(),
                     }}
                     style={styles.productImage}
                   />
@@ -346,7 +347,7 @@ const sampleOrder = {
     quantity: 8,
     rating: '4.1',
     image:
-      'https://hebbkx1anhila5yf.public.blob.vercel-storage.com/Screenshot%202025-03-13%20at%202.12.22%E2%80%AFPM-IfiCBKoVKkOoNd8hsYfS48ezAQjkX7.png',
+    fallbackImg(),
   },
   tracking: {
     placed: [
