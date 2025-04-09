@@ -11,8 +11,9 @@ import {
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Ionicons from 'react-native-vector-icons/Ionicons'; // Make sure to install expo/vector-icons if not already installed
+import { fallbackImg } from '../utils/images';
 
-const OrderTrackModal = ({visible, onClose, orderData}) => {
+const OrderTrackModal = ({ visible, onClose, orderData }) => {
   // Sample data based on the screenshot
   const sampleOrderData = {
     orderNumber: '8234',
@@ -25,8 +26,7 @@ const OrderTrackModal = ({visible, onClose, orderData}) => {
         brand: 'Brand',
         size: '80*56" (N * M)',
         quantity: 8,
-        image:
-          'https://s3-alpha-sig.figma.com/img/4f5a/8713/fa4ef7fec5ff73309653f4bd9e47df47?Expires=1742774400&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=ucFgTbikmyISCqC0oAY1bqTrA0DlMo5L~0VBEozWD0DPsl50eOWFAa0pNcyIge-V~2wyql0NIivL8baESabavtyal3APkS2qYYK~RiQWb-6jIm-z8hX2XwdlX15fve1aXx0LSVoKxJ2n6eoBPXDxSXFz7bp7q8tq4X8p08hl1ysUGsAnPgCS3DVCobsU1dlRNNgfai1deNACDHqY9V9HWrjn3eoqp0KekA3xqE8vO6aVf52stOB7PwaMSaNOhNkfTbNQ~u1-04k9~mHjCiLHTnXYN2QUjwQOwsn6LccjUwUudxRYY-SX2gDfMoXKQq6CfK1FpS0EXS2E5hNFd2vaBQ__', // Replace with actual image URL
+        image: fallbackImg(),
       },
       {
         id: 2,
@@ -34,8 +34,7 @@ const OrderTrackModal = ({visible, onClose, orderData}) => {
         brand: 'Brand',
         size: '80*56" (N * M)',
         quantity: 8,
-        image:
-          'https://s3-alpha-sig.figma.com/img/4f5a/8713/fa4ef7fec5ff73309653f4bd9e47df47?Expires=1742774400&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=ucFgTbikmyISCqC0oAY1bqTrA0DlMo5L~0VBEozWD0DPsl50eOWFAa0pNcyIge-V~2wyql0NIivL8baESabavtyal3APkS2qYYK~RiQWb-6jIm-z8hX2XwdlX15fve1aXx0LSVoKxJ2n6eoBPXDxSXFz7bp7q8tq4X8p08hl1ysUGsAnPgCS3DVCobsU1dlRNNgfai1deNACDHqY9V9HWrjn3eoqp0KekA3xqE8vO6aVf52stOB7PwaMSaNOhNkfTbNQ~u1-04k9~mHjCiLHTnXYN2QUjwQOwsn6LccjUwUudxRYY-SX2gDfMoXKQq6CfK1FpS0EXS2E5hNFd2vaBQ__', // Replace with actual image URL
+        image: fallbackImg()
       },
       {
         id: 3,
@@ -43,8 +42,7 @@ const OrderTrackModal = ({visible, onClose, orderData}) => {
         brand: 'Brand',
         size: '80*56" (N * M)',
         quantity: 8,
-        image:
-          'https://s3-alpha-sig.figma.com/img/4f5a/8713/fa4ef7fec5ff73309653f4bd9e47df47?Expires=1742774400&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=ucFgTbikmyISCqC0oAY1bqTrA0DlMo5L~0VBEozWD0DPsl50eOWFAa0pNcyIge-V~2wyql0NIivL8baESabavtyal3APkS2qYYK~RiQWb-6jIm-z8hX2XwdlX15fve1aXx0LSVoKxJ2n6eoBPXDxSXFz7bp7q8tq4X8p08hl1ysUGsAnPgCS3DVCobsU1dlRNNgfai1deNACDHqY9V9HWrjn3eoqp0KekA3xqE8vO6aVf52stOB7PwaMSaNOhNkfTbNQ~u1-04k9~mHjCiLHTnXYN2QUjwQOwsn6LccjUwUudxRYY-SX2gDfMoXKQq6CfK1FpS0EXS2E5hNFd2vaBQ__', // Replace with actual image URL
+        image: fallbackImg()
       },
       {
         id: 4,
@@ -52,8 +50,7 @@ const OrderTrackModal = ({visible, onClose, orderData}) => {
         brand: 'Brand',
         size: '80*56" (N * M)',
         quantity: 8,
-        image:
-          'https://s3-alpha-sig.figma.com/img/4f5a/8713/fa4ef7fec5ff73309653f4bd9e47df47?Expires=1742774400&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=ucFgTbikmyISCqC0oAY1bqTrA0DlMo5L~0VBEozWD0DPsl50eOWFAa0pNcyIge-V~2wyql0NIivL8baESabavtyal3APkS2qYYK~RiQWb-6jIm-z8hX2XwdlX15fve1aXx0LSVoKxJ2n6eoBPXDxSXFz7bp7q8tq4X8p08hl1ysUGsAnPgCS3DVCobsU1dlRNNgfai1deNACDHqY9V9HWrjn3eoqp0KekA3xqE8vO6aVf52stOB7PwaMSaNOhNkfTbNQ~u1-04k9~mHjCiLHTnXYN2QUjwQOwsn6LccjUwUudxRYY-SX2gDfMoXKQq6CfK1FpS0EXS2E5hNFd2vaBQ__', // Replace with actual image URL
+        image:fallbackImg()
       },
     ],
     totalTax: 1500.0,
@@ -83,10 +80,10 @@ const OrderTrackModal = ({visible, onClose, orderData}) => {
               <View style={styles.actionContainer}>
                 <LinearGradient
                   colors={['#38587F', '#101924']} // Left to right gradient colors
-                  start={{x: 0, y: 0}}
-                  end={{x: 1, y: 0}}
-                  style={{borderRadius: 50}}
-                  //   style={styles.receiptButton} // Make sure the gradient covers the button
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={{ borderRadius: 50 }}
+                //   style={styles.receiptButton} // Make sure the gradient covers the button
                 >
                   <TouchableOpacity style={styles.repeatButton}>
                     <Text style={styles.repeatButtonText}>Repeat Order</Text>
@@ -100,7 +97,7 @@ const OrderTrackModal = ({visible, onClose, orderData}) => {
 
             {data.items.map(item => (
               <View key={item.id} style={styles.itemContainer}>
-                <Image source={{uri: item.image}} style={styles.itemImage} />
+                <Image source={{ uri: item.image }} style={styles.itemImage} />
                 <View style={styles.itemDetails}>
                   <View style={styles.nameContainer}>
                     <Text style={styles.itemName}>{item.name} </Text>
@@ -313,7 +310,7 @@ const styles = StyleSheet.create({
     marginRight: 8,
     elevation: 2,
     shadowColor: '#4CAF50',
-    shadowOffset: {width: 0, height: 2}, // Offset in x and y direction
+    shadowOffset: { width: 0, height: 2 }, // Offset in x and y direction
     shadowOpacity: 1, // Opacity of the shadow
     shadowRadius: 4, // Blur radius
   },

@@ -22,6 +22,7 @@ import VariantsModal from './VariantsModal';
 import {openModal} from '../redux/slices/modalSlice';
 import {callbackRegistry} from '../utils/Modal/callbackRegistry';
 import {setSelectedVariant} from '../redux/slices/productSlice';
+import {fallbackImg} from '../utils/images';
 
 const ProductCard = ({item, onAddPress, idx}) => {
   const dispatch = useDispatch();
@@ -72,8 +73,7 @@ const ProductCard = ({item, onAddPress, idx}) => {
       <View style={styles.imageContainer}>
         <TouchableOpacity onPress={() => openScreenTag(item, idx)}>
           <Image
-            source={{
-              uri: `https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1972&q=80`,
+            source={{uri : fallbackImg(),
             }}
             style={styles.productImage}
           />

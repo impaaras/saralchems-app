@@ -13,6 +13,7 @@ import Icon from 'react-native-vector-icons/Entypo';
 import {ROUTES} from '../constants/routes';
 import {useNavigation} from '@react-navigation/native';
 import DashboardHeader from '../components/DashBoardHeader';
+import { fallbackImg } from '../utils/images';
 
 const OrderHistory = () => {
   const [activeTab, setActiveTab] = useState('All Orders');
@@ -32,7 +33,7 @@ const OrderHistory = () => {
           size: `80"×56" (4 * 4')`,
           quantity: 8,
           price: '$200.00',
-          image: `https://s3-alpha-sig.figma.com/img/4f5a/8713/fa4ef7fec5ff73309653f4bd9e47df47?Expires=1742169600&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=ESKybLsPR-n0Bud0qXuEHFHKztOgBvIgHWw3UlpvKISeLfYBduN4X4jt~IOL9EU6i3d~8d1YmH7DuRriaUPyqL~JgAXQU5Tlbrsxt-nz4EWiO-UfLYnEUhiOPknJr3DuNezXs6G8jvQMvhdayKlUtbYEI8t5-qqQe6SVbxNFrCj3efL4zMUuFNg8q2X2Vb7HnYVIofPXDNc2ujRzxQQkfNL8pgkMvXV5m5p1ZNgbEIeE5RwWkBgNxjHWeH7kGpS1zc-pQ6NsK-~Ap9gcaqJj~EVvZ5-IY0h3lv8tl1~PQ3HP967m7btS~8OHP9Ha2y7EKDur23--dI1uY099vZUw2Q__`, // Placeholder - use your actual image path
+          image: fallbackImg(),
         },
       ],
     },
@@ -46,31 +47,31 @@ const OrderHistory = () => {
           name: 'Nylon (Brand)',
           size: `80"×56" (4' × 4')`,
           quantity: 8,
-          image: `https://s3-alpha-sig.figma.com/img/4f5a/8713/fa4ef7fec5ff73309653f4bd9e47df47?Expires=1742169600&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=ESKybLsPR-n0Bud0qXuEHFHKztOgBvIgHWw3UlpvKISeLfYBduN4X4jt~IOL9EU6i3d~8d1YmH7DuRriaUPyqL~JgAXQU5Tlbrsxt-nz4EWiO-UfLYnEUhiOPknJr3DuNezXs6G8jvQMvhdayKlUtbYEI8t5-qqQe6SVbxNFrCj3efL4zMUuFNg8q2X2Vb7HnYVIofPXDNc2ujRzxQQkfNL8pgkMvXV5m5p1ZNgbEIeE5RwWkBgNxjHWeH7kGpS1zc-pQ6NsK-~Ap9gcaqJj~EVvZ5-IY0h3lv8tl1~PQ3HP967m7btS~8OHP9Ha2y7EKDur23--dI1uY099vZUw2Q__`, // Placeholder - use your actual image path
+          image: fallbackImg(),
         },
         {
           name: 'Nylon (Brand)',
           size: `80"×56" (4' × 4')`,
           quantity: 8,
-          image: `https://s3-alpha-sig.figma.com/img/4f5a/8713/fa4ef7fec5ff73309653f4bd9e47df47?Expires=1742169600&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=ESKybLsPR-n0Bud0qXuEHFHKztOgBvIgHWw3UlpvKISeLfYBduN4X4jt~IOL9EU6i3d~8d1YmH7DuRriaUPyqL~JgAXQU5Tlbrsxt-nz4EWiO-UfLYnEUhiOPknJr3DuNezXs6G8jvQMvhdayKlUtbYEI8t5-qqQe6SVbxNFrCj3efL4zMUuFNg8q2X2Vb7HnYVIofPXDNc2ujRzxQQkfNL8pgkMvXV5m5p1ZNgbEIeE5RwWkBgNxjHWeH7kGpS1zc-pQ6NsK-~Ap9gcaqJj~EVvZ5-IY0h3lv8tl1~PQ3HP967m7btS~8OHP9Ha2y7EKDur23--dI1uY099vZUw2Q__`, // Placeholder - use your actual image path
+          image: fallbackImg(),
         },
         {
           name: 'Nylon (Brand)',
           size: `80"×56" (4' × 4')`,
           quantity: 8,
-          image: `https://s3-alpha-sig.figma.com/img/4f5a/8713/fa4ef7fec5ff73309653f4bd9e47df47?Expires=1742169600&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=ESKybLsPR-n0Bud0qXuEHFHKztOgBvIgHWw3UlpvKISeLfYBduN4X4jt~IOL9EU6i3d~8d1YmH7DuRriaUPyqL~JgAXQU5Tlbrsxt-nz4EWiO-UfLYnEUhiOPknJr3DuNezXs6G8jvQMvhdayKlUtbYEI8t5-qqQe6SVbxNFrCj3efL4zMUuFNg8q2X2Vb7HnYVIofPXDNc2ujRzxQQkfNL8pgkMvXV5m5p1ZNgbEIeE5RwWkBgNxjHWeH7kGpS1zc-pQ6NsK-~Ap9gcaqJj~EVvZ5-IY0h3lv8tl1~PQ3HP967m7btS~8OHP9Ha2y7EKDur23--dI1uY099vZUw2Q__`, // Placeholder - use your actual image path
+          image: fallbackImg(),
         },
         {
           name: 'Nylon (Brand)',
           size: `80"×56" (4' × 4')`,
           quantity: 8,
-          image: `https://s3-alpha-sig.figma.com/img/4f5a/8713/fa4ef7fec5ff73309653f4bd9e47df47?Expires=1742169600&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=ESKybLsPR-n0Bud0qXuEHFHKztOgBvIgHWw3UlpvKISeLfYBduN4X4jt~IOL9EU6i3d~8d1YmH7DuRriaUPyqL~JgAXQU5Tlbrsxt-nz4EWiO-UfLYnEUhiOPknJr3DuNezXs6G8jvQMvhdayKlUtbYEI8t5-qqQe6SVbxNFrCj3efL4zMUuFNg8q2X2Vb7HnYVIofPXDNc2ujRzxQQkfNL8pgkMvXV5m5p1ZNgbEIeE5RwWkBgNxjHWeH7kGpS1zc-pQ6NsK-~Ap9gcaqJj~EVvZ5-IY0h3lv8tl1~PQ3HP967m7btS~8OHP9Ha2y7EKDur23--dI1uY099vZUw2Q__`, // Placeholder - use your actual image path
+          image: fallbackImg(),
         },
         {
           name: 'Nylon (Brand)',
           size: `80"×56" (4' × 4')`,
           quantity: 8,
-          image: `https://s3-alpha-sig.figma.com/img/4f5a/8713/fa4ef7fec5ff73309653f4bd9e47df47?Expires=1742169600&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=ESKybLsPR-n0Bud0qXuEHFHKztOgBvIgHWw3UlpvKISeLfYBduN4X4jt~IOL9EU6i3d~8d1YmH7DuRriaUPyqL~JgAXQU5Tlbrsxt-nz4EWiO-UfLYnEUhiOPknJr3DuNezXs6G8jvQMvhdayKlUtbYEI8t5-qqQe6SVbxNFrCj3efL4zMUuFNg8q2X2Vb7HnYVIofPXDNc2ujRzxQQkfNL8pgkMvXV5m5p1ZNgbEIeE5RwWkBgNxjHWeH7kGpS1zc-pQ6NsK-~Ap9gcaqJj~EVvZ5-IY0h3lv8tl1~PQ3HP967m7btS~8OHP9Ha2y7EKDur23--dI1uY099vZUw2Q__`, // Placeholder - use your actual image path
+          image: fallbackImg(),
         },
       ],
     },
@@ -85,7 +86,7 @@ const OrderHistory = () => {
           size: `80"×56" (4' × 4')`,
           quantity: 8,
           price: '$200.00',
-          image: `https://s3-alpha-sig.figma.com/img/4f5a/8713/fa4ef7fec5ff73309653f4bd9e47df47?Expires=1742169600&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=ESKybLsPR-n0Bud0qXuEHFHKztOgBvIgHWw3UlpvKISeLfYBduN4X4jt~IOL9EU6i3d~8d1YmH7DuRriaUPyqL~JgAXQU5Tlbrsxt-nz4EWiO-UfLYnEUhiOPknJr3DuNezXs6G8jvQMvhdayKlUtbYEI8t5-qqQe6SVbxNFrCj3efL4zMUuFNg8q2X2Vb7HnYVIofPXDNc2ujRzxQQkfNL8pgkMvXV5m5p1ZNgbEIeE5RwWkBgNxjHWeH7kGpS1zc-pQ6NsK-~Ap9gcaqJj~EVvZ5-IY0h3lv8tl1~PQ3HP967m7btS~8OHP9Ha2y7EKDur23--dI1uY099vZUw2Q__`, // Placeholder - use your actual image path
+          image: fallbackImg(),
         },
       ],
     },
@@ -121,7 +122,7 @@ const OrderHistory = () => {
         <View style={styles.userInfoCard}>
           <Image
             source={{
-              uri: 'https://s3-alpha-sig.figma.com/img/9153/e528/226e9714d86e9909ec7a7afbb487e6f4?Expires=1742169600&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=Ju5708~~du1MFBfTBMUJCXylWkupwwj~LkOtnGrmiNO-htDfMWhJyVGM1u6FVPIjqGmz506XWeXSI7NIHDnC8LJ3ThsMPrn8HCfoELG~cWMeK0Yz4zhpJphgAsxi04VZjHaJ2Ur1zXvmpInxpT0b-GatZl13gE5au2xQrCMZrnwgblTwpgcYLogvFeaWhui8vp49gl6QssPmS9j5wZWKevdiZkJpAgtVvr7YfdJvoPJ7WYMCWBGPPZfjz0M58GrYjfNVXLFeNqJ3cyworsc~-c71D3hhCPkOYbWBkHLF~3Mlmc~uoemnpUP8RPEWe6mto-OsM6a1cGFEecsLtwJHIQ__',
+              uri: fallbackImg(),
             }} // Use your actual asset
             style={styles.userAvatar}
           />
