@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import {
   StyleSheet,
   Text,
@@ -26,7 +26,6 @@ import {fallbackImg} from '../../utils/images';
 const CartItem = ({product, onRemove, onDecrement, onIncrement}) => {
   const navigation = useNavigation();
   const calculateTotal = (variant, quantity) => {
-    // Extract numerical value from variant (e.g., "10gm" -> 10)
     const match = variant.match(/(\d+)\s*(kg|gm|ltr)/i);
     if (!match) return `${quantity} × ${variant}`;
 
@@ -34,7 +33,6 @@ const CartItem = ({product, onRemove, onDecrement, onIncrement}) => {
     const unit = match[2].toLowerCase();
     const total = value * quantity;
 
-    // For grams, convert to kg if over 1000
     if (unit === 'gm' && total >= 1000) {
       return `${total / 1000}kg`;
     }
@@ -94,97 +92,101 @@ const CartItem = ({product, onRemove, onDecrement, onIncrement}) => {
 
 const Cart = () => {
   const navigation = useNavigation();
-  const [cartItems, setCartItems] = useState([
-    {
-      id: 1,
-      name: 'Nylon (Brand)',
-      specification: '80*56" (N + M)',
-      quality: '1',
-      quantity: 1,
-      image: fallbackImg(),
-    },
-    {
-      id: 2,
-      name: 'Nylon (Brand)',
-      specification: '80*56" (N + M)',
-      quality: '1',
-      quantity: 1,
-
-      image: fallbackImg(),
-    },
-  ]);
-
   const dispatch = useDispatch();
   const {items, loading, error} = useSelector(state => state.addToCart);
+  const isScreenFocused = useRef(false);
+  const isProcessing = useRef(false); // Track if an operation is in progress
 
-  const handleDecrement = (productId, variant, currentQuantity) => {
-    if (currentQuantity > 1) {
-      dispatch(
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      isScreenFocused.current = true;
+      fetchCartData();
+    });
+
+    return unsubscribe;
+  }, [navigation]);
+
+  useEffect(() => {
+    fetchCartData();
+  }, []);
+
+  const fetchCartData = useCallback(async () => {
+    try {
+      await dispatch(getCart()).unwrap();
+    } catch (err) {
+      Alert.alert('Error', 'Failed to load cart');
+    }
+  }, [dispatch]);
+
+  const handleCartOperation = async (
+    operation,
+    productId,
+    variant,
+    quantityChange,
+  ) => {
+    if (isProcessing.current) return;
+    isProcessing.current = true;
+    try {
+      await dispatch(
         updateCartItem({
           productId,
           variant,
-          quantity: -1,
+          quantity: quantityChange,
         }),
-      )
-        .unwrap()
-        .then(() => {
-          dispatch(getCart()); // Refresh cart after update
-        })
-        .catch(err => {
-          Alert.alert('Error', err.message || 'Failed to update quantity');
-        });
+      ).unwrap();
+      await dispatch(getCart());
+    } catch (err) {
+      Alert.alert('Error', err.message || 'Failed to update quantity');
+    } finally {
+      isProcessing.current = false;
+    }
+  };
+
+  const handleDecrement = (productId, variant, currentQuantity) => {
+    if (currentQuantity > 1) {
+      handleCartOperation(updateCartItem, productId, variant, -1);
     } else {
       handleRemoveItem(productId, variant);
     }
   };
 
-  const handleIncrement = (productId, variant, currentQuantity) => {
-    // Send the absolute quantity to update (not delta)
-    dispatch(
-      updateCartItem({
-        productId,
-        variant,
-        quantity: 1,
-      }),
-    )
-      .unwrap()
-      .then(() => {
-        dispatch(getCart()); // Refresh cart after update
-      })
-      .catch(err => {
-        Alert.alert('Error', err.message || 'Failed to update quantity');
-      });
+  const handleIncrement = (productId, variant) => {
+    handleCartOperation(updateCartItem, productId, variant, 1);
   };
 
-  const handleRemoveItem = (productId, variant) => {
-    Alert.alert(
-      'Remove Item',
-      'Are you sure you want to remove this item from your cart?',
-      [
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
-        {
-          text: 'Remove',
-          onPress: () => {
-            dispatch(removeFromCart({productId, variant}))
-              .unwrap()
-              .then(() => {
-                dispatch(getCart()); // Refresh cart after removal
-              })
-              .catch(err => {
+  const handleRemoveItem = useCallback(
+    (productId, variant) => {
+      Alert.alert(
+        'Remove Item',
+        'Are you sure you want to remove this item from your cart?',
+        [
+          {text: 'Cancel', style: 'cancel'},
+          {
+            text: 'Remove',
+            onPress: async () => {
+              try {
+                await dispatch(removeFromCart({productId, variant})).unwrap();
+                if (isScreenFocused.current) {
+                  await fetchCartData();
+                }
+              } catch (err) {
                 Alert.alert('Error', err.message || 'Failed to remove item');
-              });
+              }
+            },
           },
-        },
-      ],
-    );
-  };
+        ],
+      );
+    },
+    [dispatch, fetchCartData],
+  );
 
   useEffect(() => {
-    dispatch(getCart());
-  }, [dispatch]);
+    const unsubscribe = navigation.addListener('blur', () => {
+      isScreenFocused.current = false;
+    });
+
+    return unsubscribe;
+  }, [navigation]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -213,11 +215,7 @@ const Cart = () => {
                   )
                 }
                 onIncrement={() =>
-                  handleIncrement(
-                    item.productId._id,
-                    item.variant,
-                    item.quantity,
-                  )
+                  handleIncrement(item.productId._id, item.variant)
                 }
               />
             ))
@@ -246,21 +244,19 @@ const Cart = () => {
         </View>
         <View style={{flexDirection: 'row', justifyContent: 'space-around'}}>
           <LinearGradient
-            colors={['#05842A', '#05842A']} // Left to right gradient colors
+            colors={['#05842A', '#05842A']}
             start={{x: 0, y: 0}}
             end={{x: 1, y: 0}}
-            style={styles.confirmButton} // Make sure the gradient covers the button
-          >
+            style={styles.confirmButton}>
             <TouchableOpacity style={styles.quoteButton}>
               <Text style={styles.quoteButtonText}>Confirm</Text>
             </TouchableOpacity>
           </LinearGradient>
           <LinearGradient
-            colors={['#38587F', '#101924']} // Left to right gradient colors
+            colors={['#38587F', '#101924']}
             start={{x: 0, y: 0}}
             end={{x: 1, y: 0}}
-            style={styles.receiptButton} // Make sure the gradient covers the button
-          >
+            style={styles.receiptButton}>
             <TouchableOpacity style={styles.quoteButton}>
               <Text style={styles.quoteButtonText}>Request for Quote</Text>
             </TouchableOpacity>
@@ -278,7 +274,6 @@ const styles = StyleSheet.create({
     flex: 1,
     zIndex: 1,
   },
-
   menuButton: {
     marginRight: 15,
   },
@@ -312,7 +307,6 @@ const styles = StyleSheet.create({
   },
   cartTitle: {
     fontSize: 16,
-
     marginLeft: 10,
     fontWeight: 'bold',
     color: '#FFF',
