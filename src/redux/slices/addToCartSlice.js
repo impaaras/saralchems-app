@@ -1,11 +1,13 @@
 import {createSlice, createAsyncThunk} from '@reduxjs/toolkit';
 import axios from 'axios';
 import {StorageKeys, storage} from '../../utils/storage';
+import { API_URL } from '../../utils/ApiService';
 // import {BASE_URL} from '../config';
 
 // https://api.saraldyechems.com/
 // const BASE_URL = 'https://api.saraldyechems.com';
-const BASE_URL = 'http://172.20.10.3:4000';
+// const BASE_URL = 'http://172.20.10.3:4000';
+const BASE_URL = API_URL;
 const api = axios.create({
   baseURL: BASE_URL,
 });

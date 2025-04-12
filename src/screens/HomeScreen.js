@@ -15,6 +15,7 @@ import TrendingProducts from '../components/TrendingProducts';
 import DashboardHeader from '../components/DashBoardHeader';
 import {ROUTES} from '../constants/routes';
 import {useNavigation} from '@react-navigation/native';
+import { API_URL } from '../utils/ApiService';
 
 const HomeScreen = () => {
   const [categories, setCategories] = useState([]);
@@ -28,7 +29,7 @@ const HomeScreen = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.get(`http://172.20.10.3:4000/category`, {
+      const response = await axios.get(`${API_URL}/category`, {
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,

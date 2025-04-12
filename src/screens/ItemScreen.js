@@ -23,6 +23,7 @@ import {
   setSelectedCategory,
   setSubcategories,
 } from '../redux/slices/productSlice';
+import { API_URL } from '../utils/ApiService';
 
 const ItemScreen = ({route}) => {
   const navigation = useNavigation();
@@ -77,7 +78,7 @@ const ItemScreen = ({route}) => {
       try {
         console.log(categoryId, currentSubcategoryId);
         const response = await axios.get(
-          `http://172.20.10.3:4000/product/category/${categoryId}/subcategory/${currentSubcategoryId}`,
+          `${API_URL}/product/category/${categoryId}/subcategory/${currentSubcategoryId}`,
           {headers: {Authorization: `Bearer ${token}`}},
         );
 

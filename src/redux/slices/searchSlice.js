@@ -8,6 +8,7 @@ import {
   getItem,
   setBoolItem,
 } from '../../utils/storage';
+import { API_URL } from '../../utils/ApiService';
 
 // export const searchProducts = createAsyncThunk(
 //   'search/searchProducts',
@@ -33,8 +34,8 @@ export const searchProducts = createAsyncThunk(
 
     try {
       const url = query
-        ? `http://172.20.10.3:4000/product/search?query=${query}`
-        : 'http://172.20.10.3:4000/product';
+        ? `${API_URL}/product/search?query=${query}`
+        : `${API_URL}/product`;
 
       const response = await axios.get(url, {
         headers: {Authorization: `Bearer ${token}`},
