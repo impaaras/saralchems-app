@@ -4,8 +4,8 @@ import {StorageKeys, storage} from '../../utils/storage';
 // import {BASE_URL} from '../config';
 
 // https://api.saraldyechems.com/
-const BASE_URL = 'https://api.saraldyechems.com';
-// const BASE_URL = 'http://172.20.10.3:4000';
+// const BASE_URL = 'https://api.saraldyechems.com';
+const BASE_URL = 'http://172.20.10.3:4000';
 const api = axios.create({
   baseURL: BASE_URL,
 });
@@ -27,9 +27,8 @@ export const addToCart = createAsyncThunk(
   'cart/addToCart',
   async ({productId, variant, quantity}, {getState, rejectWithValue}) => {
     try {
-      console.log('helo yeh cart');
+      console.log(productId, variant, quantity);
       const token = storage.getString(StorageKeys.AUTH_TOKEN);
-      console.log('data', productId, variant, quantity);
       const response = await axios.post(
         `${BASE_URL}/cart/add`,
         {productId, variant, quantity},

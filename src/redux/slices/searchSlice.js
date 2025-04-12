@@ -9,22 +9,40 @@ import {
   setBoolItem,
 } from '../../utils/storage';
 
+// export const searchProducts = createAsyncThunk(
+//   'search/searchProducts',
+//   async (query, {rejectWithValue}) => {
+//     const token = storage.getString(StorageKeys.AUTH_TOKEN);
+
+//     try {
+//       const response = await axios.get(
+//         `http://172.20.10.3:4000/product/search?query=${query}`,
+//         {headers: {Authorization: `Bearer ${token}`}},
+//       );
+//       return response.data;
+//     } catch (error) {
+//       return rejectWithValue(error.response.data);
+//     }
+//   },
+// );
+
 export const searchProducts = createAsyncThunk(
   'search/searchProducts',
   async (query, {rejectWithValue}) => {
     const token = storage.getString(StorageKeys.AUTH_TOKEN);
-    console.log(token);
 
     try {
-      console.log('query', query);
-      const response = await axios.get(
-        `https://api.saraldyechems.com/product/search?query=${query}`,
-        {headers: {Authorization: `Bearer ${token}`}},
-      );
-      console.log(response.data);
+      const url = query
+        ? `http://172.20.10.3:4000/product/search?query=${query}`
+        : 'http://172.20.10.3:4000/product';
+
+      const response = await axios.get(url, {
+        headers: {Authorization: `Bearer ${token}`},
+      });
+
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(error.response?.data || 'Something went wrong');
     }
   },
 );

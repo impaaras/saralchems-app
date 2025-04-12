@@ -13,7 +13,7 @@ import Icon from 'react-native-vector-icons/Entypo';
 import {ROUTES} from '../constants/routes';
 import {useNavigation} from '@react-navigation/native';
 import DashboardHeader from '../components/DashBoardHeader';
-import { fallbackImg } from '../utils/images';
+import {fallbackImg} from '../utils/images';
 
 const OrderHistory = () => {
   const [activeTab, setActiveTab] = useState('All Orders');
@@ -221,9 +221,10 @@ const OrderHistory = () => {
                           <View style={styles.orderItemsContainer}>
                             <View style={styles.orderItem}>
                               <TouchableOpacity
-                                onPress={() =>
-                                  navigation.navigate(ROUTES.PRODUCT_DETAILS)
-                                }>
+                              // onPress={() =>
+                              //   navigation.navigate(ROUTES.PRODUCT_DETAILS)
+                              // }
+                              >
                                 <Image
                                   source={{uri: order.items[0].image}}
                                   style={styles.productImage}

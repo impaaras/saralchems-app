@@ -1,7 +1,7 @@
 import React from 'react';
 import {createDrawerNavigator} from '@react-navigation/drawer';
 import BottomNavigator from './BottomNavigator';
-import {Profile} from '../screens';
+import {Home, Profile} from '../screens';
 import {ROUTES} from '../constants/routes';
 import CustomDrawerContent from '../components/SideDrawer';
 

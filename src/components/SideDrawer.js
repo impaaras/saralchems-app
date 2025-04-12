@@ -13,6 +13,7 @@ import {useDispatch} from 'react-redux';
 import {logout} from '../redux/slices/authSlice';
 import logo from '../assets/logo.png';
 import {ROUTES} from '../constants/routes';
+import {useNavigation} from '@react-navigation/native';
 
 const {width} = Dimensions.get('window');
 
@@ -28,6 +29,7 @@ const MenuItem = ({title, onPress, isLast}) => (
 const CustomDrawerContent = props => {
   const dispatch = useDispatch();
   const {navigation} = props;
+  const navig = useNavigation();
 
   const handleLogout = () => {
     dispatch(logout());
@@ -35,17 +37,16 @@ const CustomDrawerContent = props => {
   };
 
   const navigateTo = routeName => {
-    console.log(routeName);
     navigation.closeDrawer();
-    // navigation.navigate(routeName);
+    navigation.navigate('BottomTabs', {screen: routeName});
   };
 
   const menuItems = [
     {title: 'Home', route: 'Home'},
     {title: 'Products', route: 'products'},
-    {title: 'Order History', route: 'history'},
-    {title: 'Order Tracking', route: 'tracking'},
-    {title: 'My Profile', route: 'PROFILE'},
+    {title: 'Order History', route: ROUTES.HISTORY},
+    {title: 'Order Tracking', route: ROUTES.TRACKING},
+    {title: 'My Profile', route: ROUTES.PROFILE},
     {title: 'Settings', route: 'Settings'},
     {title: 'Help & Support', route: 'Support'},
     {title: 'About Us', route: 'About'},

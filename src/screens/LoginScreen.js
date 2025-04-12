@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, {useState, useRef} from 'react';
 import {
   View,
   Text,
@@ -12,15 +12,15 @@ import {
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import logo from '../assets/logo.png';
-import { useDispatch, useSelector } from 'react-redux';
-import { loginUser } from '../redux/slices/authSlice';
-import { ROUTES } from '../constants/routes';
-import { ScrollView } from 'react-native-gesture-handler';
-import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
+import {useDispatch, useSelector} from 'react-redux';
+import {loginUser} from '../redux/slices/authSlice';
+import {ROUTES} from '../constants/routes';
+import {ScrollView} from 'react-native-gesture-handler';
+import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 
-export default function LoginScreen({ navigation }) {
+export default function LoginScreen({navigation}) {
   const dispatch = useDispatch();
-  const { loading, error } = useSelector(state => state.auth);
+  const {loading, error} = useSelector(state => state.auth);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errors, setErrors] = useState({});
@@ -94,7 +94,7 @@ export default function LoginScreen({ navigation }) {
     }
 
     try {
-      await dispatch(loginUser({ email, password })).unwrap();
+      await dispatch(loginUser({email, password})).unwrap();
       // Success case is handled by your navigation middleware or redux state
     } catch (err) {
       let errorMsg = 'Login failed. Please check your credentials.';
@@ -112,24 +112,22 @@ export default function LoginScreen({ navigation }) {
   return (
     <SafeAreaView style={styles.container}>
       <KeyboardAwareScrollView
-        contentContainerStyle={{ flexGrow: 1 }}
+        contentContainerStyle={{flexGrow: 1}}
         enableOnAndroid={true}
         keyboardShouldPersistTaps="handled"
         extraScrollHeight={170}
         showsVerticalScrollIndicator={false}>
-
-
         {/* Decorative circles */}
         <View style={styles.circle1} />
         <View style={styles.circle2} />
 
         {/* Logo */}
-        <View style={{ width: '100%', justifyContent: 'space-between' }}>
+        <View style={{width: '100%', justifyContent: 'space-between'}}>
           <View style={styles.logoContainer}>
             <View style={styles.logo}>
               <Image
                 source={logo}
-                style={{ width: 140, marginLeft: 20, height: 140 }}
+                style={{width: 140, marginLeft: 20, height: 140}}
               />
             </View>
           </View>
@@ -169,8 +167,8 @@ export default function LoginScreen({ navigation }) {
               disabled={loading}>
               <LinearGradient
                 colors={['#2B4C7E', '#121C29']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 0 }}
+                start={{x: 0, y: 0}}
+                end={{x: 1, y: 0}}
                 style={styles.loginButton}>
                 <Text style={styles.loginButtonText}>
                   {loading ? 'Logging in...' : 'Login'}
@@ -191,7 +189,7 @@ export default function LoginScreen({ navigation }) {
             style={[
               styles.errorToast,
               {
-                transform: [{ translateY: errorToastAnim }],
+                transform: [{translateY: errorToastAnim}],
               },
             ]}>
             <Text style={styles.errorToastText}>{errorMessage}</Text>

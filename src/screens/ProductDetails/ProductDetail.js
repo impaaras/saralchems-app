@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   StyleSheet,
   Text,
@@ -13,7 +13,28 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import {useNavigation} from '@react-navigation/native';
 import DashboardHeader from '../../components/DashBoardHeader';
 import LinearGradient from 'react-native-linear-gradient';
-import { fallbackImg } from '../../utils/images';
+import {fallbackImg} from '../../utils/images';
+import {useDispatch, useSelector} from 'react-redux';
+import {addToCart, getCart} from '../../redux/slices/addToCartSlice';
+import {ROUTES} from '../../constants/routes';
+
+// Option button component
+const OptionButton = ({label, selected, onPress}) => {
+  const selectedVariant = useSelector(state => state.product.selectedVariant);
+  return (
+    <TouchableOpacity
+      style={
+        selectedVariant !== label ? styles.optionButton : styles.selectedOption
+      }
+      onPress={onPress}>
+      {selectedVariant !== label ? (
+        <Text style={styles.optionButtonText}>{label}</Text>
+      ) : (
+        <Text style={styles.selectedOptionText}>{label}</Text>
+      )}
+    </TouchableOpacity>
+  );
+};
 
 // Expandable section component
 const ExpandableSection = ({title, children}) => {
@@ -41,6 +62,8 @@ const ProductDetail = () => {
   const navigation = useNavigation();
   const [quantity, setQuantity] = useState(2);
   const [inputValue, setInputValue] = useState('');
+  const [selectedSize, setSelectedSize] = useState(null);
+  const [customValue, setCustomValue] = useState('');
 
   const decrementQuantity = () => {
     if (quantity > 1) {
@@ -50,6 +73,25 @@ const ProductDetail = () => {
 
   const incrementQuantity = () => {
     setQuantity(quantity + 1);
+  };
+
+  const dispatch = useDispatch();
+  const {items, loading, error} = useSelector(state => state.addToCart);
+
+  useEffect(() => {
+    dispatch(getCart());
+  }, [dispatch]);
+
+  const categoryName = useSelector(state => state.product.categoryName);
+
+  const handleAddToCart = (productId, variant, quantity = 1) => {
+    dispatch(addToCart({productId, variant, quantity}))
+      .unwrap()
+      .catch(err => {
+        Alert.alert('Error', err.message || 'Failed to add to cart');
+      });
+
+    navigation.navigate(ROUTES.CART);
   };
 
   return (
@@ -91,12 +133,38 @@ const ProductDetail = () => {
             </View>
             {/* SKU and Input Row */}
             <View style={styles.skuRow}>
-              <View style={styles.skuContainer}>
-                {/* <Text style={styles.skuLabel}>SKU</Text> */}
+              {items &&
+                items.map((item, itemIndex) => (
+                  <View key={item._id}>
+                    <Text style={styles.itemName}>{item.name}</Text>
+                    {item.variants &&
+                      item.variants.map((size, sizeIndex) => (
+                        <View key={`${item._id}-${sizeIndex}`}>
+                          {size === 'loose' || size === 'losse' ? (
+                            <View style={styles.customInputContainer}>
+                              <TextInput
+                                style={styles.customInput}
+                                placeholder="Enter your Value"
+                                value={customValue}
+                                onChangeText={setCustomValue}
+                                keyboardType="numeric"
+                              />
+                            </View>
+                          ) : (
+                            <OptionButton
+                              label={size}
+                              selected={selectedSize === size}
+                              onPress={() => setSelectedSize(size)}
+                            />
+                          )}
+                        </View>
+                      ))}
+                  </View>
+                ))}
+              {/* <View style={styles.skuContainer}>
                 <Text style={styles.skuValue}>20 L</Text>
-              </View>
+              </View> */}
               <View style={styles.inputContainer}>
-                {/* <Text style={styles.inputLabel}>Enter your Value</Text> */}
                 <TextInput
                   style={styles.input}
                   value={inputValue}
@@ -221,7 +289,11 @@ const ProductDetail = () => {
             start={{x: 0, y: 0}}
             end={{x: 1, y: 1}}
             style={{borderRadius: 100}}>
-            <TouchableOpacity style={styles.addToCartButton}>
+            <TouchableOpacity
+              style={styles.addToCartButton}
+              onPress={() =>
+                handleAddToCart(selectedProductItem._id, selectedSize)
+              }>
               <Text style={styles.addToCartText}>Add To Cart</Text>
             </TouchableOpacity>
           </LinearGradient>
@@ -537,5 +609,10 @@ const styles = StyleSheet.create({
   },
   sectionContent: {
     paddingBottom: 15,
+  },
+  customInputContainer: {
+    flex: 1,
+    marginBottom: 10,
+    // width: 100,
   },
 });

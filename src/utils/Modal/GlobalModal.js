@@ -1,64 +1,106 @@
 import React from 'react';
-import {Modal, View, StyleSheet, Dimensions} from 'react-native';
+import {Modal, View, StyleSheet, Text, TouchableOpacity} from 'react-native';
 import {useSelector, useDispatch} from 'react-redux';
 import {closeModal} from '../../redux/slices/modalSlice';
-import ConfirmModal from './ConfirmModal';
-
-const MODAL_COMPONENTS = {
-  CONFIRM_MODAL: ConfirmModal,
-};
 
 const GlobalModal = () => {
   const dispatch = useDispatch();
   const {isOpen, modalType, modalProps} = useSelector(state => state.modal);
-  const selectedProductItem = useSelector(state => state.cart.selectedProduct);
 
-  // const handleClose = () => dispatch(closeModal());
   const handleClose = () => {
-    console.log('Dispatching close modal'); // Debug log
+    console.log('hloe');
     dispatch(closeModal());
   };
 
-  if (!isOpen || !modalType) return null;
-
-  const SpecificModal = MODAL_COMPONENTS[modalType];
-  if (!SpecificModal) return null;
+  const renderModalContent = () => {
+    switch (modalType) {
+      case 'CONFIRM_MODAL':
+        return (
+          <>
+            <Text style={styles.title}>
+              {modalProps?.title || 'Default Title'}
+            </Text>
+            <Text style={styles.message}>
+              {modalProps?.message || 'Default Message'}
+            </Text>
+            <TouchableOpacity style={styles.closeButton} onPress={handleClose}>
+              <Text style={styles.closeButtonText}>Closes</Text>
+            </TouchableOpacity>
+          </>
+        );
+      // Add other modal types here
+      default:
+        return (
+          <>
+            <Text style={styles.title}>
+              {modalProps?.title || 'Default Title'}
+            </Text>
+            <Text style={styles.message}>
+              {modalProps?.message || 'Default Message'}
+            </Text>
+            <TouchableOpacity style={styles.closeButton} onPress={handleClose}>
+              <Text style={styles.closeButtonText}>Close</Text>
+            </TouchableOpacity>
+          </>
+        );
+    }
+  };
 
   return (
     <Modal
       visible={isOpen}
-      transparent
+      transparent={true}
       animationType="fade"
       onRequestClose={handleClose}
-      statusBarTranslucent>
+      statusBarTranslucent={true}>
       <View style={styles.overlay}>
-        <View style={styles.modalWrapper}>
-          <SpecificModal
-            {...modalProps}
-            onClose={handleClose}
-            product={selectedProductItem}
-          />
-        </View>
+        <View style={styles.modalContainer}>{renderModalContent()}</View>
       </View>
     </Modal>
   );
 };
 
-const {width, height} = Dimensions.get('window');
-
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.7)',
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.5)',
     position: 'absolute',
-    width,
-    height,
+    // width: '100%',
+    // height: '100%',
+    left: 100,
+    top: 400,
   },
-  modalWrapper: {
-    width: '90%',
-    maxWidth: 500,
+  modalContainer: {
+    // width: '80%',
+    // minHeight: 150,
+    backgroundColor: 'white',
+    borderRadius: 10,
+    padding: 20,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  title: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  message: {
+    fontSize: 14,
+    color: '#555',
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  closeButton: {
+    padding: 10,
+    backgroundColor: '#2196F3',
+    borderRadius: 5,
+  },
+  closeButtonText: {
+    color: 'white',
+    fontWeight: 'bold',
   },
 });
 

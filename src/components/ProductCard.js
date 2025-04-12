@@ -13,13 +13,13 @@ import {
   openScreen,
   setVariants,
   addItem,
-  closeModal,
+  // closeModal,
 } from '../redux/slices/cartSlice'; // Import the action
 import {useNavigation} from '@react-navigation/native';
 import {ROUTES} from '../constants/routes';
 import {ProductModal} from '../screens';
 import VariantsModal from './VariantsModal';
-import {openModal} from '../redux/slices/modalSlice';
+import {closeModal, openModal} from '../redux/slices/modalSlice';
 import {callbackRegistry} from '../utils/Modal/callbackRegistry';
 import {setSelectedVariant} from '../redux/slices/productSlice';
 import {fallbackImg} from '../utils/images';
@@ -51,38 +51,53 @@ const ProductCard = ({item, onAddPress, idx}) => {
     dispatch(addItem(product));
   };
 
-  const handleOpenModal = product => {
-    dispatch(addItem(product));
+  // const handleOpenModal = product => {
+  //   dispatch(
+  //     openModal({
+  //       modalType: null,
+  //       modalProps: {},
+  //     }),
+  //   );
+  //   // dispatch(addItem(product));
+  //   // dispatch(
+  //   //   openModal({
+  //   //     modalType: 'CONFIRM_MODAL', // Must match your MODAL_COMPONENTS key
+  //   //     modalProps: {
+  //   //       title: 'Confirmation', // Customize these props
+  //   //       message: 'Are you sure you want to proceed?',
+  //   //     },
+  //   //   }),
+  //   // );
+  // };
+
+  const handleOpenModal = () => {
     dispatch(
       openModal({
-        modalType: 'CONFIRM_MODAL', // Must match your MODAL_COMPONENTS key
+        modalType: 'CONFIRM_MODAL',
         modalProps: {
-          title: 'Confirmation', // Customize these props
-          message: 'Are you sure you want to proceed?',
+          title: 'Are you sure?',
+          message: 'Do you want to continue?',
         },
+        callbackId: '123', // optional
       }),
     );
   };
 
-  const selectVariant = variant => {
-    dispatch(setSelectedVariant(variant));
+  const selectVariant = (variant, index) => {
+    console.log(variant, index);
+    let newVariantName = `${variant}${index}`;
+    dispatch(setSelectedVariant(newVariantName));
   };
 
   return (
     <View style={styles.card}>
       <View style={styles.imageContainer}>
         <TouchableOpacity onPress={() => openScreenTag(item, idx)}>
-          <Image
-            source={{uri : fallbackImg(),
-            }}
-            style={styles.productImage}
-          />
+          <Image source={{uri: fallbackImg()}} style={styles.productImage} />
         </TouchableOpacity>
-
         <TouchableOpacity
           style={styles.addButton}
           onPress={() => handleOpenModal(item, idx)}>
-          {/* onPress={() => handleAddPress(item, idx)}> */}
           <Text style={styles.addButtonText}>ADD</Text>
         </TouchableOpacity>
       </View>
@@ -105,19 +120,19 @@ const ProductCard = ({item, onAddPress, idx}) => {
                   <TouchableOpacity
                     key={index}
                     style={
-                      selectedVariant !== variant
+                      selectedVariant !== `${variant}${idx}`
                         ? styles.variantItem
                         : styles.selectedVariantItem
                     }
-                    onPress={() => selectVariant(variant)}>
+                    onPress={() => selectVariant(variant, idx)}>
                     <Text
                       style={
-                        selectedVariant !== variant
+                        selectedVariant !== `${variant}${idx}`
                           ? styles.variantText
                           : styles.selectedVariantText
                       }>
-                      {variant.length > 6
-                        ? `${variant.substring(0, 6)}...`
+                      {variant.length > 50
+                        ? `${variant.substring(0, 50)}...`
                         : variant}
                     </Text>
                   </TouchableOpacity>
@@ -133,59 +148,8 @@ const ProductCard = ({item, onAddPress, idx}) => {
               )}
             </View>
           )}
-          {/* {item.variants.length > 0 && (
-            <View style={styles.variantsContainer}>
-              <ScrollView
-                horizontal={true}
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={{
-                  display: 'flex',
-                  flexDirection: 'row',
-                }}>
-                {item.variants.slice(0, 3).map((variant, index) => {
-                  // Create a unique combination of item reference and variant
-                  const variantIdentifier = `${
-                    item.name || item.id
-                  }-${variant}`;
-                  const isSelected = selectedVariant === variantIdentifier;
-
-                  return (
-                    <TouchableOpacity
-                      key={`${item.id}-${variant}-${index}`}
-                      style={
-                        isSelected
-                          ? styles.selectedVariantItem
-                          : styles.variantItem
-                      }
-                      onPress={() => {
-                        selectVariant(variantIdentifier);
-                      }}>
-                      <Text
-                        style={
-                          isSelected
-                            ? styles.selectedVariantText
-                            : styles.variantText
-                        }>
-                        {variant.length > 6
-                          ? `${variant.substring(0, 6)}...`
-                          : variant}
-                      </Text>
-                    </TouchableOpacity>
-                  );
-                })}
-              </ScrollView>
-
-              {item.variants.length > 1 && (
-                <TouchableOpacity
-                  style={styles.moreButton}
-                  onPress={() => handleShowVariants(item.variants)}>
-                  <Text style={styles.moreButtonText}>+</Text>
-                </TouchableOpacity>
-              )}
-            </View>
-          )} */}
         </View>
-        <TouchableOpacity onPress={() => handleOpenModal(item, idx)}>
+        <TouchableOpacity onPress={() => openScreenTag(item, idx)}>
           <Text style={styles.name}>{item.name}</Text>
         </TouchableOpacity>
         <View style={styles.brandInfo}>

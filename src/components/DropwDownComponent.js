@@ -2,12 +2,14 @@ import React, {useEffect, useState} from 'react';
 import {View, Text, TouchableOpacity, StyleSheet, Animated} from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {
+  setCategoryId,
   setCategoryName,
   setCurrentSubcategoryId,
   setSelectedCategory,
   setSubcategories,
 } from '../redux/slices/productSlice';
 import {useDispatch, useSelector} from 'react-redux';
+import {useFocusEffect} from '@react-navigation/native';
 
 const DropdownMenu = ({currentRouteName, categories}) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -33,14 +35,28 @@ const DropdownMenu = ({currentRouteName, categories}) => {
     outputRange: ['0deg', '180deg'],
   });
 
+  useFocusEffect(
+    React.useCallback(() => {
+      setSecSelectedCategory(null);
+      setIsOpen(false);
+    }, []),
+  );
+
   const handleCategorySelect = (category, index) => {
+    console.log(category._id);
     setSecSelectedCategory(category);
+    dispatch(setCategoryId(category._id));
     dispatch(setSubcategories(category?.subcategories));
     dispatch(setCategoryName(category.name));
-
     dispatch(setSelectedCategory(category.subcategories[0]?.name));
+    dispatch(setCurrentSubcategoryId(category.subcategories[0]?._id));
+
     setIsOpen(false);
   };
+
+  // 67bde40594b56ca4dc672521
+  // 67bde40594b56ca4dc672521
+  // 67bdfdce16be7d6894e30146
 
   const animatedStyles = {
     transform: [{rotate: rotateInterpolate}],
@@ -89,9 +105,9 @@ const DropdownMenu = ({currentRouteName, categories}) => {
 const styles = StyleSheet.create({
   container: {
     position: 'relative',
-    width: '76%',
-    alignSelf: 'center',
-    zIndex: 2,
+    width: '95%',
+    marginLeft: -10,
+    zIndex: 999999,
   },
   dropdownButton: {
     backgroundColor: 'transparent',
@@ -111,6 +127,7 @@ const styles = StyleSheet.create({
   },
   dropdownListContainer: {
     backgroundColor: '#173A66',
+    zIndex: 99999,
     borderRadius: 20,
     paddingVertical: 10,
     width: '100%',
@@ -122,6 +139,7 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
+
     maxHeight: 300, // Added for scroll if many categories
   },
   dropdownItem: {

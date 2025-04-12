@@ -9,18 +9,23 @@ import {
   getItem,
   setBoolItem,
 } from '../../utils/storage';
+import {store} from '../store';
 
-const BASE_URL = 'https://api.saraldyechems.com';
+const BASE_URL = 'http://172.20.10.3:4000';
+// const BASE_URL = 'https://api.saraldyechems.com';
 const api = axios.create({
   baseURL: BASE_URL,
 });
 
 // Add a response interceptor to handle expired tokens
-api.interceptors.response.use(
+axios.interceptors.response.use(
   response => response,
   error => {
-    if (error.response && error.response.status === 401) {
-      storage.clearAll();
+    console.log('🔥 Global Interceptor Error:', error?.response);
+    if (error?.response?.status === 401 || error?.response?.status === 403) {
+      storage.clearAll(); // Clear MMKV or whatever you're using
+      store.dispatch(logout());
+
       return Promise.reject({tokenExpired: true});
     }
     return Promise.reject(error);
@@ -37,8 +42,6 @@ export const loginUser = createAsyncThunk(
       });
 
       const {user, token} = response.data;
-
-      console.log('backend not', user);
 
       // Store token and user data in MMKV
       setItem(StorageKeys.AUTH_TOKEN, token);
@@ -135,12 +138,16 @@ export const fetchAuthState = createAsyncThunk(
     if (token) {
       try {
         // Make a simple request to verify token
-        await axios.get(`${BASE_URL}/auth/me`, {
+        await api.get(`${BASE_URL}/auth/me`, {
           headers: {Authorization: `Bearer ${token}`},
         });
       } catch (error) {
         // If token expired, logout
-        if (error.response && error.response.status === 401) {
+
+        if (
+          (error.response && error.response.status === 401) ||
+          error.response.status === 403
+        ) {
           dispatch(logout());
           return {
             token: null,
@@ -205,6 +212,7 @@ const authSlice = createSlice({
     passwordResetRequested: false,
     passwordResetSuccess: false,
     showVariants: false, // Moved from useState
+    showSearchVariants: false,
   },
   reducers: {
     logout: state => {
@@ -217,6 +225,9 @@ const authSlice = createSlice({
     },
     toggleShowVariants: state => {
       state.showVariants = !state.showVariants;
+    },
+    toggleShowSearchVariants: state => {
+      state.showSearchVariants = !state.showSearchVariants;
     },
   },
   extraReducers: builder => {
@@ -313,6 +324,6 @@ const authSlice = createSlice({
   },
 });
 
-export const {toggleShowVariants} = authSlice.actions;
+export const {toggleShowVariants, toggleShowSearchVariants} = authSlice.actions;
 export const {logout} = authSlice.actions;
 export default authSlice.reducer;

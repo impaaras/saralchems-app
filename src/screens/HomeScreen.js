@@ -13,6 +13,8 @@ import ProductList from '../components/ProductList';
 import axios from 'axios';
 import TrendingProducts from '../components/TrendingProducts';
 import DashboardHeader from '../components/DashBoardHeader';
+import {ROUTES} from '../constants/routes';
+import {useNavigation} from '@react-navigation/native';
 
 const HomeScreen = () => {
   const [categories, setCategories] = useState([]);
@@ -26,16 +28,12 @@ const HomeScreen = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.get(
-        `https://api.saraldyechems.com/category`,
-        // `https://95ae-2401-4900-1c72-8070-dce3-2227-b42b-cdfd.ngrok-free.app/category`,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
+      const response = await axios.get(`http://172.20.10.3:4000/category`, {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
         },
-      );
+      });
 
       const categoriesData = response.data;
       const subCategoriesMap = {};

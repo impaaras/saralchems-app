@@ -8,6 +8,7 @@ import sortSlice from './slices/sortSlice';
 import modalReducer from './slices/modalSlice';
 import addCartReducer from './slices/addToCartSlice';
 import productReducer from './slices/productSlice';
+import searchHistoryReducer from './slices/searchHistory';
 
 export const store = configureStore({
   reducer: {
@@ -19,5 +20,6 @@ export const store = configureStore({
     modal: modalReducer,
     addToCart: addCartReducer,
     product: productReducer,
+    searchHistory: searchHistoryReducer,
   },
 });

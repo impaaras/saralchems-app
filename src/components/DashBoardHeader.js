@@ -11,6 +11,7 @@ import {
   StatusBar,
   ActivityIndicator,
   FlatList,
+  Dimensions,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Icon2 from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -18,7 +19,11 @@ import Icon3 from 'react-native-vector-icons/FontAwesome';
 import menuIcon from '../assets/menu_icon.png';
 import profileIcon from '../assets/profile.png';
 import {ROUTES} from '../constants/routes';
-import {useFocusEffect, useNavigation} from '@react-navigation/native';
+import {
+  useFocusEffect,
+  useNavigation,
+  useRoute,
+} from '@react-navigation/native';
 import {useDispatch, useSelector} from 'react-redux';
 import {openDrawer, toggleDrawer} from '../redux/slices/drawerSlice';
 import {ChevronLeft, Route} from 'lucide-react-native';
@@ -26,6 +31,12 @@ import DropdownMenu from './DropwDownComponent';
 import {clearSearchResults, searchProducts} from '../redux/slices/searchSlice';
 import SearchResults from './SearchResult';
 import axios from 'axios';
+import {addToHistory} from '../redux/slices/searchHistory';
+import {
+  setCategoryName,
+  setSelectedCategory,
+} from '../redux/slices/productSlice';
+const {width} = Dimensions.get('window');
 
 const DashboardHeader = ({name}) => {
   const navigation = useNavigation();
@@ -86,6 +97,8 @@ const DashboardHeader = ({name}) => {
         return 'Order Tracking';
       case ROUTES.HOME:
         return 'Trending Products';
+      case 'products':
+        return 'Products';
       case ROUTES.PROFILE:
         return 'Profile';
       case ROUTES.PRODUCT_DETAILS:
@@ -108,18 +121,21 @@ const DashboardHeader = ({name}) => {
     return () => clearTimeout(timer);
   }, [searchText]);
 
-  // Trigger search when debounced query changes
   useEffect(() => {
     if (debouncedQuery.trim()) {
       dispatch(searchProducts(debouncedQuery.trim()));
+      dispatch(addToHistory(searchText.trim()));
     } else {
-      dispatch(clearSearchResults());
+      dispatch(searchProducts('')); // Pass empty string
     }
   }, [debouncedQuery, dispatch]);
 
   const handleSearchSubmit = () => {
     if (searchText.trim()) {
       dispatch(searchProducts(searchText.trim()));
+
+      dispatch(addToHistory(searchText.trim()));
+      navigation.navigate(ROUTES.SEARCH); // Navigate to search screen
     }
   };
 
@@ -132,7 +148,8 @@ const DashboardHeader = ({name}) => {
   const token = useSelector(state => state.auth.token);
   const getCategoryData = async () => {
     try {
-      const {data} = await axios.get(`https://api.saraldyechems.com/category`, {
+      const {data} = await axios.get(`http://172.20.10.3:4000/category`, {
+        // const {data} = await axios.get(`https://api.saraldyechems.com/category`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -151,6 +168,15 @@ const DashboardHeader = ({name}) => {
   useEffect(() => {
     getCategoryData();
   }, []);
+
+  const handleGoBack = () => {
+    setSearchText('');
+    dispatch(setCategoryName(null));
+    dispatch(setSelectedCategory(null));
+    dispatch(clearSearchResults());
+    navigation.goBack();
+  };
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.headerContainer}>
@@ -164,7 +190,7 @@ const DashboardHeader = ({name}) => {
               </TouchableOpacity>
             ) : (
               <TouchableOpacity
-                onPress={() => navigation.goBack()}
+                onPress={handleGoBack}
                 style={{
                   borderWidth: 1,
                   borderColor: '#CCC',
@@ -182,7 +208,7 @@ const DashboardHeader = ({name}) => {
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 position: 'relative',
-                zIndex: 99,
+                zIndex: 9999999,
               }}>
               {openInput ||
                 (getRouteName() === 'Search' && (
@@ -191,38 +217,50 @@ const DashboardHeader = ({name}) => {
                       flexDirection: 'row',
                       alignItems: 'center',
                       flex: 1,
+                      marginLeft: 5,
+                      paddingLeft: 10,
+                      backgroundColor: '#FFF',
+                      borderRadius: 100,
                     }}>
                     <TextInput
                       placeholder="Search products..."
                       placeholderTextColor="#555"
                       value={searchText}
                       onChangeText={setSearchText}
+                      autoFocus={true}
                       style={{
-                        borderRadius: 100,
-                        flex: 1,
-                        marginLeft: 5,
-                        paddingLeft: 10,
                         paddingVertical: 10,
-                        backgroundColor: '#FFF',
+                        flex: 1,
                       }}
                     />
+
+                    {searchText.length > 0 && (
+                      <TouchableOpacity
+                        onPress={() => setSearchText('')}
+                        style={{paddingHorizontal: 10}}>
+                        <Text style={{fontSize: 22, color: '#555'}}>×</Text>
+                      </TouchableOpacity>
+                    )}
                   </View>
                 ))}
+
+              {openInput && getRouteName() === 'Search' && (
+                <Text style={styles.title}>Search products here..</Text>
+              )}
               {!openInput && getRouteName() !== 'Search' && (
                 <Text style={styles.title}>{getRouteName()}</Text>
               )}
-              {!openInput &&
-                (currentRouteName === 'products' ||
-                  currentRouteName === 'Item Screen') && (
-                  <DropdownMenu categories={categories} />
-                )}
-
+              {!openInput && currentRouteName === 'Item Screen' && (
+                <DropdownMenu categories={categories} />
+              )}
+            </View>
+            <View style={styles.rightSection}>
               <TouchableOpacity
                 onPress={() => {
                   if (getRouteName() === 'Search') {
-                    if (openInput && searchText) {
-                      handleSearchSubmit();
-                    }
+                    // if (openInput && searchText) {
+                    //   handleSearchSubmit();
+                    // }
                     setOpenInput(!openInput);
                   } else {
                     navigation.navigate(ROUTES.SEARCH);
@@ -235,8 +273,6 @@ const DashboardHeader = ({name}) => {
                   color="#FFF"
                 />
               </TouchableOpacity>
-            </View>
-            <View style={styles.rightSection}>
               <TouchableOpacity
                 style={styles.profileContainer}
                 onPress={() => navigation.navigate(ROUTES.PROFILE)}>
@@ -256,10 +292,12 @@ const DashboardHeader = ({name}) => {
 const styles = StyleSheet.create({
   headerContainer: {
     // paddingHorizontal: 8,
+    // zIndex: 0,
     paddingVertical: 16,
     paddingBottom: 100,
     borderBottomEndRadius: 40,
     borderBottomLeftRadius: 40,
+
     backgroundColor: '#3C5D87',
   },
 

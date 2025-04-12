@@ -74,16 +74,15 @@ const ItemScreen = ({route}) => {
 
     const fetchProducts = async () => {
       const token = storage.getString(StorageKeys.AUTH_TOKEN);
-
       try {
+        console.log(categoryId, currentSubcategoryId);
         const response = await axios.get(
-          `https://api.saraldyechems.com/product/category/${categoryId}/subcategory/${currentSubcategoryId}`,
+          `http://172.20.10.3:4000/product/category/${categoryId}/subcategory/${currentSubcategoryId}`,
           {headers: {Authorization: `Bearer ${token}`}},
         );
-        console.log('items', response.data);
+
         setProduct(response.data);
       } catch (error) {
-        console.error('API Error:', error);
         setErrorMsg(
           error.response?.data?.message || 'Failed to fetch products',
         );
@@ -196,7 +195,7 @@ const ItemScreen = ({route}) => {
         )}
       </ScrollView>
 
-      {isProductModalOpen && selectedProductItem && (
+      {/* {isProductModalOpen && selectedProductItem && (
         <ProductModal
           visible={isProductModalOpen}
           onClose={() => dispatch(closeModal())}
@@ -206,19 +205,26 @@ const ItemScreen = ({route}) => {
       <VariantsModal
         visible={showVariants}
         variants={selectedProductItem?.variants || []}
-      />
+      /> */}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   screen: {backgroundColor: '#F2F7FE', flex: 1},
-  scrollWrapper: {marginTop: -80, marginLeft: 10},
+  scrollWrapper: {
+    marginTop: -80,
+    marginLeft: 10,
+    // zIndex: 9999,
+    // backgroundColor: 'red',
+  },
   container: {
     backgroundColor: '#E5F1FF',
+    // backgroundColor: 'red',
     flexDirection: 'row',
     borderRadius: 15,
     paddingHorizontal: 10,
+    // zIndex: 1,
   },
   itemContainer: {
     marginTop: 20,

@@ -15,7 +15,7 @@ import {
 import {useSelector} from 'react-redux';
 import LinearGradient from 'react-native-linear-gradient';
 import {ROUTES} from '../../constants/routes';
-import { fallbackImg } from '../images';
+import {fallbackImg} from '../images';
 
 // Custom dropdown component
 const Dropdown = ({options, selectedValue, onSelect, label}) => {
@@ -104,8 +104,7 @@ const ConfirmModal = ({title, message, onClose, product}) => {
     name: 'Stoving Thinner',
     category: 'Textile Auxiliaries',
     brand: 'Kayson',
-    image:
-    fallbackImg(),
+    image: fallbackImg(),
     description:
       'Our Nylon (12 No. 54" (NxM)) is a high-quality, durable synthetic fabric designed for multiple industrial and commercial applications. Made from premium-grade nylon fibers, this fabric offers excellent strength, flexibility, and resistance to wear and tear.',
     variants: {
@@ -152,7 +151,7 @@ const ConfirmModal = ({title, message, onClose, product}) => {
 
   const handleShowMore = () => {
     onClose(); // Close the modal first
-    navigation.navigate(ROUTES.PRODUCT_DETAILS);
+    // navigation.navigate(ROUTES.PRODUCT_DETAILS);
   };
   return (
     <>
@@ -174,9 +173,7 @@ const ConfirmModal = ({title, message, onClose, product}) => {
             <View style={styles.imageContainer}>
               <Image
                 source={{
-                  uri:
-                    productData.image ||
-                    fallbackImg(),
+                  uri: productData.image || fallbackImg(),
                 }}
                 style={styles.productImage}
                 resizeMode="contain"

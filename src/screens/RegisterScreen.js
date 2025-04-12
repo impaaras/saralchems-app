@@ -15,6 +15,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import {useDispatch} from 'react-redux';
 import {registerUser} from '../redux/slices/authSlice';
 import logo from '../assets/logo.png';
+import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 
 const RegisterScreen = ({navigation}) => {
   const dispatch = useDispatch();
@@ -157,183 +158,190 @@ const RegisterScreen = ({navigation}) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.circle1} />
-      <View style={styles.circle2} />
-      <ScrollView style={{flex: 1, width: '100%'}}>
-        <View style={{flex: 1, width: '100%', alignItems: 'center'}}>
-          <View style={styles.logoContainer}>
-            <View style={styles.logo}>
-              <Image
-                source={logo}
-                style={{width: 80, marginLeft: 10, height: 80}}
-              />
+      <KeyboardAwareScrollView
+        contentContainerStyle={{flexGrow: 1}}
+        enableOnAndroid={true}
+        keyboardShouldPersistTaps="handled"
+        extraScrollHeight={170}
+        showsVerticalScrollIndicator={false}>
+        <View style={styles.circle1} />
+        <View style={styles.circle2} />
+        <ScrollView style={{flex: 1, width: '100%'}}>
+          <View style={{flex: 1, width: '100%', alignItems: 'center'}}>
+            <View style={styles.logoContainer}>
+              <View style={styles.logo}>
+                <Image
+                  source={logo}
+                  style={{width: 80, marginLeft: 10, height: 80}}
+                />
+              </View>
             </View>
-          </View>
 
-          {/* Form */}
-          <View style={styles.formContainer}>
-            <TextInput
-              style={[styles.input, errors.personName && styles.inputError]}
-              placeholder="Person Name"
-              placeholderTextColor="#555"
-              value={formData.personName}
-              onChangeText={text => handleChange('personName', text)}
-            />
-            {/* {errors.personName && (
+            {/* Form */}
+            <View style={styles.formContainer}>
+              <TextInput
+                style={[styles.input, errors.personName && styles.inputError]}
+                placeholder="Person Name"
+                placeholderTextColor="#555"
+                value={formData.personName}
+                onChangeText={text => handleChange('personName', text)}
+              />
+              {/* {errors.personName && (
               <Text style={styles.errorText}>{errors.personName}</Text>
             )} */}
 
-            <TextInput
-              style={[styles.input, errors.companyName && styles.inputError]}
-              placeholder="Company Name"
-              placeholderTextColor="#555"
-              value={formData.companyName}
-              onChangeText={text => handleChange('companyName', text)}
-            />
-            {/* {errors.companyName && (
+              <TextInput
+                style={[styles.input, errors.companyName && styles.inputError]}
+                placeholder="Company Name"
+                placeholderTextColor="#555"
+                value={formData.companyName}
+                onChangeText={text => handleChange('companyName', text)}
+              />
+              {/* {errors.companyName && (
               <Text style={styles.errorText}>{errors.companyName}</Text>
             )} */}
 
-            {/* Custom Dropdown */}
-            <View style={styles.dropdownContainer}>
-              <TouchableOpacity
-                style={[
-                  styles.dropdownButton,
-                  errors.businessType && styles.inputError,
-                ]}
-                onPress={() => setIsDropdownOpen(!isDropdownOpen)}>
-                <Text style={styles.dropdownButtonText}>
-                  {formData.businessType || 'Select Business Type'}
-                </Text>
-                <Text style={styles.dropdownArrow}>▼</Text>
-              </TouchableOpacity>
-              {isDropdownOpen && (
-                <View style={styles.dropdownList}>
-                  {businessTypes.map((type, index) => (
-                    <TouchableOpacity
-                      key={index}
-                      style={styles.dropdownItem}
-                      onPress={() => handleBusinessTypeSelect(type)}>
-                      <Text style={styles.dropdownItemText}>{type}</Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              )}
-            </View>
-            {/* {errors.businessType && (
+              {/* Custom Dropdown */}
+              <View style={styles.dropdownContainer}>
+                <TouchableOpacity
+                  style={[
+                    styles.dropdownButton,
+                    errors.businessType && styles.inputError,
+                  ]}
+                  onPress={() => setIsDropdownOpen(!isDropdownOpen)}>
+                  <Text style={styles.dropdownButtonText}>
+                    {formData.businessType || 'Select Business Type'}
+                  </Text>
+                  <Text style={styles.dropdownArrow}>▼</Text>
+                </TouchableOpacity>
+                {isDropdownOpen && (
+                  <View style={styles.dropdownList}>
+                    {businessTypes.map((type, index) => (
+                      <TouchableOpacity
+                        key={index}
+                        style={styles.dropdownItem}
+                        onPress={() => handleBusinessTypeSelect(type)}>
+                        <Text style={styles.dropdownItemText}>{type}</Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                )}
+              </View>
+              {/* {errors.businessType && (
               <Text style={styles.errorText}>{errors.businessType}</Text>
             )} */}
 
-            <TextInput
-              style={[styles.input, errors.gstNo && styles.inputError]}
-              placeholder="GST No."
-              placeholderTextColor="#555"
-              value={formData.gstNo}
-              onChangeText={text => handleChange('gstNo', text)}
-            />
-            {/* {errors.gstNo && (
+              <TextInput
+                style={[styles.input, errors.gstNo && styles.inputError]}
+                placeholder="GST No."
+                placeholderTextColor="#555"
+                value={formData.gstNo}
+                onChangeText={text => handleChange('gstNo', text)}
+              />
+              {/* {errors.gstNo && (
               <Text style={styles.errorText}>{errors.gstNo}</Text>
             )} */}
 
-            <TextInput
-              style={[styles.input, errors.phone && styles.inputError]}
-              placeholder="Phone"
-              placeholderTextColor="#555"
-              keyboardType="phone-pad"
-              value={formData.phone}
-              onChangeText={text => handleChange('phone', text)}
-            />
-            {/* {errors.phone && (
+              <TextInput
+                style={[styles.input, errors.phone && styles.inputError]}
+                placeholder="Phone"
+                placeholderTextColor="#555"
+                keyboardType="phone-pad"
+                value={formData.phone}
+                onChangeText={text => handleChange('phone', text)}
+              />
+              {/* {errors.phone && (
               <Text style={styles.errorText}>{errors.phone}</Text>
             )} */}
 
-            <TextInput
-              style={[styles.input, errors.email && styles.inputError]}
-              placeholder="Enter you email"
-              placeholderTextColor="#555"
-              keyboardType="email-address"
-              autoCapitalize="none"
-              value={formData.email}
-              onChangeText={text => handleChange('email', text)}
-            />
-            {/* {errors.email && (
+              <TextInput
+                style={[styles.input, errors.email && styles.inputError]}
+                placeholder="Enter you email"
+                placeholderTextColor="#555"
+                keyboardType="email-address"
+                autoCapitalize="none"
+                value={formData.email}
+                onChangeText={text => handleChange('email', text)}
+              />
+              {/* {errors.email && (
               <Text style={styles.errorText}>{errors.email}</Text>
             )} */}
 
-            <TextInput
-              style={[styles.input, errors.address && styles.inputError]}
-              placeholder="Company Address"
-              placeholderTextColor="#555"
-              multiline
-              value={formData.address}
-              onChangeText={text => handleChange('address', text)}
-            />
-            {/* {errors.address && (
+              <TextInput
+                style={[styles.input, errors.address && styles.inputError]}
+                placeholder="Company Address"
+                placeholderTextColor="#555"
+                multiline
+                value={formData.address}
+                onChangeText={text => handleChange('address', text)}
+              />
+              {/* {errors.address && (
               <Text style={styles.errorText}>{errors.address}</Text>
             )} */}
 
-            <TextInput
-              style={[styles.input, errors.password && styles.inputError]}
-              placeholder="Password"
-              placeholderTextColor="#555"
-              secureTextEntry
-              value={formData.password}
-              onChangeText={text => handleChange('password', text)}
-            />
+              <TextInput
+                style={[styles.input, errors.password && styles.inputError]}
+                placeholder="Password"
+                placeholderTextColor="#555"
+                secureTextEntry
+                value={formData.password}
+                onChangeText={text => handleChange('password', text)}
+              />
 
-            <TextInput
-              style={[
-                styles.input,
-                errors.confirmPassword && styles.inputError,
-              ]}
-              placeholder="Confirm Password"
-              placeholderTextColor="#555"
-              secureTextEntry
-              value={formData.confirmPassword}
-              onChangeText={text => handleChange('confirmPassword', text)}
-            />
-            {/* {errors.confirmPassword && (
+              <TextInput
+                style={[
+                  styles.input,
+                  errors.confirmPassword && styles.inputError,
+                ]}
+                placeholder="Confirm Password"
+                placeholderTextColor="#555"
+                secureTextEntry
+                value={formData.confirmPassword}
+                onChangeText={text => handleChange('confirmPassword', text)}
+              />
+              {/* {errors.confirmPassword && (
               <Text style={styles.errorText}>{errors.confirmPassword}</Text>
             )} */}
 
-            <TouchableOpacity
-              style={[
-                styles.loginButtonContainer,
-                isLoading && styles.buttonDisabled,
-              ]}
-              onPress={handleRegister}
-              disabled={isLoading}>
-              <LinearGradient
-                colors={['#2B4C7E', '#121C29']}
-                start={{x: 0, y: 0}}
-                end={{x: 1, y: 0}}
-                style={styles.loginButton}>
-                <Text style={styles.loginButtonText}>
-                  {isLoading ? 'Registering...' : 'Register'}
-                </Text>
-              </LinearGradient>
-            </TouchableOpacity>
-          </View>
+              <TouchableOpacity
+                style={[
+                  styles.loginButtonContainer,
+                  isLoading && styles.buttonDisabled,
+                ]}
+                onPress={handleRegister}
+                disabled={isLoading}>
+                <LinearGradient
+                  colors={['#2B4C7E', '#121C29']}
+                  start={{x: 0, y: 0}}
+                  end={{x: 1, y: 0}}
+                  style={styles.loginButton}>
+                  <Text style={styles.loginButtonText}>
+                    {isLoading ? 'Registering...' : 'Register'}
+                  </Text>
+                </LinearGradient>
+              </TouchableOpacity>
+            </View>
 
-          <View style={styles.signupContainer}>
-            <Text style={styles.signupText}>Already have an account? </Text>
-            <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-              <Text style={styles.signupLink}>Sign in</Text>
-            </TouchableOpacity>
+            <View style={styles.signupContainer}>
+              <Text style={styles.signupText}>Already have an account? </Text>
+              <TouchableOpacity onPress={() => navigation.navigate('Login')}>
+                <Text style={styles.signupLink}>Sign in</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
-      </ScrollView>
-      {errorMessage !== '' && (
-        <Animated.View
-          style={[
-            styles.errorToast,
-            {
-              transform: [{translateY: errorToastAnim}],
-            },
-          ]}>
-          <Text style={styles.errorToastText}>{errorMessage}</Text>
-        </Animated.View>
-      )}
+        </ScrollView>
+        {errorMessage !== '' && (
+          <Animated.View
+            style={[
+              styles.errorToast,
+              {
+                transform: [{translateY: errorToastAnim}],
+              },
+            ]}>
+            <Text style={styles.errorToastText}>{errorMessage}</Text>
+          </Animated.View>
+        )}
+      </KeyboardAwareScrollView>
     </SafeAreaView>
   );
 };

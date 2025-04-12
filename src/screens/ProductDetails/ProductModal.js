@@ -16,7 +16,6 @@ import {useNavigation} from '@react-navigation/native';
 import {ROUTES} from '../../constants/routes';
 import {useDispatch, useSelector} from 'react-redux';
 import {addToCart, getCart} from '../../redux/slices/addToCartSlice';
-import { fallbackImg } from '../../utils/images';
 
 // Custom dropdown component
 const Dropdown = ({options, selectedValue, onSelect, label}) => {
@@ -77,9 +76,7 @@ const OptionButton = ({label, selected, onPress}) => {
   const selectedVariant = useSelector(state => state.product.selectedVariant);
   return (
     <TouchableOpacity
-      style={
-        selectedVariant !== label ? styles.optionButton : styles.selectedOption
-      }
+      style={[styles.optionButton, selected && styles.selectedOption]}
       onPress={onPress}>
       {selectedVariant !== label ? (
         <Text style={styles.optionButtonText}>{label}</Text>
@@ -109,7 +106,7 @@ const ProductModal = ({visible, onClose, product}) => {
     category: 'Textile Auxiliaries',
     brand: 'Kayson',
     image:
-    fallbackImg(),
+      'https://s3-alpha-sig.figma.com/img/5ffb/a192/2dd4c257df96f4b702c011168d3cffb7?Expires=1742774400&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=U2Smx6pgvm867-k7A3ze9tyriadTE5yxgW94WVaLEeXrisHy1MIWtdMiai20EcL5YG6b4hrFOcDFdQNmVVkxsBX7elT0vufLN7I7Adjd7Cr4mtGlSfQ7NAYYI4DZBgqfcJiRTb128mma9alrjrzQ644iFbFVSZb6cchvIiJkoh8WZbqipRUGa603jVW~CUE~bl-LB35GXPny58zzgR9tIj0A4GyLNjXefrh-A3~BLkUh7PIpKtxiEJoX4xjfx-~XCHDEklFMuEv4aLm1KGusEAD1N2p73-NAMyAdPD6KtVBHW7K9zgxKKpb7An0mDK6zoX0e1Sq06AAIBYhIcY4NFg__',
     description:
       'Our Nylon (12 No. 54" (NxM)) is a high-quality, durable synthetic fabric designed for multiple industrial and commercial applications. Made from premium-grade nylon fibers, this fabric offers excellent strength, flexibility, and resistance to wear and tear.',
     variants: {
@@ -202,7 +199,7 @@ const ProductModal = ({visible, onClose, product}) => {
                 source={{
                   uri:
                     productData.image ||
-                    fallbackImg(),
+                    `https://s3-alpha-sig.figma.com/img/5ffb/a192/2dd4c257df96f4b702c011168d3cffb7?Expires=1742774400&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=U2Smx6pgvm867-k7A3ze9tyriadTE5yxgW94WVaLEeXrisHy1MIWtdMiai20EcL5YG6b4hrFOcDFdQNmVVkxsBX7elT0vufLN7I7Adjd7Cr4mtGlSfQ7NAYYI4DZBgqfcJiRTb128mma9alrjrzQ644iFbFVSZb6cchvIiJkoh8WZbqipRUGa603jVW~CUE~bl-LB35GXPny58zzgR9tIj0A4GyLNjXefrh-A3~BLkUh7PIpKtxiEJoX4xjfx-~XCHDEklFMuEv4aLm1KGusEAD1N2p73-NAMyAdPD6KtVBHW7K9zgxKKpb7An0mDK6zoX0e1Sq06AAIBYhIcY4NFg__`,
                 }}
                 style={styles.productImage}
                 resizeMode="contain"
@@ -456,22 +453,14 @@ const styles = StyleSheet.create({
   },
   selectedOption: {
     backgroundColor: '#3C5D86',
-    borderRadius: 8,
-    paddingVertical: 4,
-    paddingHorizontal: 10,
-    marginRight: 5,
-    marginBottom: 10,
-    borderWidth: 1,
-    borderColor: '#D0E4FF',
   },
   optionButtonText: {
     fontSize: 14,
-    color: '#3C5D86',
-    fontWeight: 'bold',
+    color: '#000',
+    fontWeight: '500',
   },
   selectedOptionText: {
-    color: '#FFF',
-    fontWeight: 'bold',
+    color: 'white',
   },
   addButton: {
     backgroundColor: '#3C5D86',

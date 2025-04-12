@@ -21,56 +21,10 @@ import {
   removeFromCart,
   updateCartItem,
 } from '../../redux/slices/addToCartSlice';
-import { fallbackImg } from '../../utils/images';
+import {fallbackImg} from '../../utils/images';
 
 const CartItem = ({product, onRemove, onDecrement, onIncrement}) => {
   const navigation = useNavigation();
-
-  // return (
-  //   <View style={styles.cartItem}>
-  //     <TouchableOpacity
-  //       onPress={() => navigation.navigate(ROUTES.PRODUCT_DETAILS)}>
-  //       {!product.image ? (
-  //         <Image source={{uri: product.image}} style={styles.cartItemImage} />
-  //       ) : (
-  //         <Image
-  //           style={styles.cartItemImage}
-  //           source={{
-  //             uri: 'https://s3-alpha-sig.figma.com/img/4f5a/8713/fa4ef7fec5ff73309653f4bd9e47df47?Expires=1742169600&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=ESKybLsPR-n0Bud0qXuEHFHKztOgBvIgHWw3UlpvKISeLfYBduN4X4jt~IOL9EU6i3d~8d1YmH7DuRriaUPyqL~JgAXQU5Tlbrsxt-nz4EWiO-UfLYnEUhiOPknJr3DuNezXs6G8jvQMvhdayKlUtbYEI8t5-qqQe6SVbxNFrCj3efL4zMUuFNg8q2X2Vb7HnYVIofPXDNc2ujRzxQQkfNL8pgkMvXV5m5p1ZNgbEIeE5RwWkBgNxjHWeH7kGpS1zc-pQ6NsK-~Ap9gcaqJj~EVvZ5-IY0h3lv8tl1~PQ3HP967m7btS~8OHP9Ha2y7EKDur23--dI1uY099vZUw2Q__',
-  //           }}
-  //         />
-  //       )}
-  //     </TouchableOpacity>
-  //     <View style={styles.cartItemDetails}>
-  //       <View style={styles.cartItemHeader}>
-  //         <Text style={styles.cartItemName}>{product.productId?.name}</Text>
-  //         <TouchableOpacity onPress={onRemove}>
-  //           <Icon name="delete" size={22} color="#666" />
-  //         </TouchableOpacity>
-  //       </View>
-  //       <Text style={styles.cartItemSpec}>{product.variant}</Text>
-  //       <View
-  //         style={{
-  //           flexDirection: 'row',
-  //           justifyContent: 'space-between',
-  //           alignItems: 'center',
-  //         }}>
-  //         <Text style={styles.cartItemQuality}>
-  //           Quantity : {product.quantity}
-  //         </Text>
-  //         <View style={styles.cartItemQuantity}>
-  //           <TouchableOpacity style={styles.quantityBtn} onPress={onDecrement}>
-  //             <Text style={styles.quantityBtnText}>−</Text>
-  //           </TouchableOpacity>
-  //           <Text style={styles.quantityText}>{product.quantity}</Text>
-  //           <TouchableOpacity style={styles.quantityBtn} onPress={onIncrement}>
-  //             <Text style={styles.quantityBtnText}>+</Text>
-  //           </TouchableOpacity>
-  //         </View>
-  //       </View>
-  //     </View>
-  //   </View>
-  // );
   const calculateTotal = (variant, quantity) => {
     // Extract numerical value from variant (e.g., "10gm" -> 10)
     const match = variant.match(/(\d+)\s*(kg|gm|ltr)/i);
@@ -104,7 +58,7 @@ const CartItem = ({product, onRemove, onDecrement, onIncrement}) => {
       </TouchableOpacity>
       <View style={styles.cartItemDetails}>
         <View style={styles.cartItemHeader}>
-          <Text style={styles.cartItemName}>{product.productId?.name}</Text>
+          <Text style={styles.cartItemName}>{product.productId.name}</Text>
           <TouchableOpacity onPress={onRemove}>
             <Icon name="delete" size={22} color="#666" />
           </TouchableOpacity>
@@ -147,8 +101,7 @@ const Cart = () => {
       specification: '80*56" (N + M)',
       quality: '1',
       quantity: 1,
-      image:
-      fallbackImg(),
+      image: fallbackImg(),
     },
     {
       id: 2,
@@ -157,8 +110,7 @@ const Cart = () => {
       quality: '1',
       quantity: 1,
 
-      image:
-      fallbackImg(),
+      image: fallbackImg(),
     },
   ]);
 
@@ -167,7 +119,6 @@ const Cart = () => {
 
   const handleDecrement = (productId, variant, currentQuantity) => {
     if (currentQuantity > 1) {
-      // Send the absolute quantity to update (not delta)
       dispatch(
         updateCartItem({
           productId,
@@ -235,16 +186,6 @@ const Cart = () => {
     dispatch(getCart());
   }, [dispatch]);
 
-  // if (loading) {
-  //   return (
-  //     <SafeAreaView style={styles.container}>
-  //       <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-  //         <ActivityIndicator size="large" />
-  //       </View>
-  //     </SafeAreaView>
-  //   );
-  // }
-
   return (
     <SafeAreaView style={styles.container}>
       <DashboardHeader />
@@ -282,7 +223,9 @@ const Cart = () => {
             ))
           ) : (
             <View style={{alignItems: 'center', marginTop: 50}}>
-              <Text style={{fontSize: 16}}>Your cart is empty</Text>
+              <Text style={{fontSize: 16, color: '#000'}}>
+                Your cart is empty
+              </Text>
             </View>
           )}
         </ScrollView>

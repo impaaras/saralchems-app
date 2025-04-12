@@ -5,6 +5,7 @@ const initialState = {
   selectedVariants: [],
   selectedProduct: null, // Store selected product globally
   isProductModalOpen: true, // Track modal visibility
+  isSearchModal: true,
 };
 
 const cartSlice = createSlice({
@@ -22,11 +23,16 @@ const cartSlice = createSlice({
       state.isProductModalOpen = true; // Open the modal
     },
     closeModal: state => {
-      state.isProductModalOpen = false; // Close modal
+      state.isProductModalOpen = !state.isProductModalOpen; // Close modal
+      state.selectedProduct = null;
+    },
+    closeSearchModal: state => {
+      state.isSearchModal = !state.isSearchModal; // Close modal
       state.selectedProduct = null;
     },
   },
 });
 
-export const {setVariants, addItem, closeModal, openScreen} = cartSlice.actions;
+export const {setVariants, addItem, closeModal, openScreen, closeSearchModal} =
+  cartSlice.actions;
 export default cartSlice.reducer;
