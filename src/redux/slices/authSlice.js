@@ -10,9 +10,12 @@ import {
   setBoolItem,
 } from '../../utils/storage';
 import {store} from '../store';
+import { API_URL } from '../../utils/ApiService';
 
-const BASE_URL = 'http://172.20.10.3:4000';
+const BASE_URL = API_URL;
 // const BASE_URL = 'https://api.saraldyechems.com';
+
+console.log('BASE_URL', BASE_URL)
 const api = axios.create({
   baseURL: BASE_URL,
 });

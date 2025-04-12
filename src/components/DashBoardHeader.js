@@ -36,6 +36,7 @@ import {
   setCategoryName,
   setSelectedCategory,
 } from '../redux/slices/productSlice';
+import { API_URL } from '../utils/ApiService';
 const {width} = Dimensions.get('window');
 
 const DashboardHeader = ({name}) => {
@@ -148,8 +149,7 @@ const DashboardHeader = ({name}) => {
   const token = useSelector(state => state.auth.token);
   const getCategoryData = async () => {
     try {
-      const {data} = await axios.get(`http://172.20.10.3:4000/category`, {
-        // const {data} = await axios.get(`https://api.saraldyechems.com/category`, {
+      const {data} = await axios.get(`${API_URL}/category`, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
