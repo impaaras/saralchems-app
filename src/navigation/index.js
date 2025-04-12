@@ -8,9 +8,9 @@ import GlobalModal from '../utils/Modal/GlobalModal';
 const App = () => {
   return (
     <Provider store={store}>
-      <GlobalModal />
       <NavigationContainer>
         <AppNavigator />
+        <GlobalModal />
       </NavigationContainer>
     </Provider>
   );

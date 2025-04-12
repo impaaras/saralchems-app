@@ -1,7 +1,7 @@
 import {createSlice} from '@reduxjs/toolkit';
 
 const initialState = {
-  isOpen: true, // Changed to false by default
+  isOpen: false, // Changed to false by default
   modalType: null,
   modalProps: {
     title: '',
