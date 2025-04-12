@@ -1,14 +1,13 @@
 import React from 'react';
-import {Modal, View, StyleSheet, Text, TouchableOpacity} from 'react-native';
-import {useSelector, useDispatch} from 'react-redux';
-import {closeModal} from '../../redux/slices/modalSlice';
+import { View, StyleSheet, Text, TouchableOpacity, Dimensions } from 'react-native';
+import { useSelector, useDispatch } from 'react-redux';
+import { closeModal } from '../../redux/slices/modalSlice';
 
 const GlobalModal = () => {
   const dispatch = useDispatch();
-  const {isOpen, modalType, modalProps} = useSelector(state => state.modal);
+  const { isOpen, modalType, modalProps } = useSelector(state => state.modal);
 
   const handleClose = () => {
-    console.log('hloe');
     dispatch(closeModal());
   };
 
@@ -46,35 +45,33 @@ const GlobalModal = () => {
     }
   };
 
-  return (
-    <Modal
-      visible={isOpen}
-      transparent={true}
-      animationType="fade"
-      onRequestClose={handleClose}
-      statusBarTranslucent={true}>
+  if (isOpen) {
+    return (
       <View style={styles.overlay}>
-        <View style={styles.modalContainer}>{renderModalContent()}</View>
+        <View style={styles.modalContainer}>
+          {renderModalContent()}
+        </View>
       </View>
-    </Modal>
-  );
+    );
+  }
 };
 
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    position: 'absolute',
-    // width: '100%',
-    // height: '100%',
-    left: 100,
-    top: 400,
+    position: "absolute",
+    zIndex: 9999,
+    top: 0,
+    left: 0,
+    height: '100%',
+    width: '100%',
   },
   modalContainer: {
-    // width: '80%',
-    // minHeight: 150,
+    width: '80%',
+    minHeight: 150,
     backgroundColor: 'white',
     borderRadius: 10,
     padding: 20,
