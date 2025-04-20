@@ -10,24 +10,31 @@ import {
   TextInput,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import {useNavigation} from '@react-navigation/native';
-import DashboardHeader from '../../components/DashBoardHeader';
+import {useNavigation, useRoute} from '@react-navigation/native';
+import DashboardHeader from '../../components/Header/DashBoardHeader';
 import LinearGradient from 'react-native-linear-gradient';
 import {fallbackImg} from '../../utils/images';
 import {useDispatch, useSelector} from 'react-redux';
 import {addToCart, getCart} from '../../redux/slices/addToCartSlice';
 import {ROUTES} from '../../constants/routes';
+import {setSelectedVariant} from '../../redux/slices/productSlice';
+import {setVariants} from '../../redux/slices/cartSlice';
+import {toggleShowVariants} from '../../redux/slices/authSlice';
+import {closeModal, openModal} from '../../redux/slices/modalSlice';
+import styles from './ProductDetail.styles';
 
 // Option button component
-const OptionButton = ({label, selected, onPress}) => {
+const OptionButton = ({label, selected, onPress, idx}) => {
   const selectedVariant = useSelector(state => state.product.selectedVariant);
+  let newSelected = `${label}${idx}`;
   return (
     <TouchableOpacity
-      style={
-        selectedVariant !== label ? styles.optionButton : styles.selectedOption
-      }
+      style={[
+        styles.optionButton,
+        selectedVariant === newSelected && styles.selectedOption,
+      ]}
       onPress={onPress}>
-      {selectedVariant !== label ? (
+      {selectedVariant !== newSelected ? (
         <Text style={styles.optionButtonText}>{label}</Text>
       ) : (
         <Text style={styles.selectedOptionText}>{label}</Text>
@@ -60,10 +67,12 @@ const ExpandableSection = ({title, children}) => {
 
 const ProductDetail = () => {
   const navigation = useNavigation();
-  const [quantity, setQuantity] = useState(2);
+  const [quantity, setQuantity] = useState(0);
   const [inputValue, setInputValue] = useState('');
   const [selectedSize, setSelectedSize] = useState(null);
   const [customValue, setCustomValue] = useState('');
+  const route = useRoute();
+  const {product} = route.params;
 
   const decrementQuantity = () => {
     if (quantity > 1) {
@@ -72,6 +81,7 @@ const ProductDetail = () => {
   };
 
   const incrementQuantity = () => {
+    console.log(quantity);
     setQuantity(quantity + 1);
   };
 
@@ -84,28 +94,49 @@ const ProductDetail = () => {
 
   const categoryName = useSelector(state => state.product.categoryName);
 
-  const handleAddToCart = (productId, variant, quantity = 1) => {
+  const handleAddToCart = (productId, variant, quantity) => {
+    console.log('hlo', quantity);
     dispatch(addToCart({productId, variant, quantity}))
       .unwrap()
       .catch(err => {
         Alert.alert('Error', err.message || 'Failed to add to cart');
       });
-
+    dispatch(setSelectedVariant(null));
+    dispatch(closeModal());
     navigation.navigate(ROUTES.CART);
   };
 
+  const selectVariant = (variant, index) => {
+    let newVariantName = `${variant}${index}`;
+    dispatch(setSelectedVariant(newVariantName));
+  };
+
+  const handleShowVariants = variantArray => {
+    dispatch(setVariants(variantArray));
+    dispatch(toggleShowVariants());
+    dispatch(
+      openModal({
+        modalType: 'VARIANT_MODAL',
+
+        callbackId: '123', // optional
+      }),
+    );
+  };
+
+  const selectedVariant = useSelector(state => state.product.selectedVariant);
+  const selectedProductItem = useSelector(state => state.cart.selectedProduct);
+
   return (
     <SafeAreaView style={styles.container}>
-      <DashboardHeader />
+      <DashboardHeader name={product?.name} />
       <ScrollView
         style={styles.productContent}
         showsVerticalScrollIndicator={false}>
-        {/* Product Image */}
         <View style={styles.imageContainer}>
           <Image
             source={{
               uri: fallbackImg(),
-            }} // Replace with your actual image path
+            }}
             style={styles.productImage}
             resizeMode="contain"
           />
@@ -113,7 +144,7 @@ const ProductDetail = () => {
 
         {/* Product Info */}
         <View style={styles.productInfo}>
-          <Text style={styles.productName}>Stoving Thinner</Text>
+          <Text style={styles.productName}>{product?.name}</Text>
 
           {/* Product Details Row */}
           <View style={styles.detailsRow}>
@@ -124,7 +155,7 @@ const ProductDetail = () => {
               </View>
               <View style={styles.detailItem}>
                 <Text style={styles.detailLabel}>Brand:</Text>
-                <Text style={styles.detailValue}>Krayson</Text>
+                <Text style={styles.detailValue}>{product?.brand}</Text>
               </View>
               <View style={styles.detailItem}>
                 <Text style={styles.detailLabel}>Units (in):</Text>
@@ -133,52 +164,41 @@ const ProductDetail = () => {
             </View>
             {/* SKU and Input Row */}
             <View style={styles.skuRow}>
-              {items &&
-                items.map((item, itemIndex) => (
-                  <View key={item._id}>
-                    <Text style={styles.itemName}>{item.name}</Text>
-                    {item.variants &&
-                      item.variants.map((size, sizeIndex) => (
-                        <View key={`${item._id}-${sizeIndex}`}>
-                          {size === 'loose' || size === 'losse' ? (
-                            <View style={styles.customInputContainer}>
-                              <TextInput
-                                style={styles.customInput}
-                                placeholder="Enter your Value"
-                                value={customValue}
-                                onChangeText={setCustomValue}
-                                keyboardType="numeric"
-                              />
-                            </View>
-                          ) : (
-                            <OptionButton
-                              label={size}
-                              selected={selectedSize === size}
-                              onPress={() => setSelectedSize(size)}
-                            />
-                          )}
-                        </View>
-                      ))}
+              {product &&
+                product.variants.map((size, sizeIndex) => (
+                  <View key={`${size._id}-${sizeIndex}`}>
+                    {size === 'loose' || size === 'losse' ? (
+                      <View style={styles.customInputContainer}>
+                        <TextInput
+                          style={styles.customInput}
+                          placeholder="Enter your Value"
+                          value={customValue}
+                          onChangeText={setCustomValue}
+                          keyboardType="numeric"
+                        />
+                      </View>
+                    ) : (
+                      <OptionButton
+                        key={`${sizeIndex}`}
+                        label={size}
+                        selected={selectedSize === size}
+                        onPress={() => selectVariant(size, sizeIndex)}
+                        idx={sizeIndex}
+                      />
+                    )}
                   </View>
                 ))}
-              {/* <View style={styles.skuContainer}>
-                <Text style={styles.skuValue}>20 L</Text>
-              </View> */}
-              <View style={styles.inputContainer}>
-                <TextInput
-                  style={styles.input}
-                  value={inputValue}
-                  onChangeText={setInputValue}
-                  placeholder="Enter value"
-                  keyboardType="numeric"
-                />
-              </View>
-              <TouchableOpacity style={styles.plusButton}>
+
+              <TouchableOpacity
+                style={styles.plusButton}
+                onPress={() => handleShowVariants(product.variants)}>
                 <Icon name="add" size={20} color="#FFF" />
               </TouchableOpacity>
-              <TouchableOpacity style={styles.orderButton}>
+              {/* <TouchableOpacity
+                style={styles.orderButton}
+                onPress={() => dispatch(setSelectedVariant('No variant'))}>
                 <Text style={styles.orderButtonText}>Don't know</Text>
-              </TouchableOpacity>
+              </TouchableOpacity> */}
             </View>
           </View>
 
@@ -266,7 +286,22 @@ const ProductDetail = () => {
           </ExpandableSection>
         </View>
       </ScrollView>
+
       <View style={styles.bottomActions}>
+        {selectedVariant === null && (
+          <Text
+            style={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignSelf: 'center',
+              textAlign: 'center',
+              color: 'red',
+              marginBottom: 10,
+              width: '80%',
+            }}>
+            ** Please select a variant before adding the item to your cart. **
+          </Text>
+        )}
         <View style={styles.totalQty}>
           <Text style={styles.totalQtyText}>Total Qty: 400 L</Text>
         </View>
@@ -284,6 +319,7 @@ const ProductDetail = () => {
               <Text style={styles.quantityBtnText}>+</Text>
             </TouchableOpacity>
           </View>
+
           <LinearGradient
             colors={['#1B2B48', '#2D4565']}
             start={{x: 0, y: 0}}
@@ -291,8 +327,9 @@ const ProductDetail = () => {
             style={{borderRadius: 100}}>
             <TouchableOpacity
               style={styles.addToCartButton}
+              disabled={selectedVariant === null}
               onPress={() =>
-                handleAddToCart(selectedProductItem._id, selectedSize)
+                handleAddToCart(product._id, selectedVariant, quantity)
               }>
               <Text style={styles.addToCartText}>Add To Cart</Text>
             </TouchableOpacity>
@@ -304,315 +341,3 @@ const ProductDetail = () => {
 };
 
 export default ProductDetail;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    // marginTop: -103,
-    zIndex: 1,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 15,
-    paddingVertical: 15,
-    backgroundColor: '#3C5D87',
-  },
-  menuButton: {
-    marginRight: 15,
-  },
-  headerTitle: {
-    color: '#FFF',
-    fontSize: 18,
-    fontWeight: '500',
-    flex: 1,
-  },
-  headerRight: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  searchButton: {
-    marginRight: 15,
-  },
-  cartButton: {
-    position: 'relative',
-  },
-  cartBadge: {
-    position: 'absolute',
-    right: -8,
-    top: -8,
-    backgroundColor: 'red',
-    borderRadius: 10,
-    width: 20,
-    height: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  cartBadgeText: {
-    color: '#FFF',
-    fontSize: 12,
-    fontWeight: 'bold',
-  },
-  productContent: {
-    // flex: 1,
-    marginTop: -80,
-    backgroundColor: '#FFF',
-    borderRadius: 20,
-  },
-  productTitle: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#FFF',
-    padding: 15,
-  },
-  imageContainer: {
-    backgroundColor: '#CCC',
-    margin: 15,
-    borderRadius: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: 200,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    // elevation: 2,
-  },
-  productImage: {
-    width: '90%',
-    height: '90%',
-  },
-  productInfo: {
-    borderRadius: 10,
-    paddingHorizontal: 15,
-    paddingBottom: 20,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-  },
-  productName: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#333',
-    marginBottom: 10,
-  },
-  detailsRow: {
-    marginBottom: 15,
-    backgroundColor: '#E5F1FF',
-    padding: 10,
-    borderRadius: 6,
-  },
-  detailItem: {
-    flex: 1,
-  },
-  detailLabel: {
-    fontSize: 12,
-    color: '#666',
-  },
-  detailValue: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#333',
-  },
-  skuRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 10,
-  },
-  skuContainer: {
-    borderWidth: 1,
-    backgroundColor: '#FFF',
-    borderColor: '#FFF',
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    marginRight: 10,
-    width: 70,
-  },
-  skuLabel: {
-    fontSize: 12,
-    color: '#666',
-  },
-  skuValue: {
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  inputContainer: {
-    borderWidth: 1,
-    backgroundColor: '#FFF',
-    borderColor: '#FFF',
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    marginRight: 10,
-    flex: 1,
-  },
-  inputLabel: {
-    fontSize: 12,
-    color: '#666',
-  },
-  input: {
-    fontSize: 14,
-    padding: 0,
-    height: 20,
-  },
-  plusButton: {
-    backgroundColor: '#3C5D87',
-    width: 30,
-    height: 30,
-    borderRadius: 5,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginRight: 10,
-  },
-  orderButton: {
-    backgroundColor: '#000',
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    paddingVertical: 8,
-  },
-  orderButtonText: {
-    color: '#FFF',
-    fontSize: 12,
-    fontWeight: '500',
-  },
-  productType: {
-    fontSize: 16,
-    fontWeight: '500',
-    marginBottom: 15,
-  },
-  section: {
-    marginBottom: 20,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 10,
-    color: '#333',
-  },
-  sectionText: {
-    fontSize: 14,
-    lineHeight: 20,
-    color: '#555',
-  },
-  featureItem: {
-    flexDirection: 'row',
-    marginBottom: 8,
-    alignItems: 'flex-start',
-  },
-  featureText: {
-    fontSize: 14,
-    lineHeight: 20,
-    color: '#555',
-    marginLeft: 8,
-    flex: 1,
-  },
-  featureHighlight: {
-    fontWeight: '600',
-    color: '#333',
-  },
-  specItem: {
-    flexDirection: 'row',
-    marginBottom: 5,
-  },
-  specLabel: {
-    fontSize: 14,
-    fontWeight: '500',
-    color: '#333',
-    width: 120,
-  },
-  specValue: {
-    fontSize: 14,
-    color: '#555',
-    flex: 1,
-  },
-  bottomActions: {
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    marginTop: 20,
-    // flexDirection: 'row',
-    backgroundColor: '#FFF',
-    paddingHorizontal: 15,
-
-    paddingVertical: 20,
-    borderTopWidth: 1,
-    borderTopColor: '#EEE',
-    alignItems: 'center',
-  },
-  totalQty: {
-    marginBottom: 10,
-  },
-  totalQtyText: {
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  quantityContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    borderBottomLeftRadius: 20,
-    borderBottomRightRadius: 20,
-    borderColor: '#CCC',
-    marginRight: 15,
-  },
-  quantityBtn1: {
-    width: 30,
-    height: 30,
-
-    borderRightWidth: 1,
-    borderColor: '#CCC',
-
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  quantityBtn2: {
-    width: 30,
-    height: 30,
-    borderColor: '#CCC',
-    borderLeftWidth: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  quantityBtnText: {
-    fontSize: 16,
-    color: '#3C5D87',
-  },
-  quantityText: {
-    paddingHorizontal: 15,
-    fontSize: 16,
-  },
-  addToCartButton: {
-    // backgroundColor: '#3C5D87',
-
-    paddingVertical: 8,
-    paddingHorizontal: 10,
-    alignItems: 'center',
-  },
-  addToCartText: {
-    color: '#FFF',
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  sectionContainer: {
-    marginBottom: 5,
-    borderBottomWidth: 1,
-    borderBottomColor: '#EEEEEE',
-  },
-  sectionHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 12,
-  },
-  sectionContent: {
-    paddingBottom: 15,
-  },
-  customInputContainer: {
-    flex: 1,
-    marginBottom: 10,
-    // width: 100,
-  },
-});

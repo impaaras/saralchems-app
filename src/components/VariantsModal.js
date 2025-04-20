@@ -40,6 +40,7 @@ const VariantsModal = () => {
               {variants.length > 0 ? (
                 variants.map((variant, index) => (
                   <View key={index}>
+                    <Text>{selectedVariant}</Text>
                     <TouchableOpacity
                       key={index}
                       style={
@@ -97,12 +98,13 @@ const styles = StyleSheet.create({
   modalContent: {
     backgroundColor: '#E5F1FF',
     borderRadius: 25,
-    paddingTop: 20,
+    // paddingTop: 30,
     maxHeight: '60%',
   },
   header: {
     alignItems: 'center',
     paddingHorizontal: 20,
+
     marginBottom: 10,
   },
   title: {

@@ -14,7 +14,7 @@ import Icon from 'react-native-vector-icons/MaterialIcons';
 import {useNavigation} from '@react-navigation/native';
 import {ROUTES} from '../../constants/routes';
 import LinearGradient from 'react-native-linear-gradient';
-import DashboardHeader from '../../components/DashBoardHeader';
+import DashboardHeader from '../../components/Header/DashBoardHeader';
 import {useDispatch, useSelector} from 'react-redux';
 import {
   getCart,
@@ -22,6 +22,7 @@ import {
   updateCartItem,
 } from '../../redux/slices/addToCartSlice';
 import {fallbackImg} from '../../utils/images';
+import styles from './Cart.styles';
 
 const CartItem = ({product, onRemove, onDecrement, onIncrement}) => {
   const navigation = useNavigation();
@@ -39,6 +40,11 @@ const CartItem = ({product, onRemove, onDecrement, onIncrement}) => {
 
     return `${total}${unit}`;
   };
+  const removeTrailingDigits = variant => {
+    // This will remove 1 or more digits from the end of the string
+    return variant?.replace(/\d+$/, '') || '';
+  };
+
   return (
     <View style={styles.cartItem}>
       <TouchableOpacity
@@ -61,7 +67,10 @@ const CartItem = ({product, onRemove, onDecrement, onIncrement}) => {
             <Icon name="delete" size={22} color="#666" />
           </TouchableOpacity>
         </View>
-        <Text style={styles.cartItemSpec}>{product.variant}</Text>
+        <Text style={styles.cartItemSpec}>
+          {removeTrailingDigits(product.variant)}
+        </Text>
+
         <View
           style={{
             flexDirection: 'row',
@@ -106,9 +115,9 @@ const Cart = () => {
     return unsubscribe;
   }, [navigation]);
 
-  useEffect(() => {
-    fetchCartData();
-  }, []);
+  // useEffect(() => {
+  //   fetchCartData();
+  // }, []);
 
   const fetchCartData = useCallback(async () => {
     try {
@@ -177,6 +186,7 @@ const Cart = () => {
         ],
       );
     },
+
     [dispatch, fetchCartData],
   );
 
@@ -191,8 +201,10 @@ const Cart = () => {
   return (
     <SafeAreaView style={styles.container}>
       <DashboardHeader />
-      <View style={styles.cartContent}>
-        <ScrollView style={styles.cartItemsContainer}>
+      <ScrollView
+        style={styles.cartContent}
+        showsVerticalScrollIndicator={false}>
+        <View style={styles.cartItemsContainer}>
           {items?.length > 0 ? (
             items.map((item, index) => (
               <CartItem
@@ -226,214 +238,47 @@ const Cart = () => {
               </Text>
             </View>
           )}
-        </ScrollView>
-        <View style={{alignSelf: 'center', marginBottom: 20}}>
-          <TouchableOpacity
-            onPress={() => navigation.navigate('products')}
-            style={{
-              borderWidth: 1,
-              borderColor: '#3C5D87',
-              paddingVertical: 8,
-              paddingHorizontal: 15,
-              borderRadius: 20,
-            }}>
-            <Text style={{fontSize: 16, fontWeight: '500', color: '#3C5D87'}}>
-              Add Product
-            </Text>
-          </TouchableOpacity>
         </View>
-        <View style={{flexDirection: 'row', justifyContent: 'space-around'}}>
-          <LinearGradient
-            colors={['#05842A', '#05842A']}
-            start={{x: 0, y: 0}}
-            end={{x: 1, y: 0}}
-            style={styles.confirmButton}>
-            <TouchableOpacity style={styles.quoteButton}>
-              <Text style={styles.quoteButtonText}>Confirm</Text>
+        <View style={{paddingBottom: 20}}>
+          <View style={{alignSelf: 'center', marginBottom: 20}}>
+            <TouchableOpacity
+              onPress={() => navigation.navigate('products')}
+              style={{
+                borderWidth: 1,
+                borderColor: '#3C5D87',
+                paddingVertical: 8,
+                paddingHorizontal: 15,
+                borderRadius: 20,
+              }}>
+              <Text style={{fontSize: 16, fontWeight: '500', color: '#3C5D87'}}>
+                Add Product
+              </Text>
             </TouchableOpacity>
-          </LinearGradient>
-          <LinearGradient
-            colors={['#38587F', '#101924']}
-            start={{x: 0, y: 0}}
-            end={{x: 1, y: 0}}
-            style={styles.receiptButton}>
-            <TouchableOpacity style={styles.quoteButton}>
-              <Text style={styles.quoteButtonText}>Request for Quote</Text>
-            </TouchableOpacity>
-          </LinearGradient>
+          </View>
+          <View style={{flexDirection: 'row', justifyContent: 'space-around'}}>
+            <LinearGradient
+              colors={['#05842A', '#05842A']}
+              start={{x: 0, y: 0}}
+              end={{x: 1, y: 0}}
+              style={styles.confirmButton}>
+              <TouchableOpacity style={styles.quoteButton}>
+                <Text style={styles.quoteButtonText}>Confirm</Text>
+              </TouchableOpacity>
+            </LinearGradient>
+            <LinearGradient
+              colors={['#38587F', '#101924']}
+              start={{x: 0, y: 0}}
+              end={{x: 1, y: 0}}
+              style={styles.receiptButton}>
+              <TouchableOpacity style={styles.quoteButton}>
+                <Text style={styles.quoteButtonText}>Request for Quote</Text>
+              </TouchableOpacity>
+            </LinearGradient>
+          </View>
         </View>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };
 
 export default Cart;
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    zIndex: 1,
-  },
-  menuButton: {
-    marginRight: 15,
-  },
-  searchButton: {
-    marginRight: 15,
-  },
-  cartButton: {
-    position: 'relative',
-  },
-  cartBadge: {
-    position: 'absolute',
-    right: -8,
-    top: -8,
-    backgroundColor: 'red',
-    borderRadius: 10,
-    width: 20,
-    height: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  cartBadgeText: {
-    color: '#FFF',
-    fontSize: 12,
-    fontWeight: 'bold',
-  },
-  cartContent: {
-    padding: 15,
-    marginTop: -80,
-    backgroundColor: '#FFF',
-    borderRadius: 20,
-  },
-  cartTitle: {
-    fontSize: 16,
-    marginLeft: 10,
-    fontWeight: 'bold',
-    color: '#FFF',
-    marginBottom: 20,
-  },
-  addProductsText: {
-    fontSize: 16,
-    fontWeight: '500',
-    marginBottom: 10,
-  },
-  cartItemsContainer: {
-    marginBottom: 15,
-  },
-  cartItem: {
-    flexDirection: 'row',
-    backgroundColor: '#FFF',
-    borderRadius: 10,
-    padding: 10,
-    borderWidth: 1,
-    borderColor: '#CCCCCC',
-    marginBottom: 10,
-  },
-  cartItemImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 5,
-    marginRight: 10,
-    backgroundColor: '#F0F0F0',
-  },
-  cartItemDetails: {
-    flex: 1,
-  },
-  cartItemHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 5,
-  },
-  cartItemName: {
-    fontSize: 15,
-    fontWeight: '500',
-  },
-  cartItemSpec: {
-    fontSize: 14,
-    color: '#666',
-    marginBottom: 5,
-  },
-  cartItemQuality: {
-    fontSize: 13,
-    color: '#666',
-    marginBottom: 10,
-  },
-  cartItemQuantity: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  quantityBtn: {
-    width: 30,
-    height: 30,
-    borderWidth: 1,
-    borderColor: '#DDD',
-    borderRadius: 5,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  quantityBtnText: {
-    fontSize: 16,
-    color: '#3C5D87',
-  },
-  quantityText: {
-    paddingHorizontal: 15,
-    fontSize: 16,
-  },
-  quoteButton: {
-    borderRadius: 25,
-    paddingVertical: 12,
-    alignSelf: 'center',
-    alignItems: 'center',
-  },
-  quoteButtonText: {
-    color: '#FFF',
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  bottomNav: {
-    flexDirection: 'row',
-    backgroundColor: '#FFF',
-    borderTopWidth: 1,
-    borderTopColor: '#EEE',
-    height: 60,
-  },
-  navItem: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  navText: {
-    fontSize: 12,
-    color: '#999',
-    marginTop: 4,
-  },
-  activeNavItem: {
-    marginTop: -15,
-  },
-  activeNavCircle: {
-    width: 50,
-    height: 50,
-    backgroundColor: '#3C5D87',
-    borderRadius: 25,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  activeNavText: {
-    color: '#3C5D87',
-    fontWeight: '500',
-  },
-  confirmButton: {
-    width: '30%',
-    backgroundColor: '#05842A',
-    paddingHorizontal: 5,
-    borderRadius: 100,
-  },
-  receiptButton: {
-    width: '60%',
-    backgroundColor: '#3C5D87',
-    paddingVertical: 0,
-    paddingHorizontal: 5,
-    borderRadius: 100,
-  },
-});

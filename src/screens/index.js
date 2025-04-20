@@ -1,11 +1,11 @@
-export {default as Login} from './LoginScreen';
-export {default as Signup} from './RegisterScreen';
-export {default as OTP} from './EmailOtp';
-export {default as Home} from './HomeScreen';
+export {default as Login} from './Login/LoginScreen';
+export {default as Signup} from './Register/RegisterScreen';
+export {default as OTP} from './EmailOTP/EmailOtp';
+export {default as Home} from './Homescreen/HomeScreen';
 export {default as Profile} from './Profile/Index';
-export {default as ItemScreen} from './ItemScreen';
+export {default as ItemScreen} from './Item/ItemScreen';
 export {default as ProductDetails} from './ProductDetails/ProductDetail';
 export {default as Cart} from './Cart/Cart';
 export {default as ProductModal} from './ProductDetails/ProductModal';
-export {default as ResetPassword} from './ResetPassword';
+export {default as ResetPassword} from './Reset/ResetPassword';
 export {default as Search} from '../screens/Search/SearchScreen';

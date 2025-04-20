@@ -1,7 +1,7 @@
 import {StyleSheet, Text, View} from 'react-native';
 import React from 'react';
-import SearchResults from '../../components/SearchResult';
-import DashboardHeader from '../../components/DashBoardHeader';
+import SearchResults from '../../components/Search/SearchResult';
+import DashboardHeader from '../../components/Header/DashBoardHeader';
 import ProductModal from '../ProductDetails/ProductModal';
 import {closeModal, closeSearchModal} from '../../redux/slices/cartSlice';
 import {useDispatch, useSelector} from 'react-redux';

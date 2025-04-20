@@ -10,12 +10,12 @@ import {
   setBoolItem,
 } from '../../utils/storage';
 import {store} from '../store';
-import { API_URL } from '../../utils/ApiService';
+import {API_URL} from '../../utils/ApiService';
 
 const BASE_URL = API_URL;
 // const BASE_URL = 'https://api.saraldyechems.com';
 
-console.log('BASE_URL', BASE_URL)
+console.log('BASE_URL', BASE_URL);
 const api = axios.create({
   baseURL: BASE_URL,
 });
@@ -24,7 +24,6 @@ const api = axios.create({
 axios.interceptors.response.use(
   response => response,
   error => {
-    console.log('🔥 Global Interceptor Error:', error?.response);
     if (error?.response?.status === 401 || error?.response?.status === 403) {
       storage.clearAll(); // Clear MMKV or whatever you're using
       store.dispatch(logout());

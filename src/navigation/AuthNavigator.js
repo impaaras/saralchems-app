@@ -1,9 +1,9 @@
 // src/navigation/AppNavigator.js
 import React from 'react';
 import {createStackNavigator} from '@react-navigation/stack';
-import LoginScreen from '../screens/LoginScreen';
-import RegisterScreen from '../screens/RegisterScreen';
-import EmailOtp from '../screens/EmailOtp';
+import LoginScreen from '../screens/Login/LoginScreen';
+import RegisterScreen from '../screens/Register/RegisterScreen';
+import EmailOtp from '../screens/EmailOTP/EmailOtp';
 import {StatusBar} from 'react-native';
 import {ROUTES} from '../constants/routes';
 import {ResetPassword} from '../screens';

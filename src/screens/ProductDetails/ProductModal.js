@@ -16,6 +16,14 @@ import {useNavigation} from '@react-navigation/native';
 import {ROUTES} from '../../constants/routes';
 import {useDispatch, useSelector} from 'react-redux';
 import {addToCart, getCart} from '../../redux/slices/addToCartSlice';
+import {closeModal, openModal} from '../../redux/slices/modalSlice';
+import Icon from 'react-native-vector-icons/Fontisto';
+import {setSelectedVariant} from '../../redux/slices/productSlice';
+// import {RotateCw} from 'lucide-react';
+import {PackageCheck, RotateCw} from 'lucide-react-native';
+import {setVariants} from '../../redux/slices/cartSlice';
+import {toggleShowVariants} from '../../redux/slices/authSlice';
+import {selectVariant} from '../../utils/function/function';
 
 // Custom dropdown component
 const Dropdown = ({options, selectedValue, onSelect, label}) => {
@@ -72,13 +80,48 @@ const QuantitySelector = ({quantity, setQuantity, unit}) => {
 };
 
 // Option button component
-const OptionButton = ({label, selected, onPress}) => {
+// const OptionButton = ({label, selected, onPress, idx}) => {
+//   const selectedVariant = useSelector(state => state.product.selectedVariant);
+
+//   let newSelected = `${label}${idx}`;
+
+//   console.log('delete', selectedVariant);
+
+//   const selectedVariantWithoutLast = selectedVariant?.slice(0, -1);
+//   return (
+//     <TouchableOpacity
+//       style={[
+//         styles.optionButton,
+//         selectedVariantWithoutLast === newSelected && styles.selectedOption,
+//       ]}
+//       onPress={onPress}>
+//       {selectedVariantWithoutLast !== newSelected ? (
+//         <Text style={styles.optionButtonText}>{label}</Text>
+//       ) : (
+//         <Text style={styles.selectedOptionText}>{label}</Text>
+//       )}
+//     </TouchableOpacity>
+//   );
+// };
+const OptionButton = ({label, selected, onPress, idx}) => {
   const selectedVariant = useSelector(state => state.product.selectedVariant);
+
+  let newSelected = `${label}${idx}`;
+
+  // Conditionally slice only if selectedVariant is longer than newSelected
+  const selectedVariantTrimmed =
+    selectedVariant?.length > newSelected.length
+      ? selectedVariant.slice(0, -1)
+      : selectedVariant;
+
   return (
     <TouchableOpacity
-      style={[styles.optionButton, selected && styles.selectedOption]}
+      style={[
+        styles.optionButton,
+        selectedVariantTrimmed === newSelected && styles.selectedOption,
+      ]}
       onPress={onPress}>
-      {selectedVariant !== label ? (
+      {selectedVariantTrimmed !== newSelected ? (
         <Text style={styles.optionButtonText}>{label}</Text>
       ) : (
         <Text style={styles.selectedOptionText}>{label}</Text>
@@ -87,7 +130,7 @@ const OptionButton = ({label, selected, onPress}) => {
   );
 };
 
-const ProductModal = ({visible, onClose, product}) => {
+const ProductModal = ({product}) => {
   const [quantity, setQuantity] = useState(1);
   const [selectedOptions, setSelectedOptions] = useState({});
   const [customValue, setCustomValue] = useState('');
@@ -96,31 +139,7 @@ const ProductModal = ({visible, onClose, product}) => {
   const [selectedSize, setSelectedSize] = useState(null);
   const selectedProductItem = useSelector(state => state.cart.selectedProduct);
 
-  // useEffect(() => {
-  //   console.log('selectedProductItem', selectedProductItem);
-  // }, []);
-
-  // Example product data structure (would come from props in real usage)
-  const defaultProduct = {
-    name: 'Stoving Thinner',
-    category: 'Textile Auxiliaries',
-    brand: 'Kayson',
-    image:
-      'https://s3-alpha-sig.figma.com/img/5ffb/a192/2dd4c257df96f4b702c011168d3cffb7?Expires=1742774400&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=U2Smx6pgvm867-k7A3ze9tyriadTE5yxgW94WVaLEeXrisHy1MIWtdMiai20EcL5YG6b4hrFOcDFdQNmVVkxsBX7elT0vufLN7I7Adjd7Cr4mtGlSfQ7NAYYI4DZBgqfcJiRTb128mma9alrjrzQ644iFbFVSZb6cchvIiJkoh8WZbqipRUGa603jVW~CUE~bl-LB35GXPny58zzgR9tIj0A4GyLNjXefrh-A3~BLkUh7PIpKtxiEJoX4xjfx-~XCHDEklFMuEv4aLm1KGusEAD1N2p73-NAMyAdPD6KtVBHW7K9zgxKKpb7An0mDK6zoX0e1Sq06AAIBYhIcY4NFg__',
-    description:
-      'Our Nylon (12 No. 54" (NxM)) is a high-quality, durable synthetic fabric designed for multiple industrial and commercial applications. Made from premium-grade nylon fibers, this fabric offers excellent strength, flexibility, and resistance to wear and tear.',
-    variants: {
-      sizes: ['20 L', '200 L'],
-      dimensions: ['80*56 (N * M)'],
-      meshCount: ['45', '50', '60'],
-      width: ['67', '70', '75'],
-      colors: ['White', 'Blue', 'Black'],
-    },
-    unit: 'ltr',
-    totalQty: '400 L',
-  };
-
-  const productData = product || defaultProduct;
+  const productData = product;
 
   // Handle screen dimension changes for responsiveness
   useEffect(() => {
@@ -151,9 +170,10 @@ const ProductModal = ({visible, onClose, product}) => {
 
   const navigation = useNavigation();
 
-  const handleShowMore = () => {
-    navigation.navigate(ROUTES.PRODUCT_DETAILS);
-    onClose;
+  const handleShowMore = product => {
+    // dispatch(openScreen(product));
+    dispatch(closeModal());
+    navigation.navigate(ROUTES.PRODUCT_DETAILS, {product});
   };
 
   const dispatch = useDispatch();
@@ -164,195 +184,281 @@ const ProductModal = ({visible, onClose, product}) => {
   }, [dispatch]);
 
   const categoryName = useSelector(state => state.product.categoryName);
+  const selectedVariant = useSelector(state => state.product.selectedVariant);
 
-  const handleAddToCart = (productId, variant, quantity = 1) => {
+  const handleAddToCart = (productId, variant, quantity) => {
     dispatch(addToCart({productId, variant, quantity}))
       .unwrap()
       .catch(err => {
         Alert.alert('Error', err.message || 'Failed to add to cart');
       });
-    onClose();
+    dispatch(setSelectedVariant(null));
+    dispatch(closeModal());
     navigation.navigate(ROUTES.CART);
   };
 
+  const handleClose = () => {
+    dispatch(
+      closeModal({
+        modalType: 'VARIANT_MODAL',
+        callbackId: '123', // optional
+      }),
+    );
+  };
+  const handleShowVariants = variantArray => {
+    dispatch(setVariants(variantArray));
+    dispatch(toggleShowVariants());
+    dispatch(
+      openModal({
+        modalType: 'VARIANT_MODAL',
+        callbackId: '123',
+      }),
+    );
+  };
+
+  const handleVariantSelect = (variant, index) => {
+    selectVariant(dispatch, variant, index);
+    setCustomValue('');
+  };
+
+  useEffect(() => {
+    if (customValue != '') {
+      selectVariant(dispatch, customValue);
+    }
+  }, [customValue]);
+  const OpenCart = () => {
+    dispatch(closeModal());
+    dispatch(
+      openModal({
+        modalType: 'CART',
+        callbackId: '123',
+      }),
+    );
+  };
+
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="fade"
-      onRequestClose={onClose}>
-      <View style={styles.modalContainer}>
-        <View
-          style={[styles.modalContent, {maxHeight: dimensions.height * 0.8}]}>
-          <View style={styles.header}>
-            <TouchableOpacity style={styles.closeButton} onPress={onClose}>
-              <Text style={styles.closeButtonText}>×</Text>
-            </TouchableOpacity>
+    <View style={{backgroundColor: '#E0EBF9', borderRadius: 25}}>
+      <View style={[styles.modalContent, {maxHeight: dimensions.height * 0.8}]}>
+        <ScrollView
+          contentContainerStyle={styles.contentContainer}
+          showsVerticalScrollIndicator={false}>
+          <View style={styles.imageContainer}>
+            <Image
+              source={{
+                uri:
+                  productData.image ||
+                  `https://s3-alpha-sig.figma.com/img/5ffb/a192/2dd4c257df96f4b702c011168d3cffb7?Expires=1742774400&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=U2Smx6pgvm867-k7A3ze9tyriadTE5yxgW94WVaLEeXrisHy1MIWtdMiai20EcL5YG6b4hrFOcDFdQNmVVkxsBX7elT0vufLN7I7Adjd7Cr4mtGlSfQ7NAYYI4DZBgqfcJiRTb128mma9alrjrzQ644iFbFVSZb6cchvIiJkoh8WZbqipRUGa603jVW~CUE~bl-LB35GXPny58zzgR9tIj0A4GyLNjXefrh-A3~BLkUh7PIpKtxiEJoX4xjfx-~XCHDEklFMuEv4aLm1KGusEAD1N2p73-NAMyAdPD6KtVBHW7K9zgxKKpb7An0mDK6zoX0e1Sq06AAIBYhIcY4NFg__`,
+              }}
+              style={styles.productImage}
+              resizeMode="contain"
+            />
           </View>
 
-          <ScrollView
-            contentContainerStyle={styles.contentContainer}
-            showsVerticalScrollIndicator={false}>
-            {/* Product Image */}
-            <View style={styles.imageContainer}>
-              <Image
-                source={{
-                  uri:
-                    productData.image ||
-                    `https://s3-alpha-sig.figma.com/img/5ffb/a192/2dd4c257df96f4b702c011168d3cffb7?Expires=1742774400&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=U2Smx6pgvm867-k7A3ze9tyriadTE5yxgW94WVaLEeXrisHy1MIWtdMiai20EcL5YG6b4hrFOcDFdQNmVVkxsBX7elT0vufLN7I7Adjd7Cr4mtGlSfQ7NAYYI4DZBgqfcJiRTb128mma9alrjrzQ644iFbFVSZb6cchvIiJkoh8WZbqipRUGa603jVW~CUE~bl-LB35GXPny58zzgR9tIj0A4GyLNjXefrh-A3~BLkUh7PIpKtxiEJoX4xjfx-~XCHDEklFMuEv4aLm1KGusEAD1N2p73-NAMyAdPD6KtVBHW7K9zgxKKpb7An0mDK6zoX0e1Sq06AAIBYhIcY4NFg__`,
-                }}
-                style={styles.productImage}
-                resizeMode="contain"
-              />
-            </View>
-            {/* Product Info */}
-            <View style={{marginHorizontal: 10}}>
-              <Text style={styles.title}>{selectedProductItem.name}</Text>
-            </View>
+          <View style={{marginHorizontal: 10}}>
+            <Text style={styles.title}>{selectedProductItem.name}</Text>
+          </View>
+          <View
+            style={{
+              backgroundColor: '#E5F1FF',
+              paddingTop: 10,
+              margin: 10,
+              borderRadius: 10,
+              paddingHorizontal: 10,
+            }}>
             <View
               style={{
-                backgroundColor: '#E5F1FF',
-                paddingTop: 10,
-                margin: 10,
-                borderRadius: 10,
-                paddingHorizontal: 10,
+                display: 'flex',
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                alignItems: 'center',
               }}>
               <View
                 style={{
                   display: 'flex',
+                  marginBottom: 10,
                   flexDirection: 'row',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
                 }}>
-                <View
-                  style={{
-                    display: 'flex',
-                    marginBottom: 10,
-                    flexDirection: 'row',
-                  }}>
-                  <Text style={styles.infoLabel}>Category :</Text>
-                  <Text style={{}} numberOfLines={1} ellipsizeMode="tail">
-                    {(categoryName || 'Texttile Auxlier').length > 20
-                      ? `${categoryName.substring(0, 20)}...`
-                      : categoryName}
-                  </Text>
-                </View>
-                <View
-                  style={{
-                    display: 'flex',
-                    marginBottom: 10,
-                    flexDirection: 'row',
-                  }}>
-                  <Text style={styles.infoLabel}>Brand :</Text>
-                  <Text style={styles.infoValue}>
-                    {(selectedProductItem.brand || 'Kayson').length > 8
-                      ? `${(selectedProductItem.brand || 'Kayson').substring(
-                          0,
-                          8,
-                        )}...`
-                      : selectedProductItem.brand || 'Kayson'}
-                  </Text>
-                </View>
+                <Text style={styles.infoLabel}>Category :</Text>
+                <Text style={{}} numberOfLines={1} ellipsizeMode="tail">
+                  {(categoryName || 'Texttile Auxlier').length > 20
+                    ? `${categoryName.substring(0, 20)}...`
+                    : categoryName}
+                </Text>
               </View>
+              <View
+                style={{
+                  display: 'flex',
+                  marginBottom: 10,
+                  flexDirection: 'row',
+                }}>
+                <Text style={styles.infoLabel}>Brand :</Text>
+                <Text style={styles.infoValue}>
+                  {(selectedProductItem.brand || 'Kayson').length > 8
+                    ? `${(selectedProductItem.brand || 'Kayson').substring(
+                        0,
+                        8,
+                      )}...`
+                    : selectedProductItem.brand || 'Kayson'}
+                </Text>
+              </View>
+            </View>
 
-              <View style={styles.optionsSection}>
-                <View
-                  style={{
+            <View style={styles.optionsSection}>
+              <View
+                style={{
+                  width: '80%',
+                  display: 'flex',
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                }}>
+                <ScrollView
+                  horizontal={true}
+                  showsHorizontalScrollIndicator={false}
+                  contentContainerStyle={{
                     display: 'flex',
                     flexDirection: 'row',
                     alignItems: 'center',
                   }}>
-                  {selectedProductItem.variants.map((size, index) => (
-                    <View key={index}>
-                      {size === 'loose' || size === 'losse' ? (
-                        <View style={styles.customInputContainer}>
-                          <TextInput
-                            style={styles.customInput}
-                            placeholder="Enter your Value"
-                            value={customValue}
-                            onChangeText={setCustomValue}
-                            keyboardType="numeric"
-                          />
+                  {selectedProductItem &&
+                    selectedProductItem?.variants
+                      .slice(0, 3)
+                      .map((size, index) => (
+                        <View key={index}>
+                          {size === 'loose' || size === 'losse' ? (
+                            <View style={styles.customInputContainer}>
+                              {customValue != '' && (
+                                <Text
+                                  style={{
+                                    marginRight: 6,
+                                    fontSize: 16,
+                                    fontWeight: '600',
+                                    backgroundColor: '#3C5D86',
+                                    color: 'white',
+                                    paddingVertical: 2,
+                                    paddingHorizontal: 10,
+                                    borderRadius: 5,
+                                  }}>
+                                  {customValue}
+                                </Text>
+                              )}
+                              <TextInput
+                                style={styles.customInput}
+                                placeholder="Enter your Value"
+                                value={customValue}
+                                onChangeText={setCustomValue}
+                                keyboardType="numeric"
+                              />
+                            </View>
+                          ) : (
+                            <OptionButton
+                              key={`${index}`}
+                              label={size}
+                              selected={selectedSize === size}
+                              onPress={() => handleVariantSelect(size, index)}
+                              idx={index}
+                            />
+                          )}
                         </View>
-                      ) : (
-                        <OptionButton
-                          key={`${index}`}
-                          label={size}
-                          selected={selectedSize === size}
-                          onPress={() => setSelectedSize(size)}
-                        />
-                      )}
-                    </View>
-                  ))}
-                </View>
-                <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                  <Text style={{fontWeight: 'bold', fontSize: 12}}>Unit: </Text>
-                  <Text style={{fontSize: 12}}>ltr</Text>
-                </View>
+                      ))}
+                </ScrollView>
+                {selectedProductItem.variants.length > 3 && (
+                  <TouchableOpacity
+                    style={styles.moreButton}
+                    onPress={() =>
+                      handleShowVariants(selectedProductItem.variants)
+                    }>
+                    <Text style={styles.moreButtonText}>+</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+              <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                <Text style={{fontWeight: 'bold', fontSize: 12}}>Unit: </Text>
+                <Text style={{fontSize: 12}}>ltr</Text>
               </View>
             </View>
-            <View style={styles.descriptionContainer}>
-              <Text style={styles.descriptionTitle}>Product Description:</Text>
-              <Text
-                style={styles.descriptionText}
-                numberOfLines={showMore ? undefined : 3}>
-                Our Nylon (12 No. 54" (NxM)) is a high-quality, durable
-                synthetic fabric designed for multiple industrial and commercial
-                applications. Made from premium-grade nylon fibers, this fabric
-                offers excellent strength, flexibility, and resistance to wear
-                and tear.
-                {/* {selectedProductItem?.description || productData.description} */}
+          </View>
+          <View style={styles.descriptionContainer}>
+            <Text style={styles.descriptionTitle}>Product Description:</Text>
+            <Text
+              style={styles.descriptionText}
+              numberOfLines={showMore ? undefined : 3}>
+              Our Nylon (12 No. 54" (NxM)) is a high-quality, durable synthetic
+              fabric designed for multiple industrial and commercial
+              applications. Made from premium-grade nylon fibers, this fabric
+              offers excellent strength, flexibility, and resistance to wear and
+              tear.
+              {/* {selectedProductItem?.description || productData.description} */}
+            </Text>
+            <TouchableOpacity
+              style={styles.showMoreButton}
+              onPress={() => handleShowMore(product)}>
+              <Text style={styles.showMoreText}>
+                {showMore ? 'Show Less' : 'Show More'}
               </Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+        <View
+          style={{
+            backgroundColor: '#FFF',
+            paddingBottom: 10,
+            paddingTop: 10,
+            borderRadius: 20,
+          }}>
+          {/* Total Quantity */}
+          <View style={styles.totalQtyContainer}>
+            <Text style={styles.totalQtyText}>
+              Total Qty: {productData.totalQty}
+            </Text>
+          </View>
+
+          {/* Quantity and Add to Cart */}
+          <View style={styles.actionContainer}>
+            <QuantitySelector
+              quantity={quantity}
+              setQuantity={setQuantity}
+              unit={productData.unit}
+            />
+            <LinearGradient
+              colors={['#38587F', '#101924']} // Left to right gradient colors
+              start={{x: 0, y: 0}}
+              end={{x: 1, y: 0}}
+              style={styles.receiptButton} // Make sure the gradient covers the button
+            >
               <TouchableOpacity
-                style={styles.showMoreButton}
-                onPress={handleShowMore}>
-                <Text style={styles.showMoreText}>
-                  {showMore ? 'Show Less' : 'Show More'}
-                </Text>
+                style={styles.addToCartButton}
+                disabled={selectedVariant === null}
+                // onPress={() =>
+                //   handleAddToCart(
+                //     selectedProductItem._id,
+                //     selectedVariant,
+                //     quantity,
+                //   )
+                // }
+                onPress={OpenCart}>
+                <Text style={styles.addToCartText}>Add To Cart</Text>
               </TouchableOpacity>
-            </View>
-          </ScrollView>
-
-          <View
-            style={{
-              backgroundColor: '#E5F1FF',
-              paddingBottom: 10,
-              paddingTop: 10,
-              borderRadius: 20,
-            }}>
-            {/* Total Quantity */}
-            <View style={styles.totalQtyContainer}>
-              <Text style={styles.totalQtyText}>
-                Total Qty: {productData.totalQty}
-              </Text>
-            </View>
-
-            {/* Quantity and Add to Cart */}
-            <View style={styles.actionContainer}>
-              <QuantitySelector
-                quantity={quantity}
-                setQuantity={setQuantity}
-                unit={productData.unit}
-              />
-              <LinearGradient
-                colors={['#38587F', '#101924']} // Left to right gradient colors
-                start={{x: 0, y: 0}}
-                end={{x: 1, y: 0}}
-                style={styles.receiptButton} // Make sure the gradient covers the button
-              >
-                <TouchableOpacity
-                  style={styles.addToCartButton}
-                  onPress={() =>
-                    handleAddToCart(selectedProductItem._id, selectedSize)
-                  }>
-                  <Text style={styles.addToCartText}>Add To Cart</Text>
-                </TouchableOpacity>
-              </LinearGradient>
-            </View>
+            </LinearGradient>
           </View>
         </View>
       </View>
-    </Modal>
+      <TouchableOpacity
+        style={{
+          display: 'flex',
+          flexDirection: 'row',
+          alignSelf: 'center',
+          paddingTop: 8,
+          paddingBottom: 2,
+          alignItems: 'center',
+        }}
+        onPress={handleClose}>
+        <RotateCw size={18} />
+        <Text style={{marginLeft: 2, fontSize: 16, fontWeight: '500'}}>
+          Close
+        </Text>
+      </TouchableOpacity>
+    </View>
   );
 };
 
@@ -365,6 +471,7 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     backgroundColor: '#FFF',
+
     borderRadius: 25,
     paddingTop: 5,
     overflow: 'hidden',
@@ -398,6 +505,7 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     paddingBottom: 20,
+    paddingTop: 10,
   },
   imageContainer: {
     alignItems: 'center',
@@ -437,6 +545,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     alignItems: 'center',
+
     justifyContent: 'space-between',
     // marginHorizontal: 7,
     marginBottom: 5,
@@ -447,7 +556,7 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     paddingHorizontal: 10,
     marginRight: 5,
-    marginBottom: 10,
+
     borderWidth: 1,
     borderColor: '#D0E4FF',
   },
@@ -478,7 +587,8 @@ const styles = StyleSheet.create({
   },
   customInputContainer: {
     flex: 1,
-    marginBottom: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
     // width: 100,
   },
   customInput: {
@@ -667,6 +777,20 @@ const styles = StyleSheet.create({
 
     paddingHorizontal: 10,
     borderRadius: 100,
+  },
+  moreButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+  },
+  moreButton: {
+    backgroundColor: '#3C5D85',
+    borderRadius: 3,
+    width: 24,
+    marginBottom: 9,
+    marginLeft: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 

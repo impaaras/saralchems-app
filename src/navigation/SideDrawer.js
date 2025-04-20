@@ -3,7 +3,7 @@ import {createDrawerNavigator} from '@react-navigation/drawer';
 import BottomNavigator from './BottomNavigator';
 import {Home, Profile} from '../screens';
 import {ROUTES} from '../constants/routes';
-import CustomDrawerContent from '../components/SideDrawer';
+import CustomDrawerContent from '../components/Drawer/SideDrawer';
 
 const Drawer = createDrawerNavigator();
 

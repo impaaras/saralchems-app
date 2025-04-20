@@ -7,6 +7,7 @@ const initialState = {
   categoryId: null,
   categoryName: null,
   selectedVariant: null,
+  parentCategoryName: null,
 };
 
 export const categorySlice = createSlice({
@@ -31,6 +32,9 @@ export const categorySlice = createSlice({
     setSelectedVariant: (state, action) => {
       state.selectedVariant = action.payload; // New reducer for storing the array
     },
+    setParentCategoryName: (state, action) => {
+      state.parentCategoryName = action.payload; // New reducer for storing the array
+    },
   },
 });
 
@@ -41,5 +45,6 @@ export const {
   setCategoryId,
   setCategoryName,
   setSelectedVariant,
+  setParentCategoryName,
 } = categorySlice.actions;
 export default categorySlice.reducer;
