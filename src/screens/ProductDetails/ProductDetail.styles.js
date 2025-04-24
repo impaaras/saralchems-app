@@ -1,4 +1,5 @@
-import {StyleSheet} from 'react-native';
+import {Dimensions, StyleSheet} from 'react-native';
+const {width} = Dimensions.get('window');
 
 const styles = StyleSheet.create({
   container: {
@@ -328,6 +329,18 @@ const styles = StyleSheet.create({
   },
   selectedOptionText: {
     color: 'white',
+  },
+
+  // New styles for image zoom
+  modalContainer: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.9)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  fullScreenImage: {
+    width: width,
+    height: '80%',
   },
 });
 

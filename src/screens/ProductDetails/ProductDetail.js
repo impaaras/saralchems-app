@@ -22,6 +22,7 @@ import {setVariants} from '../../redux/slices/cartSlice';
 import {toggleShowVariants} from '../../redux/slices/authSlice';
 import {closeModal, openModal} from '../../redux/slices/modalSlice';
 import styles from './ProductDetail.styles';
+import ZoomableImage from '../../components/ImageZoom/ImageZoom';
 
 // Option button component
 const OptionButton = ({label, selected, onPress, idx}) => {
@@ -288,7 +289,7 @@ const ProductDetail = () => {
       </ScrollView>
 
       <View style={styles.bottomActions}>
-        {selectedVariant === null && (
+        {/* {selectedVariant === null && (
           <Text
             style={{
               display: 'flex',
@@ -301,7 +302,7 @@ const ProductDetail = () => {
             }}>
             ** Please select a variant before adding the item to your cart. **
           </Text>
-        )}
+        )} */}
         <View style={styles.totalQty}>
           <Text style={styles.totalQtyText}>Total Qty: 400 L</Text>
         </View>
