@@ -35,8 +35,15 @@ const ProductCard = ({item, onAddPress, idx}) => {
 
   let [variantId, setVariantId] = useState(null);
 
-  const handleShowVariants = variantArray => {
-    dispatch(setVariants(variantArray));
+  const handleShowVariants = (variantArray, parentIndex, parentId) => {
+    const updatedVariants = variantArray.map(v => ({
+      label: v,
+      parentIndex,
+      parentId,
+    }));
+    dispatch(setVariants(updatedVariants));
+    // dispatch(setVariants(variantArray));
+
     dispatch(toggleShowVariants());
     dispatch(
       openModal({
@@ -49,7 +56,14 @@ const ProductCard = ({item, onAddPress, idx}) => {
 
   const checkOpen = (product, index) => {
     setVariantId(index);
-    dispatch(addItem(product));
+    // console.log(product, index);
+    const newProduct = {
+      ...product,
+      parentId: index,
+    };
+
+    dispatch(addItem(newProduct));
+    // dispatch(addItem(product));
     dispatch(
       openModal({
         modalType: 'PRODUCT_MODAL',
@@ -64,9 +78,10 @@ const ProductCard = ({item, onAddPress, idx}) => {
     state => state.cart.isProductModalOpen,
   );
 
-  const openScreenTag = product => {
+  const openScreenTag = (product, index) => {
+    // console.log(product, index);
     // dispatch(openScreen(product));
-    navigation.navigate(ROUTES.PRODUCT_DETAILS, {product});
+    navigation.navigate(ROUTES.PRODUCT_DETAILS, {product, parentIndex: index});
   };
 
   const handleAddPress = product => {
@@ -86,9 +101,9 @@ const ProductCard = ({item, onAddPress, idx}) => {
     );
   };
 
-  const handleVariantSelect = (variant, index, idx) => {
-    selectVariant(dispatch, variant, index, idx);
-  };
+  // const handleVariantSelect = (variant, index, idx) => {
+  //   selectVariant(dispatch, variant, index, idx);
+  // };
 
   return (
     <View style={styles.card}>
@@ -121,14 +136,17 @@ const ProductCard = ({item, onAddPress, idx}) => {
                   <TouchableOpacity
                     key={index}
                     style={
-                      selectedVariant !== `${variant}${index}${idx}`
+                      selectedVariant !== `${variant}${index}${idx}${item._id}`
                         ? styles.variantItem
                         : styles.selectedVariantItem
                     }
-                    onPress={() => handleVariantSelect(variant, index, idx)}>
+                    onPress={() =>
+                      selectVariant(dispatch, variant, index, idx, item._id)
+                    }>
                     <Text
                       style={
-                        selectedVariant !== `${variant}${index}${idx}`
+                        selectedVariant !==
+                        `${variant}${index}${idx}${item._id}`
                           ? styles.variantText
                           : styles.selectedVariantText
                       }>
@@ -143,7 +161,9 @@ const ProductCard = ({item, onAddPress, idx}) => {
               {item.variants.length > 1 && (
                 <TouchableOpacity
                   style={styles.moreButton}
-                  onPress={() => handleShowVariants(item.variants)}>
+                  onPress={() =>
+                    handleShowVariants(item.variants, idx, item._id)
+                  }>
                   <Text style={styles.moreButtonText}>+</Text>
                 </TouchableOpacity>
               )}

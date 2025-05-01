@@ -16,8 +16,9 @@ import Icon from 'react-native-vector-icons/Fontisto';
 import {setSelectedVariant} from '../../redux/slices/productSlice';
 import {toggleShowVariants} from '../../redux/slices/authSlice';
 import {ProductModal} from '../../screens';
-import {RotateCw} from 'lucide-react-native';
+import {RotateCw, X} from 'lucide-react-native';
 import CartModal from './CartModal';
+import ViewCart from './ViewCart';
 
 const GlobalModal = () => {
   const dispatch = useDispatch();
@@ -36,8 +37,9 @@ const GlobalModal = () => {
   const showVariants = useSelector(state => state.auth.showVariants);
   const variants = useSelector(state => state.cart.selectedVariants);
 
-  const selectVariant = (variant, index) => {
-    let newVariantName = `${variant}${index}`;
+  const selectVariant = (variant, index, parentIndex, parentId) => {
+    let newVariantName = `${variant}${index}${parentIndex}${parentId}`;
+    console.log('newavain', newVariantName);
     dispatch(setSelectedVariant(newVariantName));
   };
 
@@ -59,7 +61,12 @@ const GlobalModal = () => {
             <CartModal product={selectedProductItem} />
           </>
         );
-      // Add other modal types here
+      case 'ViewCart':
+        return (
+          <>
+            <ViewCart />
+          </>
+        );
       default:
         return (
           <>
@@ -70,7 +77,7 @@ const GlobalModal = () => {
               {modalProps?.message || 'Default Message'}
             </Text>
             <TouchableOpacity style={styles.closeButton} onPress={handleClose}>
-              <Text style={styles.closeButtonText}>Closes</Text>
+              <Text style={styles.closeButtonText}>Close</Text>
             </TouchableOpacity>
           </>
         );
@@ -79,11 +86,20 @@ const GlobalModal = () => {
 
   if (isOpen) {
     return (
-      <View style={modalType === 'CART' ? styles.overlay2 : styles.overlay}>
+      <View
+        style={
+          modalType === 'CART'
+            ? styles.overlay2
+            : modalType === 'ViewCart'
+            ? styles.viewCartDesign
+            : styles.overlay
+        }>
         <View
           style={
             modalType === 'VARIANT_MODAL'
               ? styles.modalContent
+              : modalType === 'ViewCart'
+              ? styles.viewModalContent
               : styles.modalContent2
           }>
           {modalType === 'VARIANT_MODAL' ? (
@@ -93,25 +109,34 @@ const GlobalModal = () => {
               </View>
               <ScrollView contentContainerStyle={styles.variantsContainer}>
                 <View style={styles.variantsGrid}>
-                  {/* Map through variants */}
                   {variants.length > 0 ? (
                     variants.map((variant, index) => (
                       <View key={index}>
                         <TouchableOpacity
-                          key={index}
                           style={
-                            selectedVariant !== `${variant}${index}`
+                            selectedVariant !==
+                            `${variant.label}${index}${variant.parentIndex}${variant.parentId}`
                               ? styles.variantItem
                               : styles.selectedVariant
                           }
-                          onPress={() => selectVariant(variant, index)}>
+                          onPress={() =>
+                            selectVariant(
+                              variant.label,
+                              index,
+                              variant.parentIndex,
+                              variant.parentId,
+                            )
+                          }>
                           <Text
                             style={
-                              selectedVariant !== `${variant}${index}`
+                              selectedVariant !==
+                              `${variant.label}${index}${variant.parentIndex}${variant.parentId}`
                                 ? styles.variantText
                                 : styles.selectedVariantText
                             }>
-                            {variant}
+                            {variant.label ||
+                              variant.name ||
+                              `Variant ${index + 1}`}
                           </Text>
                         </TouchableOpacity>
                       </View>
@@ -133,10 +158,8 @@ const GlobalModal = () => {
                   alignItems: 'center',
                 }}
                 onPress={handleClose}>
-                <RotateCw size={18} />
-                <Text style={{marginLeft: 6, fontSize: 16, fontWeight: '500'}}>
-                  Close
-                </Text>
+                <X size={18} />
+                <Text style={{fontSize: 16, fontWeight: '500'}}>Close</Text>
               </TouchableOpacity>
             </>
           ) : (
@@ -149,6 +172,19 @@ const GlobalModal = () => {
 };
 
 const styles = StyleSheet.create({
+  viewCartDesign: {
+    flex: 1,
+    // backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'absolute',
+    zIndex: 9999,
+    bottom: 80,
+    // bottom
+    left: 0,
+    // height: '100%',
+    width: '100%',
+  },
   overlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.5)',
@@ -169,12 +205,18 @@ const styles = StyleSheet.create({
     zIndex: 9999,
     right: 0,
     bottom: 90,
-
     width: '70%',
   },
   cartModalContainer: {
     width: '100%',
     backgroundColor: 'transparent',
+  },
+  viewModalContent: {
+    // backgroundColor: '#3C5D87',
+    borderRadius: 30,
+    padding: 5,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   modalContainer: {
     width: '80%',

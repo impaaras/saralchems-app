@@ -195,6 +195,28 @@ const DashboardHeader = ({name}) => {
     }
   };
 
+  const inputRef = React.useRef(null);
+
+  // Modify the useFocusEffect to use the ref
+  useFocusEffect(
+    useCallback(() => {
+      const routeName = getCurrentRouteName();
+      setCurrentRouteName(routeName);
+      console.log(routeName, 'routename');
+
+      // Focus the input if we're on the search screen
+      if (routeName === ROUTES.SEARCH) {
+        // setOpenInput(true);
+        // Small timeout to ensure the input is mounted before focusing
+        setTimeout(() => {
+          if (inputRef.current) {
+            inputRef.current.focus();
+          }
+        }, 100);
+      }
+    }, [navigation]),
+  );
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <View style={styles.headerContainer}>
@@ -241,6 +263,7 @@ const DashboardHeader = ({name}) => {
                       borderRadius: 100,
                     }}>
                     <TextInput
+                      ref={inputRef}
                       placeholder="Search products..."
                       placeholderTextColor="#555"
                       value={searchText}

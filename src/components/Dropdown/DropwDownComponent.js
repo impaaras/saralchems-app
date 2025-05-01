@@ -45,17 +45,6 @@ const DropdownMenu = ({currentRouteName, categories}) => {
     }, []),
   );
 
-  // const handleCategorySelect = (category, index) => {
-  //   console.log(category._id);
-  //   setSecSelectedCategory(category);
-  //   dispatch(setCategoryId(category._id));
-  //   dispatch(setSubcategories(category?.subcategories));
-  //   dispatch(setCategoryName(category.name));
-  //   dispatch(setSelectedCategory(category.subcategories[0]?.name));
-  //   dispatch(setCurrentSubcategoryId(category.subcategories[0]?._id));
-
-  //   setIsOpen(false);
-  // };
   const handleCategorySelect = (category, index) => {
     if (category._id === 'all-products') {
       dispatch(setCategoryId(null));
@@ -73,6 +62,11 @@ const DropdownMenu = ({currentRouteName, categories}) => {
       dispatch(setCurrentSubcategoryId(category.subcategories[0]?._id));
     }
 
+    Animated.timing(rotateAnimation, {
+      toValue: 0,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
     setIsOpen(false);
   };
 

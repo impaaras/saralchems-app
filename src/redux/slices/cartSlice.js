@@ -33,6 +33,12 @@ const cartSlice = createSlice({
   },
 });
 
-export const {setVariants, addItem, closeModal, openScreen, closeSearchModal} =
-  cartSlice.actions;
+export const {
+  setVariants,
+  addItem,
+  closeModal,
+  openScreen,
+  closeSearchModal,
+  selectedProduct,
+} = cartSlice.actions;
 export default cartSlice.reducer;

@@ -99,7 +99,8 @@ const BottomNavigator = () => {
       if (
         routeName === ROUTES.SEARCH ||
         routeName === 'products' ||
-        routeName === ROUTES.CART
+        routeName === ROUTES.CART ||
+        routeName === 'Home'
       ) {
         return <ScreenComponent {...props} />;
       }
