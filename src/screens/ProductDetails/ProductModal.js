@@ -235,6 +235,8 @@ const ProductModal = ({product}) => {
   // const OpenCart = itemId => {};
 
   const calculateTotal = (variant, quantity) => {
+    if (!variant) return ''; // Early return if variant is null or undefined
+
     const match = variant.match(/(\d+(\.\d+)?)\s*(kg|gm|ltr)/i);
     if (!match) return `${variant}`;
 

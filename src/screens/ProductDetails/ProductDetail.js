@@ -149,6 +149,8 @@ const ProductDetail = () => {
   }
 
   const calculateTotal = (variant, quantity) => {
+    if (!variant) return '';
+
     const match = variant.match(/(\d+(\.\d+)?)\s*(kg|gm|ltr)/i);
     if (!match) return `${variant}`;
 
