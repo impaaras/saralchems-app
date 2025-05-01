@@ -20,7 +20,7 @@ import {closeModal, openModal} from '../../redux/slices/modalSlice';
 import Icon from 'react-native-vector-icons/Fontisto';
 import {setSelectedVariant} from '../../redux/slices/productSlice';
 // import {RotateCw} from 'lucide-react';
-import {PackageCheck, RotateCw} from 'lucide-react-native';
+import {PackageCheck, RotateCw, X} from 'lucide-react-native';
 import {setVariants} from '../../redux/slices/cartSlice';
 import {toggleShowVariants} from '../../redux/slices/authSlice';
 import {selectVariant} from '../../utils/function/function';
@@ -58,55 +58,41 @@ const Dropdown = ({options, selectedValue, onSelect, label}) => {
 };
 
 // Quantity selector component
-const QuantitySelector = ({quantity, setQuantity, unit}) => {
+
+const QuantitySelector = ({quantity, setQuantity, unit, enabled}) => {
+  const selectedVariant = useSelector(state => state.product.selectedVariant);
   const increment = () => setQuantity(prev => prev + 1);
   const decrement = () => setQuantity(prev => (prev > 1 ? prev - 1 : 1));
+  // const trueValue = !(selectedVariant && enabled === '');
+  let trueValue = !(selectedVariant && (!enabled || enabled === ''));
+  console.log(!enabled);
 
   return (
     <View style={styles.quantityContainer}>
       <View style={styles.quantityControls}>
-        <TouchableOpacity style={styles.quantityButton} onPress={decrement}>
+        <TouchableOpacity
+          style={styles.quantityButton}
+          disabled={trueValue}
+          onPress={decrement}>
           <Text style={styles.quantityButtonText}>−</Text>
         </TouchableOpacity>
         <View style={styles.quantityValueContainer}>
           <Text style={styles.quantityValue}>{quantity}</Text>
         </View>
-        <TouchableOpacity style={styles.quantityButton} onPress={increment}>
+        <TouchableOpacity
+          style={styles.quantityButton}
+          disabled={trueValue}
+          onPress={increment}>
           <Text style={styles.quantityButtonText}>+</Text>
         </TouchableOpacity>
       </View>
     </View>
   );
 };
-
-// Option button component
-// const OptionButton = ({label, selected, onPress, idx}) => {
-//   const selectedVariant = useSelector(state => state.product.selectedVariant);
-
-//   let newSelected = `${label}${idx}`;
-
-//   console.log('delete', selectedVariant);
-
-//   const selectedVariantWithoutLast = selectedVariant?.slice(0, -1);
-//   return (
-//     <TouchableOpacity
-//       style={[
-//         styles.optionButton,
-//         selectedVariantWithoutLast === newSelected && styles.selectedOption,
-//       ]}
-//       onPress={onPress}>
-//       {selectedVariantWithoutLast !== newSelected ? (
-//         <Text style={styles.optionButtonText}>{label}</Text>
-//       ) : (
-//         <Text style={styles.selectedOptionText}>{label}</Text>
-//       )}
-//     </TouchableOpacity>
-//   );
-// };
-const OptionButton = ({label, selected, onPress, idx}) => {
+const OptionButton = ({label, selected, onPress, idx, item}) => {
   const selectedVariant = useSelector(state => state.product.selectedVariant);
-
-  let newSelected = `${label}${idx}`;
+  const selectedProduct = useSelector(state => state.product.selectedProduct);
+  let newSelected = `${label}${idx}${item.parentId}${item._id}`;
 
   // Conditionally slice only if selectedVariant is longer than newSelected
   const selectedVariantTrimmed =
@@ -186,15 +172,35 @@ const ProductModal = ({product}) => {
   const categoryName = useSelector(state => state.product.categoryName);
   const selectedVariant = useSelector(state => state.product.selectedVariant);
 
-  const handleAddToCart = (productId, variant, quantity) => {
+  const handleAddToCart = (productId, variant, quantity, itemId) => {
+    const last8 = selectedVariant.slice(-8); // get last 8 characters
+    const last8OfItemId = itemId.slice(-8); // get last 8 characters
+
+    if (last8 === last8OfItemId) {
+      dispatch(
+        openModal({
+          modalType: 'ViewCart',
+          callbackId: '123',
+        }),
+      );
+    } else {
+      setVariants(null);
+    }
+
     dispatch(addToCart({productId, variant, quantity}))
       .unwrap()
       .catch(err => {
         Alert.alert('Error', err.message || 'Failed to add to cart');
       });
+    dispatch(
+      openModal({
+        modalType: 'ViewCart',
+        callbackId: '123',
+      }),
+    );
     dispatch(setSelectedVariant(null));
-    dispatch(closeModal());
-    navigation.navigate(ROUTES.CART);
+    // dispatch(closeModal());
+    // navigation.navigate(ROUTES.CART);
   };
 
   const handleClose = () => {
@@ -216,8 +222,8 @@ const ProductModal = ({product}) => {
     );
   };
 
-  const handleVariantSelect = (variant, index) => {
-    selectVariant(dispatch, variant, index);
+  const handleVariantSelect = (variant, index, parentId, productId) => {
+    selectVariant(dispatch, variant, index, parentId, productId);
     setCustomValue('');
   };
 
@@ -226,15 +232,37 @@ const ProductModal = ({product}) => {
       selectVariant(dispatch, customValue);
     }
   }, [customValue]);
-  const OpenCart = () => {
-    dispatch(closeModal());
-    dispatch(
-      openModal({
-        modalType: 'CART',
-        callbackId: '123',
-      }),
-    );
+  // const OpenCart = itemId => {};
+
+  const calculateTotal = (variant, quantity) => {
+    const match = variant.match(/(\d+(\.\d+)?)\s*(kg|gm|ltr)/i);
+    if (!match) return `${variant}`;
+
+    const value = parseFloat(match[1]);
+    const unit = match[3].toLowerCase();
+    const total = value * quantity;
+
+    if (unit === 'gm' && total >= 1000) {
+      return `${total / 1000}kg`;
+    }
+
+    return `${total}${unit}`;
   };
+
+  // const resultTotal = (variant, quantity) => {
+  //   // Extract numeric part
+  //   const numberMatch = variant?.match(/^\d+(\.\d+)?/);
+  //   // Extract unit part
+  //   const unitMatch = variant?.match(/(kg|gm|ltr|ml)/i);
+
+  //   if (!numberMatch || !unitMatch) return '0';
+
+  //   const value = parseFloat(numberMatch[0]);
+  //   const unit = unitMatch[0].toLowerCase();
+  //   const total = value * quantity;
+
+  //   return `${total}${unit}`;
+  // };
 
   return (
     <View style={{backgroundColor: '#E0EBF9', borderRadius: 25}}>
@@ -326,37 +354,27 @@ const ProductModal = ({product}) => {
                       .map((size, index) => (
                         <View key={index}>
                           {size === 'loose' || size === 'losse' ? (
-                            <View style={styles.customInputContainer}>
-                              {customValue != '' && (
-                                <Text
-                                  style={{
-                                    marginRight: 6,
-                                    fontSize: 16,
-                                    fontWeight: '600',
-                                    backgroundColor: '#3C5D86',
-                                    color: 'white',
-                                    paddingVertical: 2,
-                                    paddingHorizontal: 10,
-                                    borderRadius: 5,
-                                  }}>
-                                  {customValue}
-                                </Text>
-                              )}
-                              <TextInput
-                                style={styles.customInput}
-                                placeholder="Enter your Value"
-                                value={customValue}
-                                onChangeText={setCustomValue}
-                                keyboardType="numeric"
-                              />
-                            </View>
+                            <TextInput
+                              style={styles.customInput}
+                              placeholder="Enter your Value"
+                              value={customValue}
+                              onChangeText={setCustomValue}
+                            />
                           ) : (
                             <OptionButton
                               key={`${index}`}
                               label={size}
                               selected={selectedSize === size}
-                              onPress={() => handleVariantSelect(size, index)}
+                              onPress={() =>
+                                handleVariantSelect(
+                                  size,
+                                  index,
+                                  selectedProductItem.parentId,
+                                  selectedProductItem._id,
+                                )
+                              }
                               idx={index}
+                              item={selectedProductItem}
                             />
                           )}
                         </View>
@@ -409,7 +427,8 @@ const ProductModal = ({product}) => {
           {/* Total Quantity */}
           <View style={styles.totalQtyContainer}>
             <Text style={styles.totalQtyText}>
-              Total Qty: {productData.totalQty}
+              Total Qty:{' '}
+              {customValue || calculateTotal(selectedVariant, quantity) || ''}
             </Text>
           </View>
 
@@ -419,6 +438,7 @@ const ProductModal = ({product}) => {
               quantity={quantity}
               setQuantity={setQuantity}
               unit={productData.unit}
+              enabled={customValue}
             />
             <LinearGradient
               colors={['#38587F', '#101924']} // Left to right gradient colors
@@ -429,14 +449,14 @@ const ProductModal = ({product}) => {
               <TouchableOpacity
                 style={styles.addToCartButton}
                 disabled={selectedVariant === null}
-                // onPress={() =>
-                //   handleAddToCart(
-                //     selectedProductItem._id,
-                //     selectedVariant,
-                //     quantity,
-                //   )
-                // }
-                onPress={OpenCart}>
+                onPress={() =>
+                  handleAddToCart(
+                    selectedProductItem._id,
+                    selectedVariant,
+                    quantity,
+                    selectedProductItem._id,
+                  )
+                }>
                 <Text style={styles.addToCartText}>Add To Cart</Text>
               </TouchableOpacity>
             </LinearGradient>
@@ -453,8 +473,8 @@ const ProductModal = ({product}) => {
           alignItems: 'center',
         }}
         onPress={handleClose}>
-        <RotateCw size={18} />
-        <Text style={{marginLeft: 2, fontSize: 16, fontWeight: '500'}}>
+        <X size={18} />
+        <Text style={{marginLeft: 0, fontSize: 16, fontWeight: '500'}}>
           Close
         </Text>
       </TouchableOpacity>
@@ -462,6 +482,7 @@ const ProductModal = ({product}) => {
   );
 };
 
+const {width} = Dimensions.get('window');
 const styles = StyleSheet.create({
   modalContainer: {
     flex: 1,
@@ -589,13 +610,11 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    // width: 100,
   },
   customInput: {
+    width: width * 0.5, // <-- 70% of device width
     backgroundColor: 'white',
     borderRadius: 10,
-    height: 30,
-    width: '100%',
     paddingHorizontal: 6,
     paddingVertical: 5,
     fontSize: 14,

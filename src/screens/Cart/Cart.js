@@ -27,11 +27,11 @@ import styles from './Cart.styles';
 const CartItem = ({product, onRemove, onDecrement, onIncrement}) => {
   const navigation = useNavigation();
   const calculateTotal = (variant, quantity) => {
-    const match = variant.match(/(\d+)\s*(kg|gm|ltr)/i);
-    if (!match) return `${quantity} × ${variant}`;
+    const match = variant.match(/(\d+(\.\d+)?)\s*(kg|gm|ltr)/i);
+    if (!match) return `${variant}`;
 
     const value = parseFloat(match[1]);
-    const unit = match[2].toLowerCase();
+    const unit = match[3].toLowerCase();
     const total = value * quantity;
 
     if (unit === 'gm' && total >= 1000) {
@@ -40,9 +40,13 @@ const CartItem = ({product, onRemove, onDecrement, onIncrement}) => {
 
     return `${total}${unit}`;
   };
+  // const removeTrailingDigits = variant => {
+  //   // This will remove 1 or more digits from the end of the string
+  //   return variant?.replace(/\d+$/, '') || '';
+  // };
   const removeTrailingDigits = variant => {
-    // This will remove 1 or more digits from the end of the string
-    return variant?.replace(/\d+$/, '') || '';
+    const match = variant?.match(/^\d+(\.\d+)?\s*(kg|gm|ml|ltr)/i);
+    return match ? match[0].replace(/\s+/, '') : '';
   };
 
   return (
@@ -78,11 +82,12 @@ const CartItem = ({product, onRemove, onDecrement, onIncrement}) => {
             alignItems: 'center',
           }}>
           <Text style={styles.cartItemQuality}>
-            {product.variant.match(/(kg|gm|ltr)/i) ? (
+            Total: {calculateTotal(product.variant, product.quantity)}
+            {/* {product.variant.match(/(kg|gm|ltr)/i) ? (
               <>Total: {calculateTotal(product.variant, product.quantity)}</>
             ) : (
               <>Quantity: {product.quantity}</>
-            )}
+            )} */}
           </Text>
           <View style={styles.cartItemQuantity}>
             <TouchableOpacity style={styles.quantityBtn} onPress={onDecrement}>

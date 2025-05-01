@@ -1,4 +1,5 @@
-import {StyleSheet} from 'react-native';
+import {Dimensions, StyleSheet} from 'react-native';
+const {width} = Dimensions.get('window');
 
 const styles = StyleSheet.create({
   container: {
@@ -110,11 +111,31 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: '#333',
   },
+  // skuRow: {
+  //   width: '90%',
+  //   flexDirection: 'row',
+  //   alignItems: 'center',
+  //   marginTop: 10,
+  // },
+  // listVariant: {
+  //   flex: 1,
+  //   width: '100%',
+  //   marginRight: 10,
+  //   flexDirection: 'row',
+  //   alignItems: 'center',
+
+  // },
   skuRow: {
     flexDirection: 'row',
-    alignItems: 'center',
+    // alignItems: 'center',
     marginTop: 10,
   },
+  listVariant: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginRight: 10,
+  },
+
   skuContainer: {
     borderWidth: 1,
     backgroundColor: '#FFF',
@@ -155,11 +176,11 @@ const styles = StyleSheet.create({
   plusButton: {
     backgroundColor: '#3C5D87',
     width: 30,
-    height: 30,
+    // height: 30,
     borderRadius: 5,
     justifyContent: 'center',
     alignItems: 'center',
-    marginRight: 10,
+    // marginRight: 10,
   },
   orderButton: {
     backgroundColor: '#000',
@@ -225,14 +246,9 @@ const styles = StyleSheet.create({
   bottomActions: {
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
-    marginTop: 20,
-    // flexDirection: 'row',
     backgroundColor: '#FFF',
     paddingHorizontal: 15,
-
-    paddingVertical: 20,
-    borderTopWidth: 1,
-    borderTopColor: '#EEE',
+    paddingBottom: 20,
     alignItems: 'center',
   },
   totalQty: {
@@ -328,6 +344,18 @@ const styles = StyleSheet.create({
   },
   selectedOptionText: {
     color: 'white',
+  },
+
+  // New styles for image zoom
+  modalContainer: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.9)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  fullScreenImage: {
+    width: width,
+    height: '80%',
   },
 });
 

@@ -22,11 +22,12 @@ import {setVariants} from '../../redux/slices/cartSlice';
 import {toggleShowVariants} from '../../redux/slices/authSlice';
 import {closeModal, openModal} from '../../redux/slices/modalSlice';
 import styles from './ProductDetail.styles';
+import ZoomableImage from '../../components/ImageZoom/ImageZoom';
 
 // Option button component
-const OptionButton = ({label, selected, onPress, idx}) => {
+const OptionButton = ({label, selected, onPress, idx, parentId, productId}) => {
   const selectedVariant = useSelector(state => state.product.selectedVariant);
-  let newSelected = `${label}${idx}`;
+  let newSelected = `${label}${idx}${parentId}${productId}`;
   return (
     <TouchableOpacity
       style={[
@@ -72,7 +73,7 @@ const ProductDetail = () => {
   const [selectedSize, setSelectedSize] = useState(null);
   const [customValue, setCustomValue] = useState('');
   const route = useRoute();
-  const {product} = route.params;
+  const {product, parentIndex} = route.params;
 
   const decrementQuantity = () => {
     if (quantity > 1) {
@@ -95,19 +96,26 @@ const ProductDetail = () => {
   const categoryName = useSelector(state => state.product.categoryName);
 
   const handleAddToCart = (productId, variant, quantity) => {
-    console.log('hlo', quantity);
     dispatch(addToCart({productId, variant, quantity}))
       .unwrap()
       .catch(err => {
         Alert.alert('Error', err.message || 'Failed to add to cart');
       });
     dispatch(setSelectedVariant(null));
-    dispatch(closeModal());
-    navigation.navigate(ROUTES.CART);
+    // dispatch(closeModal());
+    dispatch(
+      openModal({
+        modalType: 'ViewCart',
+        callbackId: '123',
+      }),
+    );
+    setQuantity(1);
+    // navigation.navigate(ROUTES.CART);
   };
 
-  const selectVariant = (variant, index) => {
-    let newVariantName = `${variant}${index}`;
+  const selectVariant = (variant, index, parentIndex, productId) => {
+    console.log('hlossss', variant, index, parentIndex, productId);
+    let newVariantName = `${variant}${index}${parentIndex}${productId}`;
     dispatch(setSelectedVariant(newVariantName));
   };
 
@@ -125,6 +133,50 @@ const ProductDetail = () => {
 
   const selectedVariant = useSelector(state => state.product.selectedVariant);
   const selectedProductItem = useSelector(state => state.cart.selectedProduct);
+
+  function checkVariantsValue() {
+    if (selectedVariant !== null && product?._id) {
+      const productIdLast8 = product?._id.slice(-8);
+      const variantLast8 = selectedVariant.slice(-8);
+
+      if (productIdLast8 === variantLast8) {
+        return false;
+      } else {
+        return true;
+      }
+    }
+    return true; // default false if conditions not met
+  }
+
+  const calculateTotal = (variant, quantity) => {
+    const match = variant.match(/(\d+(\.\d+)?)\s*(kg|gm|ltr)/i);
+    if (!match) return `${variant}`;
+
+    const value = parseFloat(match[1]);
+    const unit = match[3].toLowerCase();
+    const total = value * quantity;
+
+    if (unit === 'gm' && total >= 1000) {
+      return `${total / 1000}kg`;
+    }
+
+    return `${total}${unit}`;
+  };
+
+  // const resultTotal = (variant, quantity) => {
+  //   // Extract numeric part
+  //   const numberMatch = variant?.match(/^\d+(\.\d+)?/);
+  //   // Extract unit part
+  //   const unitMatch = variant?.match(/(kg|gm|ltr|ml)/i);
+
+  //   if (!numberMatch || !unitMatch) return '0';
+
+  //   const value = parseFloat(numberMatch[0]);
+  //   const unit = unitMatch[0].toLowerCase();
+  //   const total = value * quantity;
+
+  //   return `${total}${unit}`;
+  // };
 
   return (
     <SafeAreaView style={styles.container}>
@@ -162,43 +214,95 @@ const ProductDetail = () => {
                 <Text style={styles.detailValue}>ltr</Text>
               </View>
             </View>
-            {/* SKU and Input Row */}
             <View style={styles.skuRow}>
-              {product &&
-                product.variants.map((size, sizeIndex) => (
-                  <View key={`${size._id}-${sizeIndex}`}>
-                    {size === 'loose' || size === 'losse' ? (
-                      <View style={styles.customInputContainer}>
-                        <TextInput
-                          style={styles.customInput}
-                          placeholder="Enter your Value"
-                          value={customValue}
-                          onChangeText={setCustomValue}
-                          keyboardType="numeric"
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.listVariant}>
+                {product &&
+                  product.variants.slice(0, 7).map((size, sizeIndex) => (
+                    <View
+                      key={`${size._id || size}-${sizeIndex}`}
+                      style={{marginRight: 0}}>
+                      {size === 'loose' || size === 'losse' ? (
+                        <View style={styles.customInputContainer}>
+                          <TextInput
+                            style={styles.customInput}
+                            placeholder="Enter your Value"
+                            value={customValue}
+                            onChangeText={setCustomValue}
+                            keyboardType="numeric"
+                          />
+                        </View>
+                      ) : (
+                        <OptionButton
+                          label={size}
+                          selected={selectedSize === size}
+                          onPress={() =>
+                            selectVariant(
+                              size,
+                              sizeIndex,
+                              parentIndex,
+                              product?._id,
+                            )
+                          }
+                          idx={sizeIndex}
+                          parentId={parentIndex}
+                          productId={product?._id}
                         />
-                      </View>
-                    ) : (
-                      <OptionButton
-                        key={`${sizeIndex}`}
-                        label={size}
-                        selected={selectedSize === size}
-                        onPress={() => selectVariant(size, sizeIndex)}
-                        idx={sizeIndex}
-                      />
-                    )}
-                  </View>
-                ))}
+                      )}
+                    </View>
+                  ))}
+              </ScrollView>
 
               <TouchableOpacity
                 style={styles.plusButton}
                 onPress={() => handleShowVariants(product.variants)}>
                 <Icon name="add" size={20} color="#FFF" />
               </TouchableOpacity>
-              {/* <TouchableOpacity
-                style={styles.orderButton}
-                onPress={() => dispatch(setSelectedVariant('No variant'))}>
-                <Text style={styles.orderButtonText}>Don't know</Text>
-              </TouchableOpacity> */}
+            </View>
+          </View>
+          <View style={styles.bottomActions}>
+            <View style={styles.totalQty}>
+              <Text style={styles.totalQtyText}>
+                Total Qty:{' '}
+                {selectedVariant?.includes('loose')
+                  ? customValue
+                  : calculateTotal(selectedVariant, quantity)}
+              </Text>
+              {/* <Text style={styles.totalQtyText}>Total Qty: {customValue}</Text> */}
+            </View>
+            <View style={{flexDirection: 'row', alignItems: 'center'}}>
+              <View style={styles.quantityContainer}>
+                <TouchableOpacity
+                  style={styles.quantityBtn1}
+                  disabled={checkVariantsValue()}
+                  onPress={decrementQuantity}>
+                  <Text style={styles.quantityBtnText}>−</Text>
+                </TouchableOpacity>
+                <Text style={styles.quantityText}>{quantity}</Text>
+                <TouchableOpacity
+                  style={styles.quantityBtn2}
+                  disabled={checkVariantsValue()}
+                  onPress={incrementQuantity}>
+                  <Text style={styles.quantityBtnText}>+</Text>
+                </TouchableOpacity>
+              </View>
+
+              <LinearGradient
+                colors={['#1B2B48', '#2D4565']}
+                start={{x: 0, y: 0}}
+                end={{x: 1, y: 1}}
+                style={{borderRadius: 100}}>
+                <TouchableOpacity
+                  style={styles.addToCartButton}
+                  disabled={selectedVariant === null}
+                  onPress={() =>
+                    handleAddToCart(product._id, selectedVariant, quantity)
+                  }>
+                  <Text style={styles.addToCartText}>Add To Cart</Text>
+                </TouchableOpacity>
+              </LinearGradient>
             </View>
           </View>
 
@@ -286,56 +390,6 @@ const ProductDetail = () => {
           </ExpandableSection>
         </View>
       </ScrollView>
-
-      <View style={styles.bottomActions}>
-        {selectedVariant === null && (
-          <Text
-            style={{
-              display: 'flex',
-              justifyContent: 'center',
-              alignSelf: 'center',
-              textAlign: 'center',
-              color: 'red',
-              marginBottom: 10,
-              width: '80%',
-            }}>
-            ** Please select a variant before adding the item to your cart. **
-          </Text>
-        )}
-        <View style={styles.totalQty}>
-          <Text style={styles.totalQtyText}>Total Qty: 400 L</Text>
-        </View>
-        <View style={{flexDirection: 'row', alignItems: 'center'}}>
-          <View style={styles.quantityContainer}>
-            <TouchableOpacity
-              style={styles.quantityBtn1}
-              onPress={decrementQuantity}>
-              <Text style={styles.quantityBtnText}>−</Text>
-            </TouchableOpacity>
-            <Text style={styles.quantityText}>{quantity}</Text>
-            <TouchableOpacity
-              style={styles.quantityBtn2}
-              onPress={incrementQuantity}>
-              <Text style={styles.quantityBtnText}>+</Text>
-            </TouchableOpacity>
-          </View>
-
-          <LinearGradient
-            colors={['#1B2B48', '#2D4565']}
-            start={{x: 0, y: 0}}
-            end={{x: 1, y: 1}}
-            style={{borderRadius: 100}}>
-            <TouchableOpacity
-              style={styles.addToCartButton}
-              disabled={selectedVariant === null}
-              onPress={() =>
-                handleAddToCart(product._id, selectedVariant, quantity)
-              }>
-              <Text style={styles.addToCartText}>Add To Cart</Text>
-            </TouchableOpacity>
-          </LinearGradient>
-        </View>
-      </View>
     </SafeAreaView>
   );
 };

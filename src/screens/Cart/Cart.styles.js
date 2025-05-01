@@ -57,6 +57,7 @@ const styles = StyleSheet.create({
   },
   cartItem: {
     flexDirection: 'row',
+    marginTop: 10,
     backgroundColor: '#FFF',
     borderRadius: 10,
     padding: 10,

@@ -101,7 +101,9 @@ const HomeScreen = () => {
     <SafeAreaView style={styles.container}>
       <DashboardHeader />
       <TrendingProducts categories={categories} />
-      <ScrollView showsVerticalScrollIndicator={false}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={styles.scrollHomescreen}>
         <View style={styles.sectionContainer}>
           <ProductList title="Shop By Category" products={categories} />
         </View>
