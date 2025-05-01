@@ -34,5 +34,8 @@ const styles = StyleSheet.create({
     marginTop: 10,
     marginBottom: 10,
   },
+  scrollHomescreen: {
+    paddingBottom: 55,
+  },
 });
 export default styles;
