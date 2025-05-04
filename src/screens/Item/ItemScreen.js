@@ -23,9 +23,9 @@ import {
   setCurrentSubcategoryId,
   setParentCategoryName,
   setSelectedCategory,
-  setSelectedVariant,
   setSubcategories,
 } from '../../redux/slices/productSlice';
+import {setSelectedVariant} from '../../redux/slices/newCart';
 import {API_URL} from '../../utils/ApiService';
 import styles from './Item.styles';
 
@@ -82,7 +82,6 @@ const ItemScreen = ({route}) => {
     const fetchProducts = async () => {
       const token = storage.getString(StorageKeys.AUTH_TOKEN);
       try {
-        console.log(categoryId, currentSubcategoryId);
         const response = await axios.get(
           `${API_URL}/product/category/${categoryId}/subcategory/${currentSubcategoryId}`,
           {headers: {Authorization: `Bearer ${token}`}},

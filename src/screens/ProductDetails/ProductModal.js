@@ -18,8 +18,7 @@ import {useDispatch, useSelector} from 'react-redux';
 import {addToCart, getCart} from '../../redux/slices/addToCartSlice';
 import {closeModal, openModal} from '../../redux/slices/modalSlice';
 import Icon from 'react-native-vector-icons/Fontisto';
-import {setSelectedVariant} from '../../redux/slices/productSlice';
-// import {RotateCw} from 'lucide-react';
+import {setSelectedVariant} from '../../redux/slices/newCart';
 import {PackageCheck, RotateCw, X} from 'lucide-react-native';
 import {setVariants} from '../../redux/slices/cartSlice';
 import {toggleShowVariants} from '../../redux/slices/authSlice';
@@ -60,12 +59,15 @@ const Dropdown = ({options, selectedValue, onSelect, label}) => {
 // Quantity selector component
 
 const QuantitySelector = ({quantity, setQuantity, unit, enabled}) => {
-  const selectedVariant = useSelector(state => state.product.selectedVariant);
+  // const selectedVariant = useSelector(state => state.product.selectedVariant);
+  const activeProduct = useSelector(state => state.newCart.activeProduct);
   const increment = () => setQuantity(prev => prev + 1);
   const decrement = () => setQuantity(prev => (prev > 1 ? prev - 1 : 1));
   // const trueValue = !(selectedVariant && enabled === '');
-  let trueValue = !(selectedVariant && (!enabled || enabled === ''));
-  console.log(!enabled);
+  let trueValue = !(
+    activeProduct?.selectedVariant &&
+    (!enabled || enabled === '')
+  );
 
   return (
     <View style={styles.quantityContainer}>
@@ -90,15 +92,13 @@ const QuantitySelector = ({quantity, setQuantity, unit, enabled}) => {
   );
 };
 const OptionButton = ({label, selected, onPress, idx, item}) => {
-  const selectedVariant = useSelector(state => state.product.selectedVariant);
-  const selectedProduct = useSelector(state => state.product.selectedProduct);
+  const activeProduct = useSelector(state => state.newCart.activeProduct);
   let newSelected = `${label}${idx}${item.parentId}${item._id}`;
 
-  // Conditionally slice only if selectedVariant is longer than newSelected
   const selectedVariantTrimmed =
-    selectedVariant?.length > newSelected.length
-      ? selectedVariant.slice(0, -1)
-      : selectedVariant;
+    activeProduct?.selectedVariant?.length > newSelected.length
+      ? activeProduct?.selectedVariant.slice(0, -1)
+      : activeProduct?.selectedVariant;
 
   return (
     <TouchableOpacity
@@ -173,7 +173,7 @@ const ProductModal = ({product}) => {
   const selectedVariant = useSelector(state => state.product.selectedVariant);
 
   const handleAddToCart = (productId, variant, quantity, itemId) => {
-    const last8 = selectedVariant.slice(-8); // get last 8 characters
+    const last8 = variant.slice(-8); // get last 8 characters
     const last8OfItemId = itemId.slice(-8); // get last 8 characters
 
     if (last8 === last8OfItemId) {
@@ -251,21 +251,7 @@ const ProductModal = ({product}) => {
     return `${total}${unit}`;
   };
 
-  // const resultTotal = (variant, quantity) => {
-  //   // Extract numeric part
-  //   const numberMatch = variant?.match(/^\d+(\.\d+)?/);
-  //   // Extract unit part
-  //   const unitMatch = variant?.match(/(kg|gm|ltr|ml)/i);
-
-  //   if (!numberMatch || !unitMatch) return '0';
-
-  //   const value = parseFloat(numberMatch[0]);
-  //   const unit = unitMatch[0].toLowerCase();
-  //   const total = value * quantity;
-
-  //   return `${total}${unit}`;
-  // };
-
+  const activeProduct = useSelector(state => state.newCart.activeProduct);
   return (
     <View style={{backgroundColor: '#E0EBF9', borderRadius: 25}}>
       <View style={[styles.modalContent, {maxHeight: dimensions.height * 0.8}]}>
@@ -332,7 +318,6 @@ const ProductModal = ({product}) => {
                 </Text>
               </View>
             </View>
-
             <View style={styles.optionsSection}>
               <View
                 style={{
@@ -430,7 +415,9 @@ const ProductModal = ({product}) => {
           <View style={styles.totalQtyContainer}>
             <Text style={styles.totalQtyText}>
               Total Qty:{' '}
-              {customValue || calculateTotal(selectedVariant, quantity) || ''}
+              {customValue ||
+                calculateTotal(activeProduct?.selectedVariant, quantity) ||
+                ''}
             </Text>
           </View>
 
@@ -450,11 +437,11 @@ const ProductModal = ({product}) => {
             >
               <TouchableOpacity
                 style={styles.addToCartButton}
-                disabled={selectedVariant === null}
+                disabled={activeProduct?.selectedVariant === null}
                 onPress={() =>
                   handleAddToCart(
                     selectedProductItem._id,
-                    selectedVariant,
+                    activeProduct?.selectedVariant,
                     quantity,
                     selectedProductItem._id,
                   )

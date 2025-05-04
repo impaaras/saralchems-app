@@ -42,6 +42,7 @@ import {
   setSelectedVariant,
 } from '../../redux/slices/productSlice';
 import {API_URL} from '../../utils/ApiService';
+import {previousRouteName} from '../../navigation/navigationService';
 const {width} = Dimensions.get('window');
 
 const DashboardHeader = ({name}) => {
@@ -181,15 +182,14 @@ const DashboardHeader = ({name}) => {
     if (routeName === 'Profile') {
       navigation.goBack();
     } else if (routeName === ROUTES.ITEM_SCREEN) {
-      console.log(routeName);
       navigation.navigate('Home');
-      // setSearchText('');
-      // dispatch(setCategoryName(null));
-      // dispatch(setSelectedCategory(null));
-      // dispatch(setSelectedVariant(null));
-      // dispatch(clearSearchResults());
     } else if (routeName === 'Search') {
       navigation.navigate('Home');
+    } else if (
+      previousRouteName === 'Search' ||
+      routeName === ROUTES.PRODUCT_DETAILS
+    ) {
+      navigation.navigate('Search');
     } else {
       navigation.navigate(ROUTES.ITEM_SCREEN);
     }
@@ -202,7 +202,6 @@ const DashboardHeader = ({name}) => {
     useCallback(() => {
       const routeName = getCurrentRouteName();
       setCurrentRouteName(routeName);
-      console.log(routeName, 'routename');
 
       // Focus the input if we're on the search screen
       if (routeName === ROUTES.SEARCH) {

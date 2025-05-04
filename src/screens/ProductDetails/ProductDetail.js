@@ -17,7 +17,7 @@ import {fallbackImg} from '../../utils/images';
 import {useDispatch, useSelector} from 'react-redux';
 import {addToCart, getCart} from '../../redux/slices/addToCartSlice';
 import {ROUTES} from '../../constants/routes';
-import {setSelectedVariant} from '../../redux/slices/productSlice';
+import {setSelectedVariant} from '../../redux/slices/newCart';
 import {setVariants} from '../../redux/slices/cartSlice';
 import {toggleShowVariants} from '../../redux/slices/authSlice';
 import {closeModal, openModal} from '../../redux/slices/modalSlice';
@@ -25,17 +25,26 @@ import styles from './ProductDetail.styles';
 import ZoomableImage from '../../components/ImageZoom/ImageZoom';
 
 // Option button component
-const OptionButton = ({label, selected, onPress, idx, parentId, productId}) => {
-  const selectedVariant = useSelector(state => state.product.selectedVariant);
+const OptionButton = ({
+  label,
+  selected,
+  onPress,
+  idx,
+  parentId,
+  productId,
+  activeVariant,
+}) => {
+  // const selectedVariant = useSelector(state => state.product.selectedVariant);
+  const activeProduct = useSelector(state => state.newCart.activeProduct);
   let newSelected = `${label}${idx}${parentId}${productId}`;
   return (
     <TouchableOpacity
       style={[
         styles.optionButton,
-        selectedVariant === newSelected && styles.selectedOption,
+        activeProduct?.selectedVariant === newSelected && styles.selectedOption,
       ]}
       onPress={onPress}>
-      {selectedVariant !== newSelected ? (
+      {activeProduct?.selectedVariant !== newSelected ? (
         <Text style={styles.optionButtonText}>{label}</Text>
       ) : (
         <Text style={styles.selectedOptionText}>{label}</Text>
@@ -73,7 +82,7 @@ const ProductDetail = () => {
   const [selectedSize, setSelectedSize] = useState(null);
   const [customValue, setCustomValue] = useState('');
   const route = useRoute();
-  const {product, parentIndex} = route.params;
+  const {product, parentIndex, activeVariant} = route.params;
 
   const decrementQuantity = () => {
     if (quantity > 1) {
@@ -82,7 +91,6 @@ const ProductDetail = () => {
   };
 
   const incrementQuantity = () => {
-    console.log(quantity);
     setQuantity(quantity + 1);
   };
 
@@ -96,27 +104,26 @@ const ProductDetail = () => {
   const categoryName = useSelector(state => state.product.categoryName);
 
   const handleAddToCart = (productId, variant, quantity) => {
-    dispatch(addToCart({productId, variant, quantity}))
-      .unwrap()
-      .catch(err => {
-        Alert.alert('Error', err.message || 'Failed to add to cart');
-      });
-    dispatch(setSelectedVariant(null));
-    // dispatch(closeModal());
-    dispatch(
-      openModal({
-        modalType: 'ViewCart',
-        callbackId: '123',
-      }),
-    );
-    setQuantity(1);
-    // navigation.navigate(ROUTES.CART);
+    console.log(variant, 'varinat');
+    // dispatch(addToCart({productId, variant, quantity}))
+    //   .unwrap()
+    //   .catch(err => {
+    //     Alert.alert('Error', err.message || 'Failed to add to cart');
+    //   });
+    // dispatch(setSelectedVariant(null));
+    // dispatch(
+    //   openModal({
+    //     modalType: 'ViewCart',
+    //     callbackId: '123',
+    //   }),
+    // );
+    // setQuantity(1);
   };
 
   const selectVariant = (variant, index, parentIndex, productId) => {
-    console.log('hlossss', variant, index, parentIndex, productId);
     let newVariantName = `${variant}${index}${parentIndex}${productId}`;
     dispatch(setSelectedVariant(newVariantName));
+    // dispatch(setSelectedVariant(newVariantName));
   };
 
   const handleShowVariants = variantArray => {
@@ -135,9 +142,9 @@ const ProductDetail = () => {
   const selectedProductItem = useSelector(state => state.cart.selectedProduct);
 
   function checkVariantsValue() {
-    if (selectedVariant !== null && product?._id) {
+    if (activeProduct?.selectedVariant !== null && product?._id) {
       const productIdLast8 = product?._id.slice(-8);
-      const variantLast8 = selectedVariant.slice(-8);
+      const variantLast8 = activeProduct?.selectedVariant.slice(-8);
 
       if (productIdLast8 === variantLast8) {
         return false;
@@ -165,20 +172,11 @@ const ProductDetail = () => {
     return `${total}${unit}`;
   };
 
-  // const resultTotal = (variant, quantity) => {
-  //   // Extract numeric part
-  //   const numberMatch = variant?.match(/^\d+(\.\d+)?/);
-  //   // Extract unit part
-  //   const unitMatch = variant?.match(/(kg|gm|ltr|ml)/i);
+  const activeProduct = useSelector(state => state.newCart.activeProduct);
 
-  //   if (!numberMatch || !unitMatch) return '0';
-
-  //   const value = parseFloat(numberMatch[0]);
-  //   const unit = unitMatch[0].toLowerCase();
-  //   const total = value * quantity;
-
-  //   return `${total}${unit}`;
-  // };
+  useEffect(() => {
+    console.log('retry', activeProduct);
+  }, [route]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -251,17 +249,20 @@ const ProductDetail = () => {
                           idx={sizeIndex}
                           parentId={parentIndex}
                           productId={product?._id}
+                          activeVariant={activeVariant}
                         />
                       )}
                     </View>
                   ))}
               </ScrollView>
 
-              <TouchableOpacity
-                style={styles.plusButton}
-                onPress={() => handleShowVariants(product.variants)}>
-                <Icon name="add" size={20} color="#FFF" />
-              </TouchableOpacity>
+              {product.variants.length > 3 && (
+                <TouchableOpacity
+                  style={styles.plusButton}
+                  onPress={() => handleShowVariants(product.variants)}>
+                  <Icon name="add" size={20} color="#FFF" />
+                </TouchableOpacity>
+              )}
             </View>
           </View>
           <View style={styles.bottomActions}>
@@ -298,9 +299,13 @@ const ProductDetail = () => {
                 style={{borderRadius: 100}}>
                 <TouchableOpacity
                   style={styles.addToCartButton}
-                  disabled={selectedVariant === null}
+                  disabled={activeProduct?.selectedVariant === null}
                   onPress={() =>
-                    handleAddToCart(product._id, selectedVariant, quantity)
+                    handleAddToCart(
+                      product._id,
+                      activeProduct?.selectedVariant,
+                      quantity,
+                    )
                   }>
                   <Text style={styles.addToCartText}>Add To Cart</Text>
                 </TouchableOpacity>

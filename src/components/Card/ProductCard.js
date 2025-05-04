@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   ScrollView,
 } from 'react-native';
-import React, {useRef, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {toggleShowVariants} from '../../redux/slices/authSlice';
 import {useDispatch, useSelector} from 'react-redux';
 import {
@@ -21,10 +21,10 @@ import {ProductModal} from '../../screens';
 import VariantsModal from '../VariantsModal';
 import {closeModal, openModal} from '../../redux/slices/modalSlice';
 import {callbackRegistry} from '../../utils/Modal/callbackRegistry';
-import {setSelectedVariant} from '../../redux/slices/productSlice';
 import {fallbackImg} from '../../utils/images';
 import {selectVariant} from '../../utils/function/function';
 import styles from './Card.styles';
+import {setActiveProduct, setSelectedVariant} from '../../redux/slices/newCart';
 
 const ProductCard = ({item, onAddPress, idx}) => {
   const dispatch = useDispatch();
@@ -54,20 +54,22 @@ const ProductCard = ({item, onAddPress, idx}) => {
     );
   };
 
-  const checkOpen = (product, index) => {
+  const openAddModal = (product, index, currentIndex) => {
+    if (
+      activeProduct?.selectedVariant === null ||
+      activeProduct?._id !== currentIndex
+    ) {
+      dispatch(setActiveProduct(product));
+    }
     setVariantId(index);
-    // console.log(product, index);
     const newProduct = {
       ...product,
       parentId: index,
     };
-
     dispatch(addItem(newProduct));
-    // dispatch(addItem(product));
     dispatch(
       openModal({
         modalType: 'PRODUCT_MODAL',
-
         callbackId: '123',
       }),
     );
@@ -78,9 +80,14 @@ const ProductCard = ({item, onAddPress, idx}) => {
     state => state.cart.isProductModalOpen,
   );
 
-  const openScreenTag = (product, index) => {
-    // console.log(product, index);
-    // dispatch(openScreen(product));
+  const openScreenTag = (product, index, currentIndex) => {
+    if (
+      activeProduct?.selectedVariant === null ||
+      activeProduct?._id !== currentIndex
+    ) {
+      dispatch(setActiveProduct(product));
+    }
+
     navigation.navigate(ROUTES.PRODUCT_DETAILS, {product, parentIndex: index});
   };
 
@@ -100,20 +107,22 @@ const ProductCard = ({item, onAddPress, idx}) => {
       }),
     );
   };
+  const activeProduct = useSelector(state => state.newCart.activeProduct);
 
-  // const handleVariantSelect = (variant, index, idx) => {
-  //   selectVariant(dispatch, variant, index, idx);
-  // };
+  const handleVariantSelect = (product, variant, index, idx, parentId) => {
+    dispatch(setActiveProduct(product));
+    selectVariant(dispatch, variant, index, idx, parentId);
+  };
 
   return (
     <View style={styles.card}>
       <View style={styles.imageContainer}>
-        <TouchableOpacity onPress={console.log('Hlo')}>
+        <TouchableOpacity>
           <Image source={{uri: fallbackImg()}} style={styles.productImage} />
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.addButton}
-          onPress={() => checkOpen(item, idx)}>
+          onPress={() => openAddModal(item, idx, item?._id)}>
           <Text style={styles.addButtonText}>ADD</Text>
         </TouchableOpacity>
       </View>
@@ -136,18 +145,22 @@ const ProductCard = ({item, onAddPress, idx}) => {
                   <TouchableOpacity
                     key={index}
                     style={
-                      selectedVariant !== `${variant}${index}${idx}${item._id}`
-                        ? styles.variantItem
+                      activeProduct?.selectedVariant !==
+                      `${variant}${index}${idx}${item._id}`
+                        ? // selectedVariant !== `${variant}${index}${idx}${item._id}`
+                          styles.variantItem
                         : styles.selectedVariantItem
                     }
                     onPress={() =>
-                      selectVariant(dispatch, variant, index, idx, item._id)
+                      handleVariantSelect(item, variant, index, idx, item?._id)
                     }>
                     <Text
                       style={
-                        selectedVariant !==
+                        activeProduct?.selectedVariant !==
                         `${variant}${index}${idx}${item._id}`
-                          ? styles.variantText
+                          ? // selectedVariant !==
+                            // `${variant}${index}${idx}${item._id}`
+                            styles.variantText
                           : styles.selectedVariantText
                       }>
                       {variant.length > 50
@@ -170,7 +183,7 @@ const ProductCard = ({item, onAddPress, idx}) => {
             </View>
           )}
         </View>
-        <TouchableOpacity onPress={() => openScreenTag(item, idx)}>
+        <TouchableOpacity onPress={() => openScreenTag(item, idx, item?._id)}>
           <Text style={styles.name}>{item.name}</Text>
         </TouchableOpacity>
         <View style={styles.brandInfo}>

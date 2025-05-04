@@ -1,4 +1,4 @@
-import {setSelectedVariant} from '../../redux/slices/productSlice';
+import {setSelectedVariant} from '../../redux/slices/newCart';
 
 export const selectVariant = (dispatch, variant, index, idx, childId) => {
   let newVariantName = '';
@@ -10,4 +10,5 @@ export const selectVariant = (dispatch, variant, index, idx, childId) => {
     newVariantName = `${variant}${index}${idx}${childId}`;
   }
   dispatch(setSelectedVariant(newVariantName));
+  // dispatch(setSelectedVariant(newVariantName));
 };

@@ -23,6 +23,9 @@ import {
 } from '../../redux/slices/addToCartSlice';
 import {fallbackImg} from '../../utils/images';
 import styles from './Cart.styles';
+import {StorageKeys, storage} from '../../utils/storage';
+import EmptyCartScreen from './EmptyCart';
+import Loader from '../../utils/Loader';
 
 const CartItem = ({product, onRemove, onDecrement, onIncrement}) => {
   const navigation = useNavigation();
@@ -72,7 +75,7 @@ const CartItem = ({product, onRemove, onDecrement, onIncrement}) => {
           </TouchableOpacity>
         </View>
         <Text style={styles.cartItemSpec}>
-          {removeTrailingDigits(product.variant)}
+          {removeTrailingDigits(product.variant) || 'Custom variant'}
         </Text>
 
         <View
@@ -83,11 +86,6 @@ const CartItem = ({product, onRemove, onDecrement, onIncrement}) => {
           }}>
           <Text style={styles.cartItemQuality}>
             Total: {calculateTotal(product.variant, product.quantity)}
-            {/* {product.variant.match(/(kg|gm|ltr)/i) ? (
-              <>Total: {calculateTotal(product.variant, product.quantity)}</>
-            ) : (
-              <>Quantity: {product.quantity}</>
-            )} */}
           </Text>
           <View style={styles.cartItemQuantity}>
             <TouchableOpacity style={styles.quantityBtn} onPress={onDecrement}>
@@ -109,7 +107,8 @@ const Cart = () => {
   const dispatch = useDispatch();
   const {items, loading, error} = useSelector(state => state.addToCart);
   const isScreenFocused = useRef(false);
-  const isProcessing = useRef(false); // Track if an operation is in progress
+  const isProcessing = useRef(false);
+  const [loader, setLoader] = useState(false);
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
@@ -120,9 +119,9 @@ const Cart = () => {
     return unsubscribe;
   }, [navigation]);
 
-  // useEffect(() => {
-  //   fetchCartData();
-  // }, []);
+  useEffect(() => {
+    fetchCartData();
+  }, [items]);
 
   const fetchCartData = useCallback(async () => {
     try {
@@ -203,8 +202,57 @@ const Cart = () => {
     return unsubscribe;
   }, [navigation]);
 
+  const requestForQuote = async quoteData => {
+    setLoader(true);
+    const token = storage.getString(StorageKeys.AUTH_TOKEN);
+    Alert.alert(
+      'Are you sure?',
+      'Do you want to send this quote?',
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+        },
+        {
+          text: 'Yes',
+          onPress: async () => {
+            try {
+              const response = await fetch(
+                'https://api.saraldyechems.com/order/send-quote',
+                {
+                  method: 'POST',
+
+                  headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                  },
+                },
+              );
+
+              const result = await response.json();
+
+              if (response.ok) {
+                setLoader(false);
+                // Alert.alert('Success', 'Quote sent successfully!');
+              } else {
+                Alert.alert(
+                  'Error',
+                  result?.message || 'Something went wrong.',
+                );
+              }
+            } catch (error) {
+              Alert.alert('Error', error.message);
+            }
+          },
+        },
+      ],
+      {cancelable: true},
+    );
+  };
+
   return (
     <SafeAreaView style={styles.container}>
+      {loader && <Loader />}
       <DashboardHeader />
       <ScrollView
         style={styles.cartContent}
@@ -238,9 +286,7 @@ const Cart = () => {
             ))
           ) : (
             <View style={{alignItems: 'center', marginTop: 50}}>
-              <Text style={{fontSize: 16, color: '#000'}}>
-                Your cart is empty
-              </Text>
+              <EmptyCartScreen />
             </View>
           )}
         </View>
@@ -260,26 +306,31 @@ const Cart = () => {
               </Text>
             </TouchableOpacity>
           </View>
-          <View style={{flexDirection: 'row', justifyContent: 'space-around'}}>
-            <LinearGradient
-              colors={['#05842A', '#05842A']}
-              start={{x: 0, y: 0}}
-              end={{x: 1, y: 0}}
-              style={styles.confirmButton}>
-              <TouchableOpacity style={styles.quoteButton}>
-                <Text style={styles.quoteButtonText}>Confirm</Text>
-              </TouchableOpacity>
-            </LinearGradient>
-            <LinearGradient
-              colors={['#38587F', '#101924']}
-              start={{x: 0, y: 0}}
-              end={{x: 1, y: 0}}
-              style={styles.receiptButton}>
-              <TouchableOpacity style={styles.quoteButton}>
-                <Text style={styles.quoteButtonText}>Request for Quote</Text>
-              </TouchableOpacity>
-            </LinearGradient>
-          </View>
+          {items?.length > 0 && (
+            <View
+              style={{flexDirection: 'row', justifyContent: 'space-around'}}>
+              <LinearGradient
+                colors={['#05842A', '#05842A']}
+                start={{x: 0, y: 0}}
+                end={{x: 1, y: 0}}
+                style={styles.confirmButton}>
+                <TouchableOpacity style={styles.quoteButton}>
+                  <Text style={styles.quoteButtonText}>Confirm</Text>
+                </TouchableOpacity>
+              </LinearGradient>
+              <LinearGradient
+                colors={['#38587F', '#101924']}
+                start={{x: 0, y: 0}}
+                end={{x: 1, y: 0}}
+                style={styles.receiptButton}>
+                <TouchableOpacity
+                  style={styles.quoteButton}
+                  onPress={requestForQuote}>
+                  <Text style={styles.quoteButtonText}>Request for Quote</Text>
+                </TouchableOpacity>
+              </LinearGradient>
+            </View>
+          )}
         </View>
       </ScrollView>
     </SafeAreaView>

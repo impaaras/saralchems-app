@@ -134,8 +134,6 @@ export const fetchAuthState = createAsyncThunk(
     const userData = storage.getString(StorageKeys.USER_DATA);
     const isAuthenticated = storage.getBoolean(StorageKeys.IS_AUTHENTICATED);
 
-    console.log(token, userData, isAuthenticated);
-
     // If we have a token, verify it's not expired
     if (token) {
       try {

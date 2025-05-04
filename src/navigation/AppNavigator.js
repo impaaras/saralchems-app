@@ -1,12 +1,11 @@
-import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { fetchAuthState } from '../redux/slices/authSlice';
+import React, {useEffect, useState} from 'react';
+import {useDispatch, useSelector} from 'react-redux';
+import {fetchAuthState} from '../redux/slices/authSlice';
 import StackNavigation from './StackNavigation';
 import AuthNavigator from './AuthNavigator';
 import splashImg from '../assets/animation.gif';
-import { Image, View } from 'react-native';
+import {Image, View} from 'react-native';
 import FastImage from 'react-native-fast-image';
-
 
 const AppNavigator = () => {
   const dispatch = useDispatch();
@@ -18,7 +17,7 @@ const AppNavigator = () => {
       await dispatch(fetchAuthState());
       setTimeout(() => {
         setLoading(false);
-      }, 1500)
+      }, 1500);
     };
 
     checkAuthState();
@@ -31,19 +30,24 @@ const AppNavigator = () => {
 
   if (loading) {
     return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }} >
+      <View
+        style={{
+          flex: 1,
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundColor: '#F8F6F8',
+        }}>
         <FastImage
           source={splashImg}
           style={{
             height: 400,
-            width: 400
+            width: 400,
           }}
           resizeMode={'contain'}
         />
       </View>
-    )
+    );
   }
-
 
   // Use the Redux state directly instead of local state
   return <>{isAuthenticated ? <StackNavigation /> : <AuthNavigator />}</>;

@@ -19,6 +19,7 @@ import {ProductModal} from '../../screens';
 import {RotateCw, X} from 'lucide-react-native';
 import CartModal from './CartModal';
 import ViewCart from './ViewCart';
+import {selectVariant} from '../function/function';
 
 const GlobalModal = () => {
   const dispatch = useDispatch();
@@ -37,11 +38,10 @@ const GlobalModal = () => {
   const showVariants = useSelector(state => state.auth.showVariants);
   const variants = useSelector(state => state.cart.selectedVariants);
 
-  const selectVariant = (variant, index, parentIndex, parentId) => {
-    let newVariantName = `${variant}${index}${parentIndex}${parentId}`;
-    console.log('newavain', newVariantName);
-    dispatch(setSelectedVariant(newVariantName));
-  };
+  // const selectVariant = (variant, index, parentIndex, parentId) => {
+  //   let newVariantName = `${variant}${index}${parentIndex}${parentId}`;
+  //   dispatch(setSelectedVariant(newVariantName));
+  // };
 
   const selectedVariant = useSelector(state => state.product.selectedVariant);
   const categoryName = useSelector(state => state.product.categoryName);
@@ -84,6 +84,8 @@ const GlobalModal = () => {
     }
   };
 
+  const activeProduct = useSelector(state => state.newCart.activeProduct);
+
   if (isOpen) {
     return (
       <View
@@ -114,13 +116,14 @@ const GlobalModal = () => {
                       <View key={index}>
                         <TouchableOpacity
                           style={
-                            selectedVariant !==
+                            activeProduct?.selectedVariant !==
                             `${variant.label}${index}${variant.parentIndex}${variant.parentId}`
                               ? styles.variantItem
                               : styles.selectedVariant
                           }
                           onPress={() =>
                             selectVariant(
+                              dispatch,
                               variant.label,
                               index,
                               variant.parentIndex,
@@ -129,7 +132,7 @@ const GlobalModal = () => {
                           }>
                           <Text
                             style={
-                              selectedVariant !==
+                              activeProduct?.selectedVariant !==
                               `${variant.label}${index}${variant.parentIndex}${variant.parentId}`
                                 ? styles.variantText
                                 : styles.selectedVariantText

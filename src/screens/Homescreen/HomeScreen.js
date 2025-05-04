@@ -50,7 +50,6 @@ const HomeScreen = () => {
         }));
         subCategoriesMap[category._id] = subcats || [];
       });
-      console.log('hloss', subCategoriesMap);
 
       setCategories(categoriesData);
       setSubCategories(subCategoriesMap);

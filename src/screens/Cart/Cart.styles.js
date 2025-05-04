@@ -5,6 +5,7 @@ const styles = StyleSheet.create({
     flex: 1,
     zIndex: 1,
   },
+
   menuButton: {
     marginRight: 15,
   },
@@ -31,8 +32,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   cartContent: {
-    // padding: 15,
-    // paddingBottom: 100,
     marginTop: -80,
     paddingHorizontal: 15,
     marginBottom: 60,
