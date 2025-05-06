@@ -155,6 +155,7 @@ const DashboardHeader = ({name}) => {
   };
 
   const token = useSelector(state => state.auth.token);
+  // console.log(token);
   const getCategoryData = async () => {
     try {
       const {data} = await axios.get(`${API_URL}/category`, {
@@ -185,6 +186,11 @@ const DashboardHeader = ({name}) => {
       navigation.navigate('Home');
     } else if (routeName === 'Search') {
       navigation.navigate('Home');
+    } else if (
+      previousRouteName === 'products' ||
+      routeName === ROUTES.PRODUCT_DETAILS
+    ) {
+      navigation.navigate('products');
     } else if (
       previousRouteName === 'Search' ||
       routeName === ROUTES.PRODUCT_DETAILS
@@ -300,9 +306,6 @@ const DashboardHeader = ({name}) => {
               <TouchableOpacity
                 onPress={() => {
                   if (getRouteName() === 'Search') {
-                    // if (openInput && searchText) {
-                    //   handleSearchSubmit();
-                    // }
                     setOpenInput(!openInput);
                   } else {
                     navigation.navigate(ROUTES.SEARCH);

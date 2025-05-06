@@ -3,15 +3,12 @@ import {Animated, ScrollView} from 'react-native';
 import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
 import CustomTabBar from './CustomTabBar';
 import {ROUTES} from '../constants/routes';
-
 import HomeScreen from '../screens/Homescreen/HomeScreen';
 import ProductsScreen from '../screens/Product/ProductsScreen';
 import OrderHistory from '../screens/History/OrderHistory';
 import OrderTrackingScreen from '../screens/Tracking/OrderTrackingScreen';
 import ProductDetail from '../screens/ProductDetails/ProductDetail';
-
 import {Cart, ItemScreen, Profile, Search} from '../screens';
-// import HomeStackNavigator from './HomeStackNavigator';
 
 const Tab = createBottomTabNavigator();
 
@@ -81,21 +78,6 @@ const BottomNavigator = () => {
   const wrapScreen = ScreenComponent => {
     return props => {
       const routeName = props.route.name;
-
-      // Hide tab bar permanently on Product Details
-      // if (routeName === ROUTES.CART) {
-      //   useEffect(() => {
-      //     Animated.timing(tabBarOffset, {
-      //       toValue: tabBarHeight,
-      //       useNativeDriver: true,
-      //       duration: 200,
-      //     }).start();
-      //   }, []);
-
-      //   return <ScreenComponent {...props} />;
-      // }
-
-      // If it's the SEARCH screen, do not use ScrollView for handling scroll
       if (
         routeName === ROUTES.SEARCH ||
         routeName === 'products' ||
@@ -104,8 +86,6 @@ const BottomNavigator = () => {
       ) {
         return <ScreenComponent {...props} />;
       }
-
-      // For other screens, pass scroll handler to the screen
       return (
         <ScrollView
           style={{backgroundColor: '#F4F9FF'}}

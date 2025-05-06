@@ -3,7 +3,6 @@ import {selectVariant} from './function';
 
 const dispatch = useDispatch();
 export function variantSelection(variant, index, idx, childId) {
-  console.log('vari', variant, index, idx, childId);
   selectVariant(dispatch, variant, index, idx);
 }
 

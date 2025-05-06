@@ -52,7 +52,6 @@ const styles = StyleSheet.create({
   },
   cartItemsContainer: {
     marginBottom: 10,
-    // paddingBottom: 50,
   },
   cartItem: {
     flexDirection: 'row',

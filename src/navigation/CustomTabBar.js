@@ -57,7 +57,9 @@ const CustomTabBar = ({state, descriptors, navigation, translateY}) => {
               backgroundColor: 'white',
               zIndex: 9999,
             }}>
-            <Text style={{fontSize: 12, color: '#1B2B48'}}>{items.length}</Text>
+            <Text style={{fontSize: 12, color: '#1B2B48'}}>
+              {items?.length}
+            </Text>
           </View>
         ) : !isActive && label === 'Cart' ? (
           <View

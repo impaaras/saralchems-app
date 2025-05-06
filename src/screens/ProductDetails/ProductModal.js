@@ -23,6 +23,7 @@ import {PackageCheck, RotateCw, X} from 'lucide-react-native';
 import {setVariants} from '../../redux/slices/cartSlice';
 import {toggleShowVariants} from '../../redux/slices/authSlice';
 import {selectVariant} from '../../utils/function/function';
+import {extractQuantityPrefix} from '../../utils/function/removeVariantCharacter';
 
 // Custom dropdown component
 const Dropdown = ({options, selectedValue, onSelect, label}) => {
@@ -187,7 +188,8 @@ const ProductModal = ({product}) => {
       setVariants(null);
     }
 
-    dispatch(addToCart({productId, variant, quantity}))
+    let newVariant = extractQuantityPrefix(variant);
+    dispatch(addToCart({productId, variant: newVariant, quantity}))
       .unwrap()
       .catch(err => {
         Alert.alert('Error', err.message || 'Failed to add to cart');

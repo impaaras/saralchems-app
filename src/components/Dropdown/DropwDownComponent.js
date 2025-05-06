@@ -79,6 +79,25 @@ const DropdownMenu = ({currentRouteName, categories}) => {
     ...(categories || []),
   ];
 
+  const fetchAllProducts = async () => {
+    setLoading(true);
+    try {
+      const {data} = await axios.get(`${API_URL}/subcategory/with-products`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      dispatch(setAllProducts(data));
+      setLoading(false);
+    } catch (error) {
+      console.log(
+        'All Products Fetch Error:',
+        error.response?.data?.message || error.message,
+      );
+      setLoading(false);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <TouchableOpacity

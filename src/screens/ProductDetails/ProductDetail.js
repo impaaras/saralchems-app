@@ -17,12 +17,13 @@ import {fallbackImg} from '../../utils/images';
 import {useDispatch, useSelector} from 'react-redux';
 import {addToCart, getCart} from '../../redux/slices/addToCartSlice';
 import {ROUTES} from '../../constants/routes';
-import {setSelectedVariant} from '../../redux/slices/newCart';
+import {setActiveProduct, setSelectedVariant} from '../../redux/slices/newCart';
 import {setVariants} from '../../redux/slices/cartSlice';
 import {toggleShowVariants} from '../../redux/slices/authSlice';
 import {closeModal, openModal} from '../../redux/slices/modalSlice';
 import styles from './ProductDetail.styles';
 import ZoomableImage from '../../components/ImageZoom/ImageZoom';
+import {extractQuantityPrefix} from '../../utils/function/removeVariantCharacter';
 
 // Option button component
 const OptionButton = ({
@@ -34,7 +35,6 @@ const OptionButton = ({
   productId,
   activeVariant,
 }) => {
-  // const selectedVariant = useSelector(state => state.product.selectedVariant);
   const activeProduct = useSelector(state => state.newCart.activeProduct);
   let newSelected = `${label}${idx}${parentId}${productId}`;
   return (
@@ -104,19 +104,20 @@ const ProductDetail = () => {
   const categoryName = useSelector(state => state.product.categoryName);
 
   const handleAddToCart = (productId, variant, quantity) => {
-    console.log(variant, 'varinat');
-    // dispatch(addToCart({productId, variant, quantity}))
-    //   .unwrap()
-    //   .catch(err => {
-    //     Alert.alert('Error', err.message || 'Failed to add to cart');
-    //   });
-    // dispatch(setSelectedVariant(null));
-    // dispatch(
-    //   openModal({
-    //     modalType: 'ViewCart',
-    //     callbackId: '123',
-    //   }),
-    // );
+    let newVariant = extractQuantityPrefix(variant);
+    console.log(newVariant, productId, quantity);
+    dispatch(addToCart({productId, variant: newVariant, quantity}))
+      .unwrap()
+      .catch(err => {
+        Alert.alert('Error', err.message || 'Failed to add to cart');
+      });
+    dispatch(setSelectedVariant(null));
+    dispatch(
+      openModal({
+        modalType: 'ViewCart',
+        callbackId: '123',
+      }),
+    );
     // setQuantity(1);
   };
 
@@ -271,7 +272,7 @@ const ProductDetail = () => {
                 Total Qty:{' '}
                 {selectedVariant?.includes('loose')
                   ? customValue
-                  : calculateTotal(selectedVariant, quantity)}
+                  : calculateTotal(activeProduct?.selectedVariant, quantity)}
               </Text>
               {/* <Text style={styles.totalQtyText}>Total Qty: {customValue}</Text> */}
             </View>

@@ -161,6 +161,7 @@ import {closeModal} from '../../redux/slices/modalSlice';
 import {ROUTES} from '../../constants/routes';
 import LinearGradient from 'react-native-linear-gradient';
 import {CircleX, ShoppingCart} from 'lucide-react-native';
+import {extractQuantityPrefix} from '../function/removeVariantCharacter';
 
 const {height} = Dimensions.get('window');
 
@@ -212,7 +213,8 @@ const CartModal = ({product}) => {
       return;
     }
 
-    dispatch(addToCart({productId, variant, quantity}))
+    let newVariant = extractQuantityPrefix(variant);
+    dispatch(addToCart({productId, variant: newVariant, quantity}))
       .unwrap()
       .catch(err => {
         Alert.alert('Error', err.message || 'Failed to add to cart');

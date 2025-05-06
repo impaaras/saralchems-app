@@ -119,9 +119,9 @@ const Cart = () => {
     return unsubscribe;
   }, [navigation]);
 
-  useEffect(() => {
-    fetchCartData();
-  }, [items]);
+  // useEffect(() => {
+  //   fetchCartData();
+  // }, []);
 
   const fetchCartData = useCallback(async () => {
     try {
@@ -203,7 +203,6 @@ const Cart = () => {
   }, [navigation]);
 
   const requestForQuote = async quoteData => {
-    setLoader(true);
     const token = storage.getString(StorageKeys.AUTH_TOKEN);
     Alert.alert(
       'Are you sure?',
@@ -216,6 +215,7 @@ const Cart = () => {
         {
           text: 'Yes',
           onPress: async () => {
+            setLoader(true);
             try {
               const response = await fetch(
                 'https://api.saraldyechems.com/order/send-quote',
@@ -228,12 +228,11 @@ const Cart = () => {
                   },
                 },
               );
-
+              await dispatch(getCart()).unwrap();
               const result = await response.json();
 
               if (response.ok) {
                 setLoader(false);
-                // Alert.alert('Success', 'Quote sent successfully!');
               } else {
                 Alert.alert(
                   'Error',
