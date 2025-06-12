@@ -28,6 +28,7 @@ import {
 import {setSelectedVariant} from '../../redux/slices/newCart';
 import {API_URL} from '../../utils/ApiService';
 import styles from './Item.styles';
+import {fallbackImg} from '../../utils/images';
 
 const ItemScreen = ({route}) => {
   const navigation = useNavigation();
@@ -50,7 +51,6 @@ const ItemScreen = ({route}) => {
 
   // Set initial category data when screen is focused
   useEffect(() => {
-    console.log();
     if (isFocused && route.params) {
       dispatch(setSelectedCategory(route.params?.selectedItem));
       dispatch(setCurrentSubcategoryId(route.params?.subcategoryId));
@@ -67,8 +67,6 @@ const ItemScreen = ({route}) => {
 
   // Fetch products when subcategory changes
   useEffect(() => {
-    // if (!isFocused) return;
-
     setProduct([]);
     setErrorMsg('');
     setLoading(true);
@@ -145,7 +143,9 @@ const ItemScreen = ({route}) => {
                 onPress={() => handleCategorySelection(category)}>
                 <Image
                   source={{
-                    uri: 'https://images.unsplash.com/photo-1583364493238-248032147fbd?auto=format&fit=crop&w=1974&q=80',
+                    uri: category.image
+                      ? `https://api.saraldyechems.com/upload/image/${category.image}`
+                      : fallbackImg(),
                   }}
                   style={styles.image}
                 />
@@ -187,6 +187,7 @@ const ItemScreen = ({route}) => {
                   item={product}
                   onAddPress={handleAddPress}
                   idx={index}
+                  ParentCategoryId={categoryId}
                 />
               ))}
           </View>

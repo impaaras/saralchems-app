@@ -38,8 +38,6 @@ const Profile = () => {
 
   const user = useSelector(state => state.auth.user); // Make sure the path is correct
 
-  console.log('users', user);
-
   // Check if user exists, else fallback to default value
   const userName = user?.name || 'John Deo';
   const userEmail = user?.email || 'JohnDeo@gmail.com';

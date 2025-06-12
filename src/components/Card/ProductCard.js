@@ -26,7 +26,7 @@ import {selectVariant} from '../../utils/function/function';
 import styles from './Card.styles';
 import {setActiveProduct, setSelectedVariant} from '../../redux/slices/newCart';
 
-const ProductCard = ({item, onAddPress, idx}) => {
+const ProductCard = ({item, onAddPress, idx, ParentCategoryId}) => {
   const dispatch = useDispatch();
   const navigation = useNavigation();
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -42,13 +42,10 @@ const ProductCard = ({item, onAddPress, idx}) => {
       parentId,
     }));
     dispatch(setVariants(updatedVariants));
-    // dispatch(setVariants(variantArray));
-
     dispatch(toggleShowVariants());
     dispatch(
       openModal({
         modalType: 'VARIANT_MODAL',
-
         callbackId: '123', // optional
       }),
     );
@@ -61,6 +58,7 @@ const ProductCard = ({item, onAddPress, idx}) => {
     ) {
       dispatch(setActiveProduct(product));
     }
+
     setVariantId(index);
     const newProduct = {
       ...product,
@@ -114,12 +112,49 @@ const ProductCard = ({item, onAddPress, idx}) => {
     selectVariant(dispatch, variant, index, idx, parentId);
   };
 
+  const handleImageZoom = (imageUri, imageList, currentIndex) => {
+    dispatch(
+      openModal({
+        modalType: 'ImageZoomModal',
+        modalProps: {
+          visible: true,
+          imageList,
+          currentIndex,
+        },
+      }),
+    );
+  };
+
   return (
     <View style={styles.card}>
       <View style={styles.imageContainer}>
-        <TouchableOpacity>
-          <Image source={{uri: fallbackImg()}} style={styles.productImage} />
-        </TouchableOpacity>
+        {!item.image || item.image.length === 0 ? (
+          <TouchableOpacity>
+            <Image
+              source={{
+                uri:
+                  Array.isArray(item.image) && item.image.length > 0
+                    ? `https://api.saraldyechems.com/upload/image/${item.image[0]}`
+                    : fallbackImg(),
+              }}
+              style={styles.productImage}
+            />
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity
+            onPress={() => handleImageZoom(item, item?.image, 0)}>
+            <Image
+              source={{
+                uri:
+                  Array.isArray(item.image) && item.image.length > 0
+                    ? `https://api.saraldyechems.com/upload/image/${item.image[0]}`
+                    : fallbackImg(),
+              }}
+              resizeMode="contain"
+              style={styles.productImage}
+            />
+          </TouchableOpacity>
+        )}
         <TouchableOpacity
           style={styles.addButton}
           onPress={() => openAddModal(item, idx, item?._id)}>
@@ -146,9 +181,8 @@ const ProductCard = ({item, onAddPress, idx}) => {
                     key={index}
                     style={
                       activeProduct?.selectedVariant !==
-                      `${variant}${index}${idx}${item._id}`
-                        ? // selectedVariant !== `${variant}${index}${idx}${item._id}`
-                          styles.variantItem
+                      `${variant}AFTER${index}${idx}${item._id}`
+                        ? styles.variantItem
                         : styles.selectedVariantItem
                     }
                     onPress={() =>
@@ -157,10 +191,8 @@ const ProductCard = ({item, onAddPress, idx}) => {
                     <Text
                       style={
                         activeProduct?.selectedVariant !==
-                        `${variant}${index}${idx}${item._id}`
-                          ? // selectedVariant !==
-                            // `${variant}${index}${idx}${item._id}`
-                            styles.variantText
+                        `${variant}AFTER${index}${idx}${item._id}`
+                          ? styles.variantText
                           : styles.selectedVariantText
                       }>
                       {variant.length > 50

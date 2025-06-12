@@ -9,8 +9,9 @@ import {
   Dimensions,
   Image,
   Platform,
+  FlatList,
 } from 'react-native';
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import LinearGradient from 'react-native-linear-gradient';
 import {useNavigation} from '@react-navigation/native';
 import {ROUTES} from '../../constants/routes';
@@ -24,6 +25,8 @@ import {setVariants} from '../../redux/slices/cartSlice';
 import {toggleShowVariants} from '../../redux/slices/authSlice';
 import {selectVariant} from '../../utils/function/function';
 import {extractQuantityPrefix} from '../../utils/function/removeVariantCharacter';
+import {fallbackImg} from '../../utils/images';
+import ScrollImage from '../../components/ScrollImage/Index';
 
 // Custom dropdown component
 const Dropdown = ({options, selectedValue, onSelect, label}) => {
@@ -94,7 +97,7 @@ const QuantitySelector = ({quantity, setQuantity, unit, enabled}) => {
 };
 const OptionButton = ({label, selected, onPress, idx, item}) => {
   const activeProduct = useSelector(state => state.newCart.activeProduct);
-  let newSelected = `${label}${idx}${item.parentId}${item._id}`;
+  let newSelected = `${label}AFTER${idx}${item.parentId}${item._id}`;
 
   const selectedVariantTrimmed =
     activeProduct?.selectedVariant?.length > newSelected.length
@@ -136,25 +139,6 @@ const ProductModal = ({product}) => {
     return () => subscription?.remove();
   }, []);
 
-  // Determine if the product has selectable options
-  const hasOptions =
-    productData.variants && Object.keys(productData.variants).length > 0;
-
-  // Determine if the product has dimension options
-  const hasDimensions = productData.variants && productData.variants.dimensions;
-
-  // Determine if the product has color options
-  const hasColors = productData.variants && productData.variants.colors;
-
-  // Determine if the product has mesh count options
-  const hasMeshCount = productData.variants && productData.variants.meshCount;
-
-  // Determine if the product has width options
-  const hasWidth = productData.variants && productData.variants.width;
-
-  // Determine if the product has size options
-  const hasSizes = productData.variants && productData.variants.sizes;
-
   const navigation = useNavigation();
 
   const handleShowMore = product => {
@@ -174,8 +158,8 @@ const ProductModal = ({product}) => {
   const selectedVariant = useSelector(state => state.product.selectedVariant);
 
   const handleAddToCart = (productId, variant, quantity, itemId) => {
-    const last8 = variant.slice(-8); // get last 8 characters
-    const last8OfItemId = itemId.slice(-8); // get last 8 characters
+    const last8 = variant.slice(-8);
+    const last8OfItemId = itemId.slice(-8);
 
     if (last8 === last8OfItemId) {
       dispatch(
@@ -187,12 +171,22 @@ const ProductModal = ({product}) => {
     } else {
       setVariants(null);
     }
+    let newVariant;
+    if (customValue && customValue.trim() !== '') {
+      newVariant = customValue.trim();
+      dispatch(setSelectedVariant(null));
+    } else {
+      newVariant = extractQuantityPrefix(variant);
+    }
 
-    let newVariant = extractQuantityPrefix(variant);
     dispatch(addToCart({productId, variant: newVariant, quantity}))
       .unwrap()
       .catch(err => {
-        Alert.alert('Error', err.message || 'Failed to add to cart');
+        showAlert({
+          title: 'Error',
+          message: err.message,
+          acceptText: 'OK',
+        });
       });
     dispatch(
       openModal({
@@ -201,8 +195,26 @@ const ProductModal = ({product}) => {
       }),
     );
     dispatch(setSelectedVariant(null));
-    // dispatch(closeModal());
-    // navigation.navigate(ROUTES.CART);
+  };
+  const handleAddToCartMachineProduct = (productId, quantity) => {
+    let variant = 'no variant';
+    dispatch(addToCart({productId, variant, quantity}))
+      .unwrap()
+      .catch(err => {
+        showAlert({
+          title: 'Error',
+          message: err.message,
+          acceptText: 'OK',
+        });
+        // Alert.alert('Error', err.message || 'Failed to add to cart');
+      });
+    dispatch(
+      openModal({
+        modalType: 'ViewCart',
+        callbackId: '123',
+      }),
+    );
+    dispatch(setSelectedVariant(null));
   };
 
   const handleClose = () => {
@@ -213,13 +225,21 @@ const ProductModal = ({product}) => {
       }),
     );
   };
-  const handleShowVariants = variantArray => {
-    dispatch(setVariants(variantArray));
+  const handleShowVariants = (variantArray, parentIndex, parentId) => {
+    const updatedVariants = variantArray.map(v => ({
+      label: v,
+      parentIndex,
+      parentId,
+    }));
+    dispatch(setVariants(updatedVariants));
+    // dispatch(setVariants(variantArray));
+
     dispatch(toggleShowVariants());
     dispatch(
       openModal({
         modalType: 'VARIANT_MODAL',
-        callbackId: '123',
+
+        callbackId: '123', // optional
       }),
     );
   };
@@ -234,44 +254,56 @@ const ProductModal = ({product}) => {
       selectVariant(dispatch, customValue);
     }
   }, [customValue]);
-  // const OpenCart = itemId => {};
+
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   const calculateTotal = (variant, quantity) => {
-    if (!variant) return ''; // Early return if variant is null or undefined
+    if (!variant) return '';
+    const cleanVariant = variant.split(/AFTER|"/i)[0].trim();
 
-    const match = variant.match(/(\d+(\.\d+)?)\s*(kg|gm|ltr)/i);
-    if (!match) return `${variant}`;
+    const match = cleanVariant.match(/^(.*?)(\d+(\.\d+)?)\s*(kg|gm|ltr)$/i);
 
-    const value = parseFloat(match[1]);
-    const unit = match[3].toLowerCase();
-    const total = value * quantity;
+    if (match) {
+      const namePart = match[1].trim();
+      const value = parseFloat(match[2]);
+      const unit = match[4].toLowerCase();
+      const total = value * quantity;
 
-    if (unit === 'gm' && total >= 1000) {
-      return `${total / 1000}kg`;
+      const formattedTotal =
+        unit === 'gm' && total >= 1000
+          ? `${(total / 1000).toFixed(2)}kg`
+          : `${total}${unit}`;
+
+      return namePart ? `${namePart} ${formattedTotal}` : formattedTotal;
     }
 
-    return `${total}${unit}`;
+    // fallback if no match
+    return cleanVariant;
   };
 
+  const flatListRef = useRef(null);
+  const images = [
+    '6835f4c60a5e90b467049ddf',
+    '6835f4c50a5e90b467049ddd',
+    '683568b5a45bd79a89b93bcf',
+    '683568b6a45bd79a89b93bd1',
+    '683568b8a45bd79a89b93bd3',
+  ];
+
   const activeProduct = useSelector(state => state.newCart.activeProduct);
+  console.log(product, 'my dat');
+
   return (
     <View style={{backgroundColor: '#E0EBF9', borderRadius: 25}}>
       <View style={[styles.modalContent, {maxHeight: dimensions.height * 0.8}]}>
         <ScrollView
           contentContainerStyle={styles.contentContainer}
           showsVerticalScrollIndicator={false}>
-          <View style={styles.imageContainer}>
-            <Image
-              source={{
-                uri:
-                  productData.image ||
-                  `https://s3-alpha-sig.figma.com/img/5ffb/a192/2dd4c257df96f4b702c011168d3cffb7?Expires=1742774400&Key-Pair-Id=APKAQ4GOSFWCW27IBOMQ&Signature=U2Smx6pgvm867-k7A3ze9tyriadTE5yxgW94WVaLEeXrisHy1MIWtdMiai20EcL5YG6b4hrFOcDFdQNmVVkxsBX7elT0vufLN7I7Adjd7Cr4mtGlSfQ7NAYYI4DZBgqfcJiRTb128mma9alrjrzQ644iFbFVSZb6cchvIiJkoh8WZbqipRUGa603jVW~CUE~bl-LB35GXPny58zzgR9tIj0A4GyLNjXefrh-A3~BLkUh7PIpKtxiEJoX4xjfx-~XCHDEklFMuEv4aLm1KGusEAD1N2p73-NAMyAdPD6KtVBHW7K9zgxKKpb7An0mDK6zoX0e1Sq06AAIBYhIcY4NFg__`,
-              }}
-              style={styles.productImage}
-              resizeMode="contain"
-            />
-          </View>
-
+          {!product?.image || product?.item?.length === 0 ? (
+            <ScrollImage product={images} />
+          ) : (
+            <ScrollImage product={product} />
+          )}
           <View style={{marginHorizontal: 10}}>
             <Text style={styles.title}>{selectedProductItem.name}</Text>
           </View>
@@ -297,10 +329,13 @@ const ProductModal = ({product}) => {
                   flexDirection: 'row',
                 }}>
                 <Text style={styles.infoLabel}>Category :</Text>
-                <Text style={{}} numberOfLines={1} ellipsizeMode="tail">
+                {/* <Text style={{}} numberOfLines={1} ellipsizeMode="tail">
                   {(categoryName || 'Texttile Auxlier').length > 20
                     ? `${categoryName.substring(0, 20)}...`
                     : categoryName}
+                </Text> */}
+                <Text>
+                  {product?.categorySubcategoryPairs[0]?.categoryId.name}
                 </Text>
               </View>
               <View
@@ -369,11 +404,17 @@ const ProductModal = ({product}) => {
                         </View>
                       ))}
                 </ScrollView>
-                {selectedProductItem.variants.length > 3 && (
+                {selectedProductItem.variants?.length > 3 && (
                   <TouchableOpacity
                     style={styles.moreButton}
-                    onPress={() =>
-                      handleShowVariants(selectedProductItem.variants)
+                    onPress={
+                      () =>
+                        handleShowVariants(
+                          selectedProductItem.variants,
+                          selectedProductItem.parentId,
+                          selectedProductItem._id,
+                        )
+                      // handleShowVariants(selectedProductItem.variants)
                     }>
                     <Text style={styles.moreButtonText}>+</Text>
                   </TouchableOpacity>
@@ -431,26 +472,49 @@ const ProductModal = ({product}) => {
               unit={productData.unit}
               enabled={customValue}
             />
-            <LinearGradient
-              colors={['#38587F', '#101924']} // Left to right gradient colors
-              start={{x: 0, y: 0}}
-              end={{x: 1, y: 0}}
-              style={styles.receiptButton} // Make sure the gradient covers the button
-            >
-              <TouchableOpacity
-                style={styles.addToCartButton}
-                disabled={activeProduct?.selectedVariant === null}
-                onPress={() =>
-                  handleAddToCart(
-                    selectedProductItem._id,
-                    activeProduct?.selectedVariant,
-                    quantity,
-                    selectedProductItem._id,
-                  )
-                }>
-                <Text style={styles.addToCartText}>Add To Cart</Text>
-              </TouchableOpacity>
-            </LinearGradient>
+            {categoryName === 'Textile Printing Machines' ||
+            !activeProduct?.selectVariant ||
+            categoryName === 'Machines' ? (
+              <LinearGradient
+                colors={['#38587F', '#101924']} // Left to right gradient colors
+                start={{x: 0, y: 0}}
+                end={{x: 1, y: 0}}
+                style={styles.receiptButton} // Make sure the gradient covers the button
+              >
+                <TouchableOpacity
+                  style={styles.addToCartButton}
+                  // disabled={activeProduct?.selectedVariant === null}
+                  onPress={() =>
+                    handleAddToCartMachineProduct(
+                      selectedProductItem._id,
+                      quantity,
+                    )
+                  }>
+                  <Text style={styles.addToCartText}>Add To Cart</Text>
+                </TouchableOpacity>
+              </LinearGradient>
+            ) : (
+              <LinearGradient
+                colors={['#38587F', '#101924']} // Left to right gradient colors
+                start={{x: 0, y: 0}}
+                end={{x: 1, y: 0}}
+                style={styles.receiptButton} // Make sure the gradient covers the button
+              >
+                <TouchableOpacity
+                  style={styles.addToCartButton}
+                  disabled={activeProduct?.selectedVariant === null}
+                  onPress={() =>
+                    handleAddToCart(
+                      selectedProductItem._id,
+                      activeProduct?.selectedVariant,
+                      quantity,
+                      selectedProductItem._id,
+                    )
+                  }>
+                  <Text style={styles.addToCartText}>Add To Cart</Text>
+                </TouchableOpacity>
+              </LinearGradient>
+            )}
           </View>
         </View>
       </View>
@@ -522,10 +586,10 @@ const styles = StyleSheet.create({
   imageContainer: {
     alignItems: 'center',
     marginBottom: 15,
-    backgroundColor: '#CCC',
+    backgroundColor: 'rgba(0, 0, 0, 0.04)',
     padding: 10,
     borderRadius: 15,
-    marginHorizontal: 10,
+    // marginHorizontal: 10,
   },
   productImage: {
     width: '100%',

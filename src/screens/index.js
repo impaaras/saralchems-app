@@ -9,3 +9,4 @@ export {default as Cart} from './Cart/Cart';
 export {default as ProductModal} from './ProductDetails/ProductModal';
 export {default as ResetPassword} from './Reset/ResetPassword';
 export {default as Search} from '../screens/Search/SearchScreen';
+export {default as ResetHandle} from './Reset/ResetPasswordResult';

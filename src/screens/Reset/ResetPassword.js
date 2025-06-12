@@ -16,6 +16,7 @@ import {requestPasswordReset} from '../../redux/slices/authSlice';
 import {ROUTES} from '../../constants/routes';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import styles from './Reset.styles';
+import Loader from '../../utils/Loader';
 
 export default function ResetPassword({navigation}) {
   const dispatch = useDispatch();
@@ -24,6 +25,7 @@ export default function ResetPassword({navigation}) {
   const [errors, setErrors] = useState({});
   const [errorMessage, setErrorMessage] = useState('');
   const errorToastAnim = useRef(new Animated.Value(-100)).current;
+  const [loader, setLoader] = useState(false);
 
   const showErrorToast = message => {
     setErrorMessage(message);
@@ -66,13 +68,15 @@ export default function ResetPassword({navigation}) {
   };
 
   const handleResetPassword = async () => {
+    setLoader(true);
     if (!validateForm()) {
       showErrorToast('Please check all fields and try again');
       return;
     }
     try {
       await dispatch(requestPasswordReset({email})).unwrap();
-      navigation.navigate('OTP', {email});
+      setLoader(false);
+      navigation.navigate(ROUTES.RESET_HANDLE, {email});
     } catch (err) {
       let errorMsg = 'Failed to send reset request. Try again later.';
       console.log('er', err.message);
@@ -81,12 +85,14 @@ export default function ResetPassword({navigation}) {
       } else if (err?.data?.message) {
         errorMsg = err.data.message;
       }
+      setLoader(false);
       showErrorToast(errorMsg);
     }
   };
 
   return (
     <SafeAreaView style={styles.container}>
+      {loader && <Loader />}
       <KeyboardAwareScrollView
         contentContainerStyle={{flexGrow: 1}}
         enableOnAndroid={true}

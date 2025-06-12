@@ -6,8 +6,6 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   headerContainer: {
-    // padding: 16,
-    // marginTop: -110,
     marginTop: -30,
     borderRadius: 12,
     backgroundColor: '#FFF',
@@ -195,6 +193,102 @@ const styles = StyleSheet.create({
     color: 'white',
     fontSize: 12,
     fontWeight: '600',
+  },
+  quoteButton: {
+    borderRadius: 25,
+    paddingVertical: 10,
+    alignSelf: 'center',
+    alignItems: 'center',
+  },
+  confirmButton: {
+    width: '30%',
+    backgroundColor: '#05842A',
+    paddingHorizontal: 5,
+    borderRadius: 100,
+  },
+  quoteButtonText: {
+    color: '#FFF',
+    fontSize: 14,
+    fontWeight: '500',
+  },
+
+  // Modal styles
+  modalContainer: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  modalContent: {
+    backgroundColor: 'white',
+    borderRadius: 10,
+    padding: 20,
+    width: '100%',
+    maxWidth: 400,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    color: '#3C5D87',
+  },
+  modalSubtitle: {
+    fontSize: 14,
+    marginBottom: 15,
+    color: '#555',
+  },
+  reasonInput: {
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 5,
+    padding: 10,
+    marginBottom: 20,
+    textAlignVertical: 'top',
+    height: 100,
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  modalButton: {
+    flex: 1,
+    padding: 12,
+    borderRadius: 5,
+    alignItems: 'center',
+    marginHorizontal: 5,
+  },
+  cancelButton: {
+    backgroundColor: '#f2f2f2',
+  },
+  submitButton: {
+    backgroundColor: '#3C5D87',
+  },
+  cancelButtonText: {
+    color: '#333',
+    fontWeight: '500',
+  },
+  submitButtonText: {
+    color: 'white',
+    fontWeight: '500',
+  },
+  messageText: {
+    textAlign: 'center',
+    padding: 20,
+    color: '#555',
+  },
+  errorText: {
+    textAlign: 'center',
+    padding: 20,
+    color: 'red',
   },
 });
 

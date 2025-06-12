@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useState, useRef} from 'react';
 import {
   StyleSheet,
   Text,
@@ -8,6 +8,8 @@ import {
   Image,
   ScrollView,
   TextInput,
+  FlatList,
+  Dimensions,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {useNavigation, useRoute} from '@react-navigation/native';
@@ -25,6 +27,12 @@ import styles from './ProductDetail.styles';
 import ZoomableImage from '../../components/ImageZoom/ImageZoom';
 import {extractQuantityPrefix} from '../../utils/function/removeVariantCharacter';
 
+import {useAlert} from '../../context/CustomAlertContext';
+import ImageZoomModal from '../../components/ImageZoom/ImageZoom';
+import ScrollImage from '../../components/ScrollImage/Index';
+
+const {width: screenWidth} = Dimensions.get('window');
+
 // Option button component
 const OptionButton = ({
   label,
@@ -36,7 +44,7 @@ const OptionButton = ({
   activeVariant,
 }) => {
   const activeProduct = useSelector(state => state.newCart.activeProduct);
-  let newSelected = `${label}${idx}${parentId}${productId}`;
+  let newSelected = `${label}AFTER${idx}${parentId}${productId}`;
   return (
     <TouchableOpacity
       style={[
@@ -77,12 +85,24 @@ const ExpandableSection = ({title, children}) => {
 
 const ProductDetail = () => {
   const navigation = useNavigation();
-  const [quantity, setQuantity] = useState(0);
+  const [quantity, setQuantity] = useState(1);
   const [inputValue, setInputValue] = useState('');
   const [selectedSize, setSelectedSize] = useState(null);
   const [customValue, setCustomValue] = useState('');
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const flatListRef = useRef(null);
   const route = useRoute();
   const {product, parentIndex, activeVariant} = route.params;
+  const [zoomModalVisible, setZoomModalVisible] = useState(false);
+  const [selectedImageUri, setSelectedImageUri] = useState('');
+
+  const images = [
+    '6835f4c60a5e90b467049ddf',
+    '6835f4c50a5e90b467049ddd',
+    '683568b5a45bd79a89b93bcf',
+    '683568b6a45bd79a89b93bd1',
+    '683568b8a45bd79a89b93bd3',
+  ];
 
   const decrementQuantity = () => {
     if (quantity > 1) {
@@ -103,28 +123,61 @@ const ProductDetail = () => {
 
   const categoryName = useSelector(state => state.product.categoryName);
 
+  const {showAlert} = useAlert();
   const handleAddToCart = (productId, variant, quantity) => {
-    let newVariant = extractQuantityPrefix(variant);
-    console.log(newVariant, productId, quantity);
+    let newVariant;
+    if (customValue && customValue.trim() !== '') {
+      newVariant = customValue.trim();
+      dispatch(setSelectedVariant(null));
+    } else {
+      newVariant = extractQuantityPrefix(variant);
+    }
+
     dispatch(addToCart({productId, variant: newVariant, quantity}))
       .unwrap()
       .catch(err => {
-        Alert.alert('Error', err.message || 'Failed to add to cart');
+        showAlert({
+          title: 'Error',
+          message: error.message,
+          acceptText: 'OK',
+        });
+        // Alert.alert('Error', err.message || 'Failed to add to cart');
       });
     dispatch(setSelectedVariant(null));
+    setQuantity(1);
+    setCustomValue('');
     dispatch(
       openModal({
         modalType: 'ViewCart',
         callbackId: '123',
       }),
     );
-    // setQuantity(1);
+  };
+  const handleAddToCartWithMachines = (productId, quantity) => {
+    let variant = 'no variant';
+    dispatch(addToCart({productId, variant, quantity}))
+      .unwrap()
+      .catch(err => {
+        showAlert({
+          title: 'Error',
+          message: err.message,
+          acceptText: 'OK',
+        });
+        // Alert.alert('Error', err.message || 'Failed to add to cart');
+      });
+    dispatch(setSelectedVariant(null));
+    setQuantity(1);
+    dispatch(
+      openModal({
+        modalType: 'ViewCart',
+        callbackId: '123',
+      }),
+    );
   };
 
   const selectVariant = (variant, index, parentIndex, productId) => {
-    let newVariantName = `${variant}${index}${parentIndex}${productId}`;
+    let newVariantName = `${variant}AFTER${index}${parentIndex}${productId}`;
     dispatch(setSelectedVariant(newVariantName));
-    // dispatch(setSelectedVariant(newVariantName));
   };
 
   const handleShowVariants = variantArray => {
@@ -156,28 +209,36 @@ const ProductDetail = () => {
     return true; // default false if conditions not met
   }
 
+  const cleanVariant = variant => {
+    if (!variant) return '';
+    return variant.split('"')[0];
+  };
+
   const calculateTotal = (variant, quantity) => {
     if (!variant) return '';
+    const cleanVariant = variant.split(/AFTER|"/i)[0].trim();
 
-    const match = variant.match(/(\d+(\.\d+)?)\s*(kg|gm|ltr)/i);
-    if (!match) return `${variant}`;
+    const match = cleanVariant.match(/^(.*?)(\d+(\.\d+)?)\s*(kg|gm|ltr)$/i);
 
-    const value = parseFloat(match[1]);
-    const unit = match[3].toLowerCase();
-    const total = value * quantity;
+    if (match) {
+      const namePart = match[1].trim();
+      const value = parseFloat(match[2]);
+      const unit = match[4].toLowerCase();
+      const total = value * quantity;
 
-    if (unit === 'gm' && total >= 1000) {
-      return `${total / 1000}kg`;
+      const formattedTotal =
+        unit === 'gm' && total >= 1000
+          ? `${parseFloat((total / 1000).toFixed(1))}kg`
+          : `${parseFloat(total.toFixed(1))}${unit}`;
+
+      return namePart ? `${namePart} ${formattedTotal}` : formattedTotal;
     }
 
-    return `${total}${unit}`;
+    // fallback if no match
+    return cleanVariant;
   };
 
   const activeProduct = useSelector(state => state.newCart.activeProduct);
-
-  useEffect(() => {
-    console.log('retry', activeProduct);
-  }, [route]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -185,15 +246,11 @@ const ProductDetail = () => {
       <ScrollView
         style={styles.productContent}
         showsVerticalScrollIndicator={false}>
-        <View style={styles.imageContainer}>
-          <Image
-            source={{
-              uri: fallbackImg(),
-            }}
-            style={styles.productImage}
-            resizeMode="contain"
-          />
-        </View>
+        {!product?.image || product?.item?.length === 0 ? (
+          <ScrollImage product={images} />
+        ) : (
+          <ScrollImage product={product} />
+        )}
 
         {/* Product Info */}
         <View style={styles.productInfo}>
@@ -204,7 +261,9 @@ const ProductDetail = () => {
             <View style={{flexDirection: 'row'}}>
               <View style={styles.detailItem}>
                 <Text style={styles.detailLabel}>Category:</Text>
-                <Text style={styles.detailValue}>Textile Auxiliaries</Text>
+                <Text style={styles.detailValue}>
+                  {product?.categorySubcategoryPairs[0]?.categoryId.name}
+                </Text>
               </View>
               <View style={styles.detailItem}>
                 <Text style={styles.detailLabel}>Brand:</Text>
@@ -221,17 +280,22 @@ const ProductDetail = () => {
                 showsHorizontalScrollIndicator={false}
                 contentContainerStyle={styles.listVariant}>
                 {product &&
-                  product.variants.slice(0, 7).map((size, sizeIndex) => (
+                  product.variants.slice(0, 7)?.map((size, sizeIndex) => (
                     <View
                       key={`${size._id || size}-${sizeIndex}`}
-                      style={{marginRight: 0}}>
+                      style={{
+                        marginRight: 0,
+                      }}>
                       {size === 'loose' || size === 'losse' ? (
                         <View style={styles.customInputContainer}>
                           <TextInput
                             style={styles.customInput}
                             placeholder="Enter your Value"
                             value={customValue}
-                            onChangeText={setCustomValue}
+                            onChangeText={value => {
+                              setCustomValue(value);
+                              selectVariant(null);
+                            }}
                             keyboardType="numeric"
                           />
                         </View>
@@ -257,7 +321,7 @@ const ProductDetail = () => {
                   ))}
               </ScrollView>
 
-              {product.variants.length > 3 && (
+              {product?.variants?.length > 3 && (
                 <TouchableOpacity
                   style={styles.plusButton}
                   onPress={() => handleShowVariants(product.variants)}>
@@ -293,24 +357,45 @@ const ProductDetail = () => {
                 </TouchableOpacity>
               </View>
 
-              <LinearGradient
-                colors={['#1B2B48', '#2D4565']}
-                start={{x: 0, y: 0}}
-                end={{x: 1, y: 1}}
-                style={{borderRadius: 100}}>
-                <TouchableOpacity
-                  style={styles.addToCartButton}
-                  disabled={activeProduct?.selectedVariant === null}
-                  onPress={() =>
-                    handleAddToCart(
-                      product._id,
-                      activeProduct?.selectedVariant,
-                      quantity,
-                    )
-                  }>
-                  <Text style={styles.addToCartText}>Add To Cart</Text>
-                </TouchableOpacity>
-              </LinearGradient>
+              {categoryName === 'Machines' ? (
+                <LinearGradient
+                  colors={['#1B2B48', '#2D4565']}
+                  start={{x: 0, y: 0}}
+                  end={{x: 1, y: 1}}
+                  style={{borderRadius: 100}}>
+                  <TouchableOpacity
+                    style={styles.addToCartButton}
+                    onPress={() =>
+                      handleAddToCartWithMachines(product._id, quantity)
+                    }>
+                    <Text style={styles.addToCartText}>Add To Cart</Text>
+                  </TouchableOpacity>
+                </LinearGradient>
+              ) : (
+                <LinearGradient
+                  colors={['#1B2B48', '#2D4565']}
+                  start={{x: 0, y: 0}}
+                  end={{x: 1, y: 1}}
+                  style={{borderRadius: 100}}>
+                  <TouchableOpacity
+                    style={styles.addToCartButton}
+                    disabled={
+                      customValue === '' &&
+                      activeProduct?.selectedVariant === null
+                    }
+                    onPress={() =>
+                      handleAddToCart(
+                        product._id,
+                        customValue !== ''
+                          ? customValue
+                          : activeProduct?.selectedVariant,
+                        quantity,
+                      )
+                    }>
+                    <Text style={styles.addToCartText}>Add To Cart</Text>
+                  </TouchableOpacity>
+                </LinearGradient>
+              )}
             </View>
           </View>
 

@@ -6,7 +6,7 @@ import RegisterScreen from '../screens/Register/RegisterScreen';
 import EmailOtp from '../screens/EmailOTP/EmailOtp';
 import {StatusBar} from 'react-native';
 import {ROUTES} from '../constants/routes';
-import {ResetPassword} from '../screens';
+import {ResetHandle, ResetPassword} from '../screens';
 const Stack = createStackNavigator();
 const StackNavigation = () => {
   return (
@@ -31,6 +31,11 @@ const StackNavigation = () => {
         <Stack.Screen
           name={ROUTES.RESET_PASSWORD}
           component={ResetPassword}
+          options={{headerShown: false}}
+        />
+        <Stack.Screen
+          name={ROUTES.RESET_HANDLE}
+          component={ResetHandle}
           options={{headerShown: false}}
         />
       </Stack.Navigator>

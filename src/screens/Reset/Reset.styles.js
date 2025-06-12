@@ -154,6 +154,40 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontWeight: '600',
   },
+
+  otpContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 40,
+    paddingHorizontal: 10,
+  },
+  otpInput: {
+    width: 50,
+    height: 50,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#DDD',
+    backgroundColor: '#fff',
+    fontSize: 20,
+    textAlign: 'center',
+    shadowColor: '#333',
+    shadowOffset: {
+      width: 0,
+      height: 1,
+    },
+    shadowOpacity: 0.08,
+    shadowRadius: 2,
+    elevation: 100,
+  },
+  otpInputDisabled: {
+    backgroundColor: '#f5f5f5',
+    borderColor: '#e0e0e0',
+  },
+  otpText: {
+    marginLeft: 10,
+    fontSize: 14,
+    marginBottom: 10,
+  },
 });
 
 export default styles;

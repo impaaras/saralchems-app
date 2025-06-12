@@ -5,6 +5,7 @@ import {ROUTES} from '../constants/routes';
 import {ItemScreen, Profile} from '../screens';
 import SideDrawer from './SideDrawer';
 import {TransitionSpecs, CardStyleInterpolators} from '@react-navigation/stack';
+import {AlertProvider} from '../context/CustomAlertContext';
 
 const Stack = createStackNavigator();
 

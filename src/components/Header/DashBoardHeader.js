@@ -12,6 +12,7 @@ import {
   ActivityIndicator,
   FlatList,
   Dimensions,
+  BackHandler,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import Icon2 from 'react-native-vector-icons/MaterialCommunityIcons';
@@ -43,6 +44,7 @@ import {
 } from '../../redux/slices/productSlice';
 import {API_URL} from '../../utils/ApiService';
 import {previousRouteName} from '../../navigation/navigationService';
+import {fetchUserProfile} from '../../redux/slices/authSlice';
 const {width} = Dimensions.get('window');
 
 const DashboardHeader = ({name}) => {
@@ -155,7 +157,7 @@ const DashboardHeader = ({name}) => {
   };
 
   const token = useSelector(state => state.auth.token);
-  // console.log(token);
+
   const getCategoryData = async () => {
     try {
       const {data} = await axios.get(`${API_URL}/category`, {
@@ -179,27 +181,37 @@ const DashboardHeader = ({name}) => {
   }, []);
 
   const handleGoBack = () => {
-    let routeName = getRouteName();
-    if (routeName === 'Profile') {
-      navigation.goBack();
-    } else if (routeName === ROUTES.ITEM_SCREEN) {
-      navigation.navigate('Home');
-    } else if (routeName === 'Search') {
-      navigation.navigate('Home');
-    } else if (
-      previousRouteName === 'products' ||
-      routeName === ROUTES.PRODUCT_DETAILS
+    const routeName = getRouteName();
+    if (
+      routeName === ROUTES.ITEM_SCREEN ||
+      routeName === ROUTES.SEARCH ||
+      routeName === 'products'
     ) {
-      navigation.navigate('products');
-    } else if (
-      previousRouteName === 'Search' ||
-      routeName === ROUTES.PRODUCT_DETAILS
-    ) {
-      navigation.navigate('Search');
+      navigation.navigate(ROUTES.HOME); // Specific fallback for ITEM_SCREEN
+      return;
+    }
+
+    if (navigation.canGoBack()) {
+      navigation.navigate(previousRouteName);
     } else {
-      navigation.navigate(ROUTES.ITEM_SCREEN);
+      navigation.navigate(ROUTES.HOME); // Fallback if there's no screen to go back to
     }
   };
+
+  // const useBackButtonHandler = () => {
+  //   useEffect(() => {
+  //     const onBackPress = () => {
+  //       handleGoBack();
+  //       return true; // Prevent default behavior
+  //     };
+
+  //     BackHandler.addEventListener('hardwareBackPress', onBackPress);
+
+  //     return () => {
+  //       BackHandler.removeEventListener('hardwareBackPress', onBackPress);
+  //     };
+  //   }, []);
+  // };
 
   const inputRef = React.useRef(null);
 
@@ -221,6 +233,14 @@ const DashboardHeader = ({name}) => {
       }
     }, [navigation]),
   );
+
+  const {user} = useSelector(state => state.auth);
+
+  useEffect(() => {
+    if (token) {
+      dispatch(fetchUserProfile({token}));
+    }
+  }, [dispatch, token]);
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -296,7 +316,8 @@ const DashboardHeader = ({name}) => {
               {!openInput &&
                 getRouteName() !== 'Search' &&
                 getRouteName() !== ROUTES.ITEM_SCREEN && (
-                  <Text style={styles.title}>{getRouteName()}</Text>
+                  <Text style={styles.title}>Welcome, {user?.name}🤗</Text>
+                  // <Text style={styles.title}>{getRouteName()}</Text>
                 )}
               {!openInput && currentRouteName === ROUTES.ITEM_SCREEN && (
                 <DropdownMenu categories={categories} />

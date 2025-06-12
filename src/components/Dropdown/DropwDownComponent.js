@@ -11,11 +11,14 @@ import {
 import {useDispatch, useSelector} from 'react-redux';
 import {useFocusEffect} from '@react-navigation/native';
 import styles from './Dropdown.styles';
+import {useLoader} from '../../context/LoaderContext';
 
 const DropdownMenu = ({currentRouteName, categories}) => {
   const [isOpen, setIsOpen] = useState(false);
   const [rotateAnimation] = useState(new Animated.Value(0));
   const [selectedCategory, setSecSelectedCategory] = useState(null);
+  const {setLoading} = useLoader();
+
   const parentCategoryName = useSelector(
     state => state.product.parentCategoryName,
   );

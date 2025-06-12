@@ -14,11 +14,14 @@ import DashboardHeader from '../../components/Header/DashBoardHeader';
 import ProductCard from '../../components/Card/ProductCard';
 import {addItem} from '../../redux/slices/cartSlice';
 import styles from './Product.styles';
+import {useLoader} from '../../context/LoaderContext';
 
 const PAGE_SIZE = 15;
 
 const ProductsScreen = () => {
   const dispatch = useDispatch();
+
+  const {setLoading} = useLoader();
   const {
     results: allProducts,
     loading,
@@ -29,10 +32,27 @@ const ProductsScreen = () => {
   const [currentPage, setCurrentPage] = useState(1);
 
   // Call API every time screen is focused
+  // useFocusEffect(
+  //   useCallback(() => {
+  //     dispatch(searchProducts(''));
+  //   }, [dispatch]),
+  // );
+
   useFocusEffect(
     useCallback(() => {
-      dispatch(searchProducts(''));
-    }, [dispatch]),
+      const fetchData = async () => {
+        setLoading(true);
+        try {
+          await dispatch(searchProducts('')).unwrap();
+        } catch (err) {
+          console.error(err);
+        } finally {
+          setLoading(false); // Hide loader
+        }
+      };
+
+      fetchData();
+    }, [dispatch, setLoading]),
   );
 
   // When full product list is updated, reset visible products
@@ -77,9 +97,7 @@ const ProductsScreen = () => {
           borderTopRightRadius: 15,
           marginTop: -80,
         }}>
-        {loading ? (
-          <Text style={styles.loadingText}>Loading...</Text>
-        ) : error ? (
+        {error ? (
           <Text style={styles.errorText}>{error}</Text>
         ) : (
           <FlatList
@@ -91,11 +109,6 @@ const ProductsScreen = () => {
             numColumns={3}
             onEndReached={handleLoadMore}
             onEndReachedThreshold={0.5}
-            ListFooterComponent={() =>
-              visibleProducts.length < allProducts.length ? (
-                <Text style={styles.loadingText}>Loading more...</Text>
-              ) : null
-            }
           />
         )}
       </View>

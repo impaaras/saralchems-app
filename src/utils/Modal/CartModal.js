@@ -209,7 +209,12 @@ const CartModal = ({product}) => {
 
   const handleAddToCart = (productId, variant, quantity) => {
     if (quantity < 1) {
-      Alert.alert('Error', 'Please select at least 1 item');
+      showAlert({
+        title: 'Error',
+        message: 'Please select at least 1 item',
+        acceptText: 'OK',
+      });
+      // Alert.alert('Error', 'Please select at least 1 item');
       return;
     }
 
@@ -217,7 +222,12 @@ const CartModal = ({product}) => {
     dispatch(addToCart({productId, variant: newVariant, quantity}))
       .unwrap()
       .catch(err => {
-        Alert.alert('Error', err.message || 'Failed to add to cart');
+        showAlert({
+          title: 'Error',
+          message: err.message,
+          acceptText: 'OK',
+        });
+        // Alert.alert('Error', err.message || 'Failed to add to cart');
       });
     dispatch(setSelectedVariant(null));
     handleClose();

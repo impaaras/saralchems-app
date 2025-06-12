@@ -72,6 +72,7 @@ const styles = StyleSheet.create({
   },
   cartItemDetails: {
     flex: 1,
+    marginLeft: 10,
   },
   cartItemHeader: {
     flexDirection: 'row',

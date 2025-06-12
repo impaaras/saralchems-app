@@ -26,9 +26,19 @@ import styles from './Cart.styles';
 import {StorageKeys, storage} from '../../utils/storage';
 import EmptyCartScreen from './EmptyCart';
 import Loader from '../../utils/Loader';
+import {setActiveProduct} from '../../redux/slices/newCart';
+import {openModal} from '../../redux/slices/modalSlice';
+import {addItem} from '../../redux/slices/cartSlice';
+
+import {useAlert} from '../../context/CustomAlertContext';
+import {useLoader} from '../../context/LoaderContext';
+import ScrollImage from '../../components/ScrollImage/Index';
 
 const CartItem = ({product, onRemove, onDecrement, onIncrement}) => {
+  let [variantId, setVariantId] = useState(null);
   const navigation = useNavigation();
+  const dispatch = useDispatch();
+
   const calculateTotal = (variant, quantity) => {
     const match = variant.match(/(\d+(\.\d+)?)\s*(kg|gm|ltr)/i);
     if (!match) return `${variant}`;
@@ -41,43 +51,57 @@ const CartItem = ({product, onRemove, onDecrement, onIncrement}) => {
       return `${total / 1000}kg`;
     }
 
-    return `${total}${unit}`;
+    return `${parseFloat(total.toFixed(1))}${unit}`;
   };
-  // const removeTrailingDigits = variant => {
-  //   // This will remove 1 or more digits from the end of the string
-  //   return variant?.replace(/\d+$/, '') || '';
-  // };
   const removeTrailingDigits = variant => {
     const match = variant?.match(/^\d+(\.\d+)?\s*(kg|gm|ml|ltr)/i);
     return match ? match[0].replace(/\s+/, '') : '';
   };
 
+  const activeProduct = useSelector(state => state.newCart.activeProduct);
+  const openAddModal = (product, index, currentIndex) => {
+    if (
+      activeProduct?.selectedVariant === null ||
+      activeProduct?._id !== currentIndex
+    ) {
+      dispatch(setActiveProduct(product));
+    }
+    setVariantId(index);
+    const newProduct = {
+      ...product,
+      parentId: index,
+      variants: product.variants || [],
+    };
+
+    dispatch(addItem(newProduct));
+    dispatch(
+      openModal({
+        modalType: 'PRODUCT_MODAL',
+        callbackId: '123',
+        product: newProduct,
+      }),
+    );
+  };
+
   return (
     <View style={styles.cartItem}>
-      <TouchableOpacity
-        onPress={() => navigation.navigate(ROUTES.PRODUCT_DETAILS)}>
-        {!product.image ? (
-          <Image source={{uri: product.image}} style={styles.cartItemImage} />
-        ) : (
-          <Image
-            style={styles.cartItemImage}
-            source={{
-              uri: fallbackImg(),
-            }}
-          />
-        )}
-      </TouchableOpacity>
+      {product && <ScrollImage product={product} reffer="cart" />}
       <View style={styles.cartItemDetails}>
         <View style={styles.cartItemHeader}>
-          <Text style={styles.cartItemName}>{product.productId.name}</Text>
+          <TouchableOpacity
+            onPress={() => openAddModal(product, 0, product?._id)}>
+            <Text style={styles.cartItemName}>{product.productId.name}</Text>
+          </TouchableOpacity>
           <TouchableOpacity onPress={onRemove}>
             <Icon name="delete" size={22} color="#666" />
           </TouchableOpacity>
         </View>
         <Text style={styles.cartItemSpec}>
-          {removeTrailingDigits(product.variant) || 'Custom variant'}
+          <Text style={{fontWeight: '700'}}>Variant - </Text>
+          {removeTrailingDigits(product.variant) ||
+            product.variant ||
+            'Custom variant'}
         </Text>
-
         <View
           style={{
             flexDirection: 'row',
@@ -85,7 +109,10 @@ const CartItem = ({product, onRemove, onDecrement, onIncrement}) => {
             alignItems: 'center',
           }}>
           <Text style={styles.cartItemQuality}>
-            Total: {calculateTotal(product.variant, product.quantity)}
+            <Text style={{fontWeight: '700'}}> Total Qty: </Text>
+            {product.variant === 'no variant'
+              ? product.quantity
+              : calculateTotal(product.variant, product.quantity)}
           </Text>
           <View style={styles.cartItemQuantity}>
             <TouchableOpacity style={styles.quantityBtn} onPress={onDecrement}>
@@ -108,7 +135,8 @@ const Cart = () => {
   const {items, loading, error} = useSelector(state => state.addToCart);
   const isScreenFocused = useRef(false);
   const isProcessing = useRef(false);
-  const [loader, setLoader] = useState(false);
+  const {setLoading} = useLoader();
+  const [alertVisible, setAlertVisible] = useState(true);
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
@@ -119,15 +147,21 @@ const Cart = () => {
     return unsubscribe;
   }, [navigation]);
 
-  // useEffect(() => {
-  //   fetchCartData();
-  // }, []);
-
+  const {showAlert} = useAlert();
   const fetchCartData = useCallback(async () => {
     try {
       await dispatch(getCart()).unwrap();
     } catch (err) {
-      Alert.alert('Error', 'Failed to load cart');
+      showAlert({
+        title: 'Error',
+        message: 'Failed to load cart',
+        rejectText: 'Cancel',
+      });
+      showAlert({
+        title: 'Error',
+        message: error.message,
+        acceptText: 'OK',
+      });
     }
   }, [dispatch]);
 
@@ -149,7 +183,11 @@ const Cart = () => {
       ).unwrap();
       await dispatch(getCart());
     } catch (err) {
-      Alert.alert('Error', err.message || 'Failed to update quantity');
+      showAlert({
+        title: 'Error',
+        message: error.message,
+        acceptText: 'OK',
+      });
     } finally {
       isProcessing.current = false;
     }
@@ -169,26 +207,26 @@ const Cart = () => {
 
   const handleRemoveItem = useCallback(
     (productId, variant) => {
-      Alert.alert(
-        'Remove Item',
-        'Are you sure you want to remove this item from your cart?',
-        [
-          {text: 'Cancel', style: 'cancel'},
-          {
-            text: 'Remove',
-            onPress: async () => {
-              try {
-                await dispatch(removeFromCart({productId, variant})).unwrap();
-                if (isScreenFocused.current) {
-                  await fetchCartData();
-                }
-              } catch (err) {
-                Alert.alert('Error', err.message || 'Failed to remove item');
-              }
-            },
-          },
-        ],
-      );
+      showAlert({
+        title: 'Remove Item',
+        message: 'Are you sure you want to remove this item from your cart?',
+        onConfirm: async () => {
+          try {
+            await dispatch(removeFromCart({productId, variant})).unwrap();
+            if (isScreenFocused.current) {
+              await fetchCartData();
+            }
+          } catch (err) {
+            showAlert({
+              title: 'Error',
+              message: err.message || 'Failed to remove item',
+              acceptText: 'OK',
+            });
+          }
+        },
+        acceptText: 'Remove',
+        rejectText: 'Cancel',
+      });
     },
 
     [dispatch, fetchCartData],
@@ -202,86 +240,91 @@ const Cart = () => {
     return unsubscribe;
   }, [navigation]);
 
+  const selectedProductItem = useSelector(state => state.cart.selectedProduct);
   const requestForQuote = async quoteData => {
     const token = storage.getString(StorageKeys.AUTH_TOKEN);
-    Alert.alert(
-      'Are you sure?',
-      'Do you want to send this quote?',
-      [
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
-        {
-          text: 'Yes',
-          onPress: async () => {
-            setLoader(true);
-            try {
-              const response = await fetch(
-                'https://api.saraldyechems.com/order/send-quote',
-                {
-                  method: 'POST',
 
-                  headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`,
-                  },
-                },
-              );
-              await dispatch(getCart()).unwrap();
-              const result = await response.json();
+    showAlert({
+      title: 'Are you sure?',
+      message: 'Do you want to send this quote?',
+      onConfirm: async () => {
+        setLoading(true);
+        try {
+          const response = await fetch(
+            'https://api.saraldyechems.com/order/send-quote',
+            {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`,
+              },
+            },
+          );
 
-              if (response.ok) {
-                setLoader(false);
-              } else {
-                Alert.alert(
-                  'Error',
-                  result?.message || 'Something went wrong.',
-                );
-              }
-            } catch (error) {
-              Alert.alert('Error', error.message);
-            }
-          },
-        },
-      ],
-      {cancelable: true},
-    );
+          await dispatch(getCart()).unwrap();
+          const result = await response.json();
+
+          if (response.ok) {
+            setLoading(false);
+          } else {
+            showAlert({
+              title: 'Error',
+              message: result?.message || 'Something went wrong.',
+              acceptText: 'OK',
+            });
+          }
+        } catch (error) {
+          showAlert({
+            title: 'Error',
+            message: error.message,
+            acceptText: 'OK',
+          });
+        }
+      },
+      acceptText: 'Yes',
+      rejectText: 'Cancel',
+    });
   };
 
   return (
     <SafeAreaView style={styles.container}>
-      {loader && <Loader />}
       <DashboardHeader />
       <ScrollView
         style={styles.cartContent}
         showsVerticalScrollIndicator={false}>
         <View style={styles.cartItemsContainer}>
-          {items?.length > 0 ? (
-            items.map((item, index) => (
-              <CartItem
-                key={`${index}`}
-                product={{
-                  ...item,
-                  id: item.productId._id,
-                  name: item.productId.name,
-                  image:
-                    item.productId.image || 'https://via.placeholder.com/150',
-                }}
-                onRemove={() =>
-                  handleRemoveItem(item.productId._id, item.variant)
-                }
-                onDecrement={() =>
-                  handleDecrement(
-                    item.productId._id,
-                    item.variant,
-                    item.quantity,
-                  )
-                }
-                onIncrement={() =>
-                  handleIncrement(item.productId._id, item.variant)
-                }
-              />
+          {items && items?.length > 0 ? (
+            items?.map((item, index) => (
+              <>
+                <CartItem
+                  key={`${index}`}
+                  product={{
+                    ...item,
+                    id: item.productId._id,
+                    name: item.productId.name,
+                    variants: item.productId?.variants || item.variants || [],
+                    image: Array.isArray(item?.productId?.image)
+                      ? item?.productId?.image // If it's already an array, use it directly
+                      : [
+                          item?.productId?.image ||
+                            'https://via.placeholder.com/150',
+                        ], // Convert string to array or use fallback
+                  }}
+                  onRemove={() =>
+                    handleRemoveItem(item.productId._id, item.variant)
+                  }
+                  onDecrement={() =>
+                    handleDecrement(
+                      item.productId._id,
+                      item.variant,
+                      item.quantity,
+                    )
+                  }
+                  onIncrement={() =>
+                    handleIncrement(item.productId._id, item.variant)
+                  }
+                />
+              </>
             ))
           ) : (
             <View style={{alignItems: 'center', marginTop: 50}}>
@@ -290,25 +333,24 @@ const Cart = () => {
           )}
         </View>
         <View style={{paddingBottom: 20}}>
-          <View style={{alignSelf: 'center', marginBottom: 20}}>
-            <TouchableOpacity
-              onPress={() => navigation.navigate('products')}
-              style={{
-                borderWidth: 1,
-                borderColor: '#3C5D87',
-                paddingVertical: 8,
-                paddingHorizontal: 15,
-                borderRadius: 20,
-              }}>
-              <Text style={{fontSize: 16, fontWeight: '500', color: '#3C5D87'}}>
-                Add Product
-              </Text>
-            </TouchableOpacity>
-          </View>
           {items?.length > 0 && (
             <View
               style={{flexDirection: 'row', justifyContent: 'space-around'}}>
-              <LinearGradient
+              <TouchableOpacity
+                onPress={() => navigation.navigate('products')}
+                style={{
+                  borderWidth: 1,
+                  borderColor: '#3C5D87',
+                  paddingVertical: 8,
+                  paddingHorizontal: 15,
+                  borderRadius: 20,
+                }}>
+                <Text
+                  style={{fontSize: 16, fontWeight: '500', color: '#3C5D87'}}>
+                  Add Product
+                </Text>
+              </TouchableOpacity>
+              {/* <LinearGradient
                 colors={['#05842A', '#05842A']}
                 start={{x: 0, y: 0}}
                 end={{x: 1, y: 0}}
@@ -316,7 +358,7 @@ const Cart = () => {
                 <TouchableOpacity style={styles.quoteButton}>
                   <Text style={styles.quoteButtonText}>Confirm</Text>
                 </TouchableOpacity>
-              </LinearGradient>
+              </LinearGradient> */}
               <LinearGradient
                 colors={['#38587F', '#101924']}
                 start={{x: 0, y: 0}}

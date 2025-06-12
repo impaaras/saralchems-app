@@ -7,8 +7,7 @@ export const selectVariant = (dispatch, variant, index, idx, childId) => {
   } else if (idx === undefined) {
     newVariantName = `${variant}${index}`;
   } else {
-    newVariantName = `${variant}${index}${idx}${childId}`;
+    newVariantName = `${variant}AFTER${index}${idx}${childId}`;
   }
   dispatch(setSelectedVariant(newVariantName));
-  // dispatch(setSelectedVariant(newVariantName));
 };

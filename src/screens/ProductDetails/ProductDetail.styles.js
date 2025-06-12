@@ -62,12 +62,15 @@ const styles = StyleSheet.create({
     padding: 15,
   },
   imageContainer: {
-    backgroundColor: '#CCC',
+    backgroundColor: 'rgba(0, 0, 0, 0.04)',
+    // backgroundColor: '#EEE',
+
     margin: 15,
     borderRadius: 10,
     alignItems: 'center',
     justifyContent: 'center',
     height: 200,
+
     shadowColor: '#000',
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.1,
@@ -75,8 +78,8 @@ const styles = StyleSheet.create({
     // elevation: 2,
   },
   productImage: {
-    width: '90%',
-    height: '90%',
+    width: '100%',
+    height: '100%',
   },
   productInfo: {
     borderRadius: 10,
@@ -111,20 +114,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: '#333',
   },
-  // skuRow: {
-  //   width: '90%',
-  //   flexDirection: 'row',
-  //   alignItems: 'center',
-  //   marginTop: 10,
-  // },
-  // listVariant: {
-  //   flex: 1,
-  //   width: '100%',
-  //   marginRight: 10,
-  //   flexDirection: 'row',
-  //   alignItems: 'center',
 
-  // },
   skuRow: {
     flexDirection: 'row',
     // alignItems: 'center',
@@ -322,15 +312,26 @@ const styles = StyleSheet.create({
     paddingBottom: 15,
   },
   customInputContainer: {
-    backgroundColor: '#FFF',
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  customInput: {
+    width: width * 0.5,
+    backgroundColor: 'white',
+    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+    fontSize: 14,
+    borderWidth: 1,
+    borderColor: '#D0E4FF',
   },
   optionButton: {
     backgroundColor: '#FFF',
     borderRadius: 8,
-    paddingVertical: 4,
+    paddingVertical: 6,
     paddingHorizontal: 10,
     marginRight: 5,
-
     borderWidth: 1,
     borderColor: '#D0E4FF',
   },
@@ -356,6 +357,43 @@ const styles = StyleSheet.create({
   fullScreenImage: {
     width: width,
     height: '80%',
+  },
+  // Add these styles to your existing ProductDetail.styles.js file
+
+  imageSlideContainer: {
+    width: width,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
+  dotsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'absolute',
+    bottom: 15,
+    width: '100%',
+  },
+
+  dot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: 'rgba(255, 255, 255, 0.5)',
+    marginHorizontal: 4,
+  },
+
+  activeDot: {
+    backgroundColor: '#fff',
+    width: 20,
+  },
+  zoomIndicator: {
+    position: 'absolute',
+    top: 10,
+    right: 10,
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    borderRadius: 15,
+    padding: 5,
   },
 });
 

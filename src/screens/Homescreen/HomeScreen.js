@@ -18,14 +18,14 @@ import {useNavigation} from '@react-navigation/native';
 import {API_URL} from '../../utils/ApiService';
 import {getRouteName} from '../../utils/function/routeName';
 import styles from './Homescreen.styles';
+import {useLoader} from '../../context/LoaderContext';
 
 const HomeScreen = () => {
   const [categories, setCategories] = useState([]);
   const [subCategories, setSubCategories] = useState({});
-  const [loading, setLoading] = useState(true);
+  const {setLoading} = useLoader();
   const [error, setError] = useState(null);
 
-  // Get token from Redux store
   const token = useSelector(state => state.auth.token);
   const getCategoryData = async () => {
     setLoading(true);
@@ -76,15 +76,6 @@ const HomeScreen = () => {
       getCategoryData();
     }
   }, [token]);
-
-  if (loading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#3b5998" />
-      </View>
-    );
-  }
-
   if (error) {
     return (
       <>

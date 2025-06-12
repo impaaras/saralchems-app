@@ -5,6 +5,7 @@ import {useNavigation} from '@react-navigation/native';
 import {ROUTES} from '../../constants/routes';
 import {useDispatch} from 'react-redux';
 import {closeModal} from '../../redux/slices/modalSlice';
+import {useSelector} from 'react-redux';
 
 const ViewCart = () => {
   const navigation = useNavigation();
@@ -32,7 +33,7 @@ const ViewCart = () => {
     // Cleanup timer on unmount
     return () => clearTimeout(timer);
   }, [dispatch, translateY]);
-
+  const {items} = useSelector(state => state.addToCart);
   return (
     <Animated.View style={[styles.container, {transform: [{translateY}]}]}>
       <View style={styles.iconContainer}>
@@ -40,7 +41,9 @@ const ViewCart = () => {
       </View>
       <View>
         <Text style={styles.title}>View Cart</Text>
-        <Text style={styles.subtitle}>1 Item</Text>
+        <Text style={styles.subtitle}>
+          {items.length} {items.length > 1 ? 'Items' : 'Item'}
+        </Text>
       </View>
       <TouchableOpacity
         onPress={handleCartOption}

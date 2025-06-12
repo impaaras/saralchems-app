@@ -8,24 +8,8 @@ import {
   getItem,
   setBoolItem,
 } from '../../utils/storage';
-import { API_URL } from '../../utils/ApiService';
-
-// export const searchProducts = createAsyncThunk(
-//   'search/searchProducts',
-//   async (query, {rejectWithValue}) => {
-//     const token = storage.getString(StorageKeys.AUTH_TOKEN);
-
-//     try {
-//       const response = await axios.get(
-//         `http://172.20.10.3:4000/product/search?query=${query}`,
-//         {headers: {Authorization: `Bearer ${token}`}},
-//       );
-//       return response.data;
-//     } catch (error) {
-//       return rejectWithValue(error.response.data);
-//     }
-//   },
-// );
+import {API_URL} from '../../utils/ApiService';
+import {useLoader} from '../../context/LoaderContext';
 
 export const searchProducts = createAsyncThunk(
   'search/searchProducts',

@@ -13,9 +13,6 @@ import {store} from '../store';
 import {API_URL} from '../../utils/ApiService';
 
 const BASE_URL = API_URL;
-// const BASE_URL = 'https://api.saraldyechems.com';
-
-console.log('BASE_URL', BASE_URL);
 const api = axios.create({
   baseURL: BASE_URL,
 });
@@ -44,7 +41,6 @@ export const loginUser = createAsyncThunk(
       });
 
       const {user, token} = response.data;
-
       // Store token and user data in MMKV
       setItem(StorageKeys.AUTH_TOKEN, token);
       setItem(StorageKeys.USER_DATA, user);
@@ -166,6 +162,25 @@ export const fetchAuthState = createAsyncThunk(
   },
 );
 
+export const fetchUserProfile = createAsyncThunk(
+  'auth/fetchUserProfile',
+  async ({token}, {rejectWithValue}) => {
+    try {
+      const response = await axios.get(`${BASE_URL}/user/profile`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      return response.data; // Return the user profile data
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data || 'Failed to fetch user profile',
+      );
+    }
+  },
+);
+
 // Request Password Reset
 export const requestPasswordReset = createAsyncThunk(
   'auth/requestPasswordReset',
@@ -181,7 +196,6 @@ export const requestPasswordReset = createAsyncThunk(
     }
   },
 );
-
 // Reset Password
 export const resetPassword = createAsyncThunk(
   'auth/resetPassword',
@@ -202,6 +216,9 @@ export const resetPassword = createAsyncThunk(
 const authSlice = createSlice({
   name: 'auth',
   initialState: {
+    // user: null,
+    loading: false,
+    error: null,
     user: getItem(StorageKeys.USER_DATA), // Load user from storage
     token: getItem(StorageKeys.AUTH_TOKEN), // Load token from storage
     isAuthenticated: getItem(StorageKeys.IS_AUTHENTICATED) === 'true',
@@ -320,6 +337,19 @@ const authSlice = createSlice({
       .addCase(resetPassword.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload?.message || 'Failed to reset password';
+      })
+      .addCase(fetchUserProfile.pending, state => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchUserProfile.fulfilled, (state, action) => {
+        state.loading = false;
+        state.user = action.payload; // Set the user data
+        state.error = null;
+      })
+      .addCase(fetchUserProfile.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || 'Failed to fetch user profile'; // Set the error message
       });
   },
 });

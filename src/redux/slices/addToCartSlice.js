@@ -25,14 +25,13 @@ export const addToCart = createAsyncThunk(
   'cart/addToCart',
   async ({productId, variant, quantity}, {getState, rejectWithValue}) => {
     try {
-      console.log(productId, variant, quantity);
       const token = storage.getString(StorageKeys.AUTH_TOKEN);
       const response = await axios.post(
         `${BASE_URL}/cart/add`,
         {productId, variant, quantity},
         {headers: {Authorization: `Bearer ${token}`}},
       );
-      console.log('datasss', response.data);
+
       return response.data.cart;
     } catch (error) {
       return rejectWithValue(error.response.data);

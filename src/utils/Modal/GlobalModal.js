@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {
   View,
   Modal,
@@ -20,6 +20,8 @@ import {RotateCw, X} from 'lucide-react-native';
 import CartModal from './CartModal';
 import ViewCart from './ViewCart';
 import {selectVariant} from '../function/function';
+import GlobalAlert from './GlobalAlert';
+import ImageZoomModal from '../../components/ImageZoom/ImageZoom';
 
 const GlobalModal = () => {
   const dispatch = useDispatch();
@@ -38,14 +40,48 @@ const GlobalModal = () => {
   const showVariants = useSelector(state => state.auth.showVariants);
   const variants = useSelector(state => state.cart.selectedVariants);
 
-  // const selectVariant = (variant, index, parentIndex, parentId) => {
-  //   let newVariantName = `${variant}${index}${parentIndex}${parentId}`;
-  //   dispatch(setSelectedVariant(newVariantName));
-  // };
-
   const selectedVariant = useSelector(state => state.product.selectedVariant);
   const categoryName = useSelector(state => state.product.categoryName);
   const selectedProductItem = useSelector(state => state.cart.selectedProduct);
+
+  const [modalVisible, setModalVisible] = useState(false);
+
+  const handleOpenModal = () => {
+    setModalVisible(true);
+  };
+
+  const handleCloseModal = () => {
+    setModalVisible(false);
+  };
+
+  const handleAccept = () => {
+    console.log('Accepted!');
+    setModalVisible(false);
+  };
+
+  const handleReject = () => {
+    console.log('Rejected!');
+    setModalVisible(false);
+  };
+
+  const [alertConfig, setAlertConfig] = useState({});
+  const [alertVisible, setAlertVisible] = useState(false);
+
+  const showAlert = config => {
+    setAlertConfig(config);
+    setAlertVisible(true);
+  };
+
+  const hideAlert = () => {
+    setAlertVisible(false);
+  };
+
+  const handleVariantSelect = (variant, index, idx, parentId) => {
+    selectVariant(dispatch, variant, index, idx, parentId);
+  };
+  const onClose = () => {
+    dispatch(closeModal());
+  };
 
   const renderModalContent = () => {
     switch (modalType) {
@@ -61,11 +97,39 @@ const GlobalModal = () => {
             <CartModal product={selectedProductItem} />
           </>
         );
+
       case 'ViewCart':
         return (
           <>
             <ViewCart />
           </>
+        );
+
+      case 'ImageZoomModal':
+        console.log(modalProps); // Debug modalProps
+        return (
+          <ImageZoomModal
+            visible={modalProps.visible}
+            imageList={modalProps.imageList}
+            currentIndex={modalProps.currentIndex}
+            onClose={onClose}
+          />
+        );
+      case 'ALERT_MODAL':
+        return (
+          <GlobalAlert
+            visible={alertVisible}
+            title={alertConfig.title}
+            message={alertConfig.message}
+            onConfirm={() => {
+              alertConfig.onConfirm && alertConfig.onConfirm();
+              hideAlert();
+            }}
+            onCancel={() => {
+              alertConfig.onCancel && alertConfig.onCancel();
+              hideAlert();
+            }}
+          />
         );
       default:
         return (
@@ -94,6 +158,8 @@ const GlobalModal = () => {
             ? styles.overlay2
             : modalType === 'ViewCart'
             ? styles.viewCartDesign
+            : modalType === 'ImageZoomModal'
+            ? styles.zoomContainer
             : styles.overlay
         }>
         <View
@@ -102,6 +168,8 @@ const GlobalModal = () => {
               ? styles.modalContent
               : modalType === 'ViewCart'
               ? styles.viewModalContent
+              : modalType === 'ImageZoomModal'
+              ? styles.zoomModal
               : styles.modalContent2
           }>
           {modalType === 'VARIANT_MODAL' ? (
@@ -117,13 +185,12 @@ const GlobalModal = () => {
                         <TouchableOpacity
                           style={
                             activeProduct?.selectedVariant !==
-                            `${variant.label}${index}${variant.parentIndex}${variant.parentId}`
+                            `${variant.label}AFTER${index}${variant.parentIndex}${variant.parentId}`
                               ? styles.variantItem
                               : styles.selectedVariant
                           }
                           onPress={() =>
-                            selectVariant(
-                              dispatch,
+                            handleVariantSelect(
                               variant.label,
                               index,
                               variant.parentIndex,
@@ -133,7 +200,7 @@ const GlobalModal = () => {
                           <Text
                             style={
                               activeProduct?.selectedVariant !==
-                              `${variant.label}${index}${variant.parentIndex}${variant.parentId}`
+                              `${variant.label}AFTER${index}${variant.parentIndex}${variant.parentId}`
                                 ? styles.variantText
                                 : styles.selectedVariantText
                             }>
@@ -200,6 +267,18 @@ const styles = StyleSheet.create({
     height: '100%',
     width: '100%',
   },
+  zoomContainer: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    position: 'absolute',
+    zIndex: 9999,
+    top: 0,
+    left: 0,
+    height: '100%',
+    width: '100%',
+  },
   overlay2: {
     flex: 1,
     justifyContent: 'center',
@@ -215,7 +294,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
   },
   viewModalContent: {
-    // backgroundColor: '#3C5D87',
     borderRadius: 30,
     padding: 5,
     justifyContent: 'center',
@@ -265,14 +343,16 @@ const styles = StyleSheet.create({
   modalContent2: {
     backgroundColor: '#E5F1FF',
     borderRadius: 25,
-    // paddingTop: 0,
     width: '90%',
-    // maxHeight: '60%',
+  },
+  zoomModal: {
+    backgroundColor: '#FFF',
+    borderRadius: 25,
+    width: '90%',
   },
   modalContent: {
     backgroundColor: '#E5F1FF',
     borderRadius: 25,
-    // paddingTop: 0,
     width: '90%',
     maxHeight: '60%',
   },

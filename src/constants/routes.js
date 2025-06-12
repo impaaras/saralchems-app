@@ -24,4 +24,5 @@ export const ROUTES = {
   HISTORY: 'History',
   RESET_PASSWORD: 'Reset password',
   SEARCH: 'Search',
+  RESET_HANDLE: 'Reset handle',
 };

@@ -77,6 +77,7 @@ const ProductList = ({title, products, onViewAll, idx}) => {
                 }}
                 style={styles.productImage}
               />
+
               <CustomText
                 style={[
                   styles.productName,
