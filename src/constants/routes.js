@@ -25,4 +25,5 @@ export const ROUTES = {
   RESET_PASSWORD: 'Reset password',
   SEARCH: 'Search',
   RESET_HANDLE: 'Reset handle',
+  PRODUCT_SCREEN: 'products',
 };

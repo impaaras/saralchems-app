@@ -9,7 +9,6 @@ import {
   Dimensions,
 } from 'react-native';
 import {useSelector, useDispatch} from 'react-redux';
-
 import {closeModal} from '../../redux/slices/modalSlice';
 import VariantsModal from '../../components/VariantsModal';
 import Icon from 'react-native-vector-icons/Fontisto';
@@ -106,7 +105,6 @@ const GlobalModal = () => {
         );
 
       case 'ImageZoomModal':
-        console.log(modalProps); // Debug modalProps
         return (
           <ImageZoomModal
             visible={modalProps.visible}
@@ -244,7 +242,7 @@ const GlobalModal = () => {
 const styles = StyleSheet.create({
   viewCartDesign: {
     flex: 1,
-    // backgroundColor: 'rgba(0,0,0,0.5)',
+
     justifyContent: 'center',
     alignItems: 'center',
     position: 'absolute',

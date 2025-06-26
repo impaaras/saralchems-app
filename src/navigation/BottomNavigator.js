@@ -109,7 +109,7 @@ const BottomNavigator = () => {
       <Tab.Screen name="Home">
         {props => wrapScreen(HomeScreen)(props)}
       </Tab.Screen>
-      <Tab.Screen name="products">
+      <Tab.Screen name={ROUTES.PRODUCT_SCREEN}>
         {props => wrapScreen(ProductsScreen)(props)}
       </Tab.Screen>
       <Tab.Screen name={ROUTES.CART}>

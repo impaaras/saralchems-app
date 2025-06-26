@@ -21,7 +21,11 @@ const PAGE_SIZE = 15;
 
 const SearchResults = ({searchText}) => {
   const dispatch = useDispatch();
+  // const {results, loading, error} = useSelector(state => state.search);
   const {results, loading, error} = useSelector(state => state.search);
+
+  const allProducts = results?.products || []; // ✅ fix: ensure it's an array
+
   const {history} = useSelector(state => state.searchHistory);
   const navigation = useNavigation();
   const {setLoading} = useLoader();
@@ -32,13 +36,13 @@ const SearchResults = ({searchText}) => {
 
   // Update visible products when search results change
   useEffect(() => {
-    if (results && results.length > 0) {
-      setVisibleProducts(results.slice(0, PAGE_SIZE));
+    if (allProducts && allProducts.length > 0) {
+      setVisibleProducts(allProducts.slice(0, PAGE_SIZE));
       setCurrentPage(1);
     } else {
       setVisibleProducts([]);
     }
-  }, [results]);
+  }, [allProducts]);
 
   const handleAddPress = product => {
     dispatch(addItem(product));
@@ -62,7 +66,7 @@ const SearchResults = ({searchText}) => {
   // Load more function - matches your ProductsScreen implementation
   const handleLoadMore = () => {
     const nextPage = currentPage + 1;
-    const nextData = results.slice(0, nextPage * PAGE_SIZE);
+    const nextData = allProducts.slice(0, nextPage * PAGE_SIZE);
 
     if (nextData.length > visibleProducts.length) {
       setVisibleProducts(nextData);
@@ -70,8 +74,8 @@ const SearchResults = ({searchText}) => {
     }
   };
 
-  const showNoResults = searchText && results?.length === 0;
-  const showInitialState = !searchText && results?.length === 0;
+  const showNoResults = searchText && allProducts?.length === 0;
+  const showInitialState = !searchText && allProducts?.length === 0;
 
   const renderProductItem = ({item, index}) => (
     <ProductCard
@@ -129,7 +133,7 @@ const SearchResults = ({searchText}) => {
           onEndReached={handleLoadMore}
           onEndReachedThreshold={0.5}
           ListFooterComponent={() =>
-            visibleProducts.length < (results?.length || 0) ? (
+            visibleProducts.length < (allProducts?.length || 0) ? (
               <View style={styles.loadingMoreContainer}>
                 <ActivityIndicator size="small" color="#3C5D87" />
                 <Text style={styles.loadingMoreText}>Loading more...</Text>

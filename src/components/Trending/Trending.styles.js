@@ -5,6 +5,7 @@ const styles = StyleSheet.create({
     paddingTop: 14,
     paddingBottom: 4,
     marginTop: -100,
+    marginLeft: -8,
     zIndex: 1,
   },
   header: {

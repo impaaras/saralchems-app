@@ -7,6 +7,7 @@ import {
   ScrollView,
   TextInput,
   Modal,
+  Dimensions,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/Entypo';
@@ -24,6 +25,22 @@ import {useAlert} from '../../context/CustomAlertContext';
 import InfoIcon from 'react-native-vector-icons/Entypo';
 import {openModal} from '../../redux/slices/modalSlice';
 import ScrollImage from '../../components/ScrollImage/Index';
+import emptyImage from '../../assets/empty.png';
+
+// Get screen dimensions
+const {width: screenWidth, height: screenHeight} = Dimensions.get('window');
+
+// Responsive helper functions
+const wp = percentage => {
+  return (percentage * screenWidth) / 100;
+};
+
+const hp = percentage => {
+  return (percentage * screenHeight) / 100;
+};
+
+const isTablet = screenWidth >= 768;
+const isSmallScreen = screenWidth < 380;
 
 // Helper to format the date
 const formatDate = dateString => {
@@ -217,17 +234,41 @@ const OrderHistory = () => {
   return (
     <View style={styles.container}>
       <DashboardHeader />
-      <View style={styles.headerContainer}>
-        <View style={styles.userInfoCard}>
+      <View style={[styles.headerContainer, {marginTop: hp(-4)}]}>
+        <View
+          style={[
+            styles.userInfoCard,
+            {
+              marginTop: hp(-6),
+              margin: wp(4),
+              padding: wp(4),
+            },
+          ]}>
           <Image
             source={{
               uri: fallbackImg(),
             }}
-            style={styles.userAvatar}
+            style={[styles.userAvatar]}
           />
-          <View style={styles.userTextContainer}>
-            <Text style={styles.userName}>{user?.name}</Text>
-            <Text style={styles.userEmail}>{user?.email}</Text>
+          <View style={[styles.userTextContainer, {marginLeft: wp(4)}]}>
+            <Text
+              style={[
+                styles.userName,
+                // {
+                //   fontSize: isTablet ? 18 : isSmallScreen ? 14 : 16,
+                // },
+              ]}>
+              {user?.name}
+            </Text>
+            <Text
+              style={[
+                styles.userEmail,
+                // {
+                //   fontSize: isTablet ? 16 : isSmallScreen ? 12 : 14,
+                // },
+              ]}>
+              {user?.email}
+            </Text>
           </View>
         </View>
 
@@ -236,7 +277,7 @@ const OrderHistory = () => {
             borderTopLeftRadius: 20,
             borderTopRightRadius: 20,
           }}>
-          <View style={styles.tabsContainer}>
+          <View style={[styles.tabsContainer]}>
             {filterTabs.map(tab => (
               <LinearGradient
                 key={tab}
@@ -247,12 +288,17 @@ const OrderHistory = () => {
                 end={{x: 1, y: 0}}
                 style={[
                   styles.tabButton,
-                  activeTab === tab && styles.activeTabButton,
+                  activeTab === tab && [styles.activeTabButton],
                 ]}>
-                <TouchableOpacity onPress={() => setActiveTab(tab)}>
+                <TouchableOpacity
+                  onPress={() => setActiveTab(tab)}
+                  style={{
+                    paddingVertical: wp(2),
+                  }}>
                   <Text
                     style={[
                       styles.tabText,
+                      {fontSize: isTablet ? 15 : isSmallScreen ? 11 : 13},
                       activeTab === tab && styles.activeTabText,
                     ]}>
                     {tab}
@@ -264,19 +310,72 @@ const OrderHistory = () => {
         </View>
 
         <ScrollView
-          style={styles.ordersContainer}
+          style={[styles.ordersContainer]}
           showsVerticalScrollIndicator={false}>
           {error ? (
-            <Text style={styles.errorText}>{error}</Text>
+            <Text style={[styles.errorText, {padding: wp(5)}]}>{error}</Text>
           ) : filteredOrders.length === 0 ? (
-            <Text style={styles.messageText}>No orders found</Text>
+            <ScrollView contentContainerStyle={styles.emptyContainer}>
+              <Image
+                source={emptyImage} // replace with your relevant image
+                style={styles.emptyImage}
+                resizeMode="contain"
+              />
+              <Text style={styles.emptyTitle}>No Orders Yet</Text>
+              <Text style={styles.emptySubtitle}>
+                You haven't ordered any products yet. Start by exploring our dye
+                & chemical range.
+              </Text>
+              <LinearGradient
+                colors={['#38587F', '#101924']}
+                start={{x: 0, y: 0}}
+                end={{x: 1, y: 0}}
+                style={{
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                  paddingHorizontal: 6,
+                  borderRadius: 100,
+                }}>
+                <TouchableOpacity
+                  style={styles.goBackButton}
+                  onPress={() => navigation.goBack()}>
+                  <Text style={styles.goBackText}>GO BACK</Text>
+                </TouchableOpacity>
+              </LinearGradient>
+            </ScrollView>
           ) : (
             filteredOrders.map((order, index) => (
-              <View key={index} style={styles.orderCard}>
-                <View style={styles.orderHeader}>
-                  <View style={styles.orderDetails}>
+              <View
+                key={index}
+                style={[
+                  styles.orderCard,
+                  {
+                    marginBottom: hp(2),
+                  },
+                ]}>
+                <View
+                  style={[
+                    styles.orderHeader,
+                    {
+                      paddingHorizontal: wp(4),
+                      paddingBottom: hp(1.2),
+                    },
+                  ]}>
+                  <View
+                    style={[
+                      styles.orderDetails,
+                      {
+                        marginTop: hp(1),
+                      },
+                    ]}>
                     <View>
-                      <Text style={styles.orderIdText}>
+                      <Text
+                        style={[
+                          styles.orderIdText,
+                          // {
+                          //   fontSize: isTablet ? 17 : isSmallScreen ? 13 : 15,
+                          // },
+                        ]}>
                         Order #{order?._id.slice(-9)}
                       </Text>
                       <View
@@ -284,14 +383,34 @@ const OrderHistory = () => {
                         <View
                           style={[
                             styles.statusDot,
-                            {backgroundColor: getStatusColor(order.status)},
+                            {
+                              backgroundColor: getStatusColor(order.status),
+                              width: wp(2.5),
+                              height: wp(2.5),
+                              borderRadius: wp(1.25),
+                              marginRight: wp(2),
+                            },
                           ]}
                         />
-                        <Text style={styles.orderStatus}>{order.status}</Text>
+                        <Text
+                          style={[
+                            styles.orderStatus,
+                            // {
+                            //   fontSize: isTablet ? 16 : isSmallScreen ? 12 : 14,
+                            // },
+                          ]}>
+                          {order.status}
+                        </Text>
                       </View>
                     </View>
                     <View>
-                      <Text style={styles.orderDateText}>
+                      <Text
+                        style={[
+                          styles.orderDateText,
+                          // {
+                          //   fontSize: isTablet ? 15 : isSmallScreen ? 11 : 13,
+                          // },
+                        ]}>
                         Placed on {formatDate(order.createdAt)}
                       </Text>
                       {!order.isPartialOrder && (
@@ -299,14 +418,14 @@ const OrderHistory = () => {
                           style={{flexDirection: 'row', alignItems: 'center'}}>
                           <InfoIcon
                             name="info-with-circle"
-                            size={18}
+                            size={isTablet ? 20 : isSmallScreen ? 16 : 18}
                             color="#101924"
                           />
                           <Text
                             style={{
-                              fontSize: 13,
+                              fontSize: isTablet ? 15 : isSmallScreen ? 11 : 13,
                               color: 'black',
-                              marginLeft: 3,
+                              marginLeft: wp(0.8),
                             }}>
                             Partial Order
                           </Text>
@@ -317,7 +436,7 @@ const OrderHistory = () => {
                   <View
                     style={{
                       backgroundColor: '#3C5D87',
-                      marginTop: 10,
+                      marginTop: hp(1.2),
                       borderRadius: 10,
                     }}>
                     <View
@@ -328,22 +447,67 @@ const OrderHistory = () => {
                       {!expandedOrders.includes(order._id) &&
                         order.items.length > 0 && (
                           <View style={styles.orderItemsContainer}>
-                            <View style={styles.orderItem}>
+                            <View
+                              style={[
+                                styles.orderItem,
+                                {
+                                  marginTop: hp(1.2),
+                                  padding: wp(3.8),
+                                },
+                              ]}>
                               <ScrollImage
                                 product={order.items[0]?.productId}
                                 reffer="cart"
                               />
-                              <View style={styles.productDetails}>
-                                <Text style={styles.productName}>
+                              <View
+                                style={[
+                                  styles.productDetails,
+                                  {
+                                    marginLeft: wp(4),
+                                  },
+                                ]}>
+                                <Text
+                                  style={[
+                                    styles.productName,
+                                    // {
+                                    //   fontSize: isTablet
+                                    //     ? 17
+                                    //     : isSmallScreen
+                                    //     ? 13
+                                    //     : 15,
+                                    // },
+                                  ]}>
                                   {order.items[0].productId.name}
                                 </Text>
-                                <Text style={styles.productSize}>
+                                <Text
+                                  style={[
+                                    styles.productSize,
+                                    // {
+                                    //   fontSize: isTablet
+                                    //     ? 15
+                                    //     : isSmallScreen
+                                    //     ? 11
+                                    //     : 13,
+                                    //   marginTop: hp(0.5),
+                                    // },
+                                  ]}>
                                   <Text style={{fontWeight: '700'}}>
                                     Variant
                                   </Text>
                                   : {order.items[0].variant}
                                 </Text>
-                                <Text style={styles.productQuantity}>
+                                <Text
+                                  style={[
+                                    styles.productQuantity,
+                                    // {
+                                    //   fontSize: isTablet
+                                    //     ? 15
+                                    //     : isSmallScreen
+                                    //     ? 11
+                                    //     : 13,
+                                    //   marginTop: hp(0.5),
+                                    // },
+                                  ]}>
                                   Quantity: {order.items[0].quantity}
                                 </Text>
                               </View>
@@ -353,8 +517,24 @@ const OrderHistory = () => {
                                     colors={['#38587F', '#101924']}
                                     start={{x: 0, y: 0}}
                                     end={{x: 1, y: 0}}
-                                    style={styles.ratingContainer}>
-                                    <Text style={styles.ratingText}>
+                                    style={[
+                                      styles.ratingContainer,
+                                      // {
+                                      //   height: hp(2.5),
+                                      //   width: wp(7.5),
+                                      // },
+                                    ]}>
+                                    <Text
+                                      style={[
+                                        styles.ratingText,
+                                        // {
+                                        //   fontSize: isTablet
+                                        //     ? 14
+                                        //     : isSmallScreen
+                                        //     ? 10
+                                        //     : 12,
+                                        // },
+                                      ]}>
                                       +{order.items.length - 1}
                                     </Text>
                                   </LinearGradient>
@@ -367,19 +547,63 @@ const OrderHistory = () => {
                       {expandedOrders.includes(order._id) && (
                         <View style={styles.orderItemsContainer}>
                           {order.items.map((item, itemIndex) => (
-                            <View key={itemIndex} style={styles.orderItem}>
+                            <View
+                              key={itemIndex}
+                              style={[
+                                styles.orderItem,
+                                // {
+                                //   marginTop: hp(1.2),
+                                //   padding: wp(3.8),
+                                // },
+                              ]}>
                               <ScrollImage
                                 product={order.items[itemIndex]?.productId}
                                 reffer="cart"
                               />
-                              <View style={styles.productDetails}>
-                                <Text style={styles.productName}>
+                              <View
+                                style={[
+                                  styles.productDetails,
+                                  {
+                                    marginLeft: wp(4),
+                                  },
+                                ]}>
+                                <Text
+                                  style={[
+                                    styles.productName,
+                                    // {
+                                    //   fontSize: isTablet
+                                    //     ? 17
+                                    //     : isSmallScreen
+                                    //     ? 13
+                                    //     : 15,
+                                    // },
+                                  ]}>
                                   {item.productId.name}
                                 </Text>
-                                <Text style={styles.productSize}>
+                                <Text
+                                  style={[
+                                    styles.productSize,
+                                    // {
+                                    //   fontSize: isTablet
+                                    //     ? 15
+                                    //     : isSmallScreen
+                                    //     ? 11
+                                    //     : 13,
+                                    // },
+                                  ]}>
                                   Variant: {item.variant}
                                 </Text>
-                                <Text style={styles.productQuantity}>
+                                <Text
+                                  style={[
+                                    styles.productQuantity,
+                                    // {
+                                    //   fontSize: isTablet
+                                    //     ? 15
+                                    //     : isSmallScreen
+                                    //     ? 11
+                                    //     : 13,
+                                    // },
+                                  ]}>
                                   Quantity: {item.quantity}
                                 </Text>
                               </View>
@@ -395,7 +619,7 @@ const OrderHistory = () => {
                           borderBottomLeftRadius: 10,
                           borderBottomRightRadius: 10,
                           marginTop: -10,
-                          paddingTop: 7,
+                          paddingTop: hp(0.9),
                         }}>
                         <Icon
                           name={
@@ -404,31 +628,53 @@ const OrderHistory = () => {
                               : 'chevron-down'
                           }
                           style={{alignSelf: 'center'}}
-                          size={24}
+                          size={isTablet ? 28 : isSmallScreen ? 20 : 24}
                           color="#fff"
                         />
                       </TouchableOpacity>
                     )}
                   </View>
-                  <View style={{marginTop: 10}}>
+                  <View style={{marginTop: hp(1.2)}}>
                     {order.status === 'Invoice Uploaded' ||
                     order.status === 'Quote Sent' ||
                     order.status === 'Partially Fulfilled' ? (
                       <View
                         style={{
-                          flexDirection: 'row',
+                          flexDirection: isSmallScreen ? 'column' : 'row',
                           justifyContent: 'space-between',
+                          gap: isSmallScreen ? hp(1) : 0,
                         }}>
                         <LinearGradient
                           colors={['#101924', '#38587F']}
                           start={{x: 0, y: 0}}
                           end={{x: 1, y: 0}}
-                          style={styles.confirmButton}>
+                          style={[
+                            styles.confirmButton,
+                            {
+                              width: isSmallScreen ? '100%' : '45%',
+                            },
+                          ]}>
                           <TouchableOpacity
-                            style={styles.quoteButton}
+                            style={[
+                              styles.quoteButton,
+                              {
+                                paddingVertical: hp(1.2),
+                              },
+                            ]}
                             onPress={() => handleConfirmOrder(order._id)}
                             disabled={processing}>
-                            <Text style={styles.quoteButtonText}>
+                            <Text
+                              style={[
+                                styles.quoteButtonText,
+                                {
+                                  color: '#FFF',
+                                  // fontSize: isTablet
+                                  //   ? 16
+                                  //   : isSmallScreen
+                                  //   ? 12
+                                  //   : 14,
+                                },
+                              ]}>
                               {processing ? 'Processing...' : 'Confirm'}
                             </Text>
                           </TouchableOpacity>
@@ -439,16 +685,28 @@ const OrderHistory = () => {
                           end={{x: 1, y: 0}}
                           style={[
                             styles.confirmButton,
-                            {borderColor: '#101924', borderWidth: 2},
+                            {
+                              borderColor: '#101924',
+                              borderWidth: 1,
+                              width: isSmallScreen ? '100%' : '45%',
+                              // paddingHorizontal: wp(1.25),
+                            },
                           ]}>
                           <TouchableOpacity
-                            style={[styles.quoteButton]}
+                            style={[
+                              styles.quoteButton,
+                              {
+                                paddingVertical: hp(1.2),
+                              },
+                            ]}
                             onPress={() => handleReworkOrder(order._id)}
                             disabled={processing}>
                             <Text
                               style={[
                                 styles.quoteButtonText,
-                                {color: '#101924'},
+                                {
+                                  color: '#101924',
+                                },
                               ]}>
                               {processing ? 'Processing...' : 'Rework'}
                             </Text>
@@ -473,14 +731,46 @@ const OrderHistory = () => {
           setReworkModalVisible(false);
           setReworkReason('');
         }}>
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Request Rework</Text>
-            <Text style={styles.modalSubtitle}>
+        <View style={[styles.modalContainer, {padding: wp(5)}]}>
+          <View
+            style={[
+              styles.modalContent,
+              {
+                padding: wp(5),
+                width: isTablet ? '80%' : '100%',
+                maxWidth: isTablet ? 500 : 400,
+              },
+            ]}>
+            <Text
+              style={[
+                styles.modalTitle,
+                {
+                  fontSize: isTablet ? 20 : 18,
+                  marginBottom: hp(1.2),
+                },
+              ]}>
+              Request Rework
+            </Text>
+            <Text
+              style={[
+                styles.modalSubtitle,
+                {
+                  fontSize: isTablet ? 16 : 14,
+                  marginBottom: hp(1.8),
+                },
+              ]}>
               Please provide a reason for your rework request:
             </Text>
             <TextInput
-              style={styles.reasonInput}
+              style={[
+                styles.reasonInput,
+                {
+                  padding: wp(2.5),
+                  marginBottom: hp(2.4),
+                  height: hp(12),
+                  fontSize: isTablet ? 16 : 14,
+                },
+              ]}
               placeholder="Enter reason for rework"
               multiline={true}
               numberOfLines={4}
@@ -489,18 +779,46 @@ const OrderHistory = () => {
             />
             <View style={styles.modalButtons}>
               <TouchableOpacity
-                style={[styles.modalButton, styles.cancelButton]}
+                style={[
+                  styles.modalButton,
+                  styles.cancelButton,
+                  {
+                    padding: hp(1.4),
+                    marginHorizontal: wp(1.25),
+                  },
+                ]}
                 onPress={() => {
                   setReworkModalVisible(false);
                   setReworkReason('');
                 }}>
-                <Text style={styles.cancelButtonText}>Cancel</Text>
+                <Text
+                  style={[
+                    styles.cancelButtonText,
+                    {
+                      fontSize: isTablet ? 16 : 14,
+                    },
+                  ]}>
+                  Cancel
+                </Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.modalButton, styles.submitButton]}
+                style={[
+                  styles.modalButton,
+                  styles.submitButton,
+                  {
+                    padding: hp(1.4),
+                    marginHorizontal: wp(1.25),
+                  },
+                ]}
                 onPress={submitReworkRequest}
                 disabled={processing}>
-                <Text style={styles.submitButtonText}>
+                <Text
+                  style={[
+                    styles.submitButtonText,
+                    {
+                      fontSize: isTablet ? 16 : 14,
+                    },
+                  ]}>
                   {processing ? 'Submitting...' : 'Submit'}
                 </Text>
               </TouchableOpacity>

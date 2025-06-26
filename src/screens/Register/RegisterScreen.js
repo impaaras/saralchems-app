@@ -9,20 +9,47 @@ import {
   ScrollView,
   Alert,
   Animated,
+  Vibration,
+  Dimensions,
 } from 'react-native';
-import React, {useState, useRef} from 'react';
+import React, {useState, useRef, useEffect} from 'react';
 import LinearGradient from 'react-native-linear-gradient';
 import {useDispatch} from 'react-redux';
 import {registerUser} from '../../redux/slices/authSlice';
 import logo from '../../assets/logo.png';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
-import styles from './Register.styles';
+
+// Get screen dimensions
+const {width: screenWidth, height: screenHeight} = Dimensions.get('window');
+
+// Responsive utility functions
+const wp = percentage => {
+  return (percentage * screenWidth) / 100;
+};
+
+const hp = percentage => {
+  return (percentage * screenHeight) / 100;
+};
+
+const isSmallDevice = screenWidth < 420;
+const isMediumDevice = screenWidth >= 360 && screenWidth < 414;
+const isLargeDevice = screenWidth >= 414;
+const isTablet = screenWidth >= 768;
+
+// Dynamic font sizes based on screen size
+const getFontSize = (small, medium, large, tablet) => {
+  if (isTablet) return tablet || large;
+  if (isLargeDevice) return large;
+  if (isMediumDevice) return medium;
+  return small;
+};
 
 const RegisterScreen = ({navigation}) => {
   const dispatch = useDispatch();
   const [isLoading, setIsLoading] = useState(false);
   const errorToastAnim = useRef(new Animated.Value(-100)).current;
   const [errorMessage, setErrorMessage] = useState('');
+
   // Form state
   const [formData, setFormData] = useState({
     personName: '',
@@ -40,6 +67,31 @@ const RegisterScreen = ({navigation}) => {
   const [errors, setErrors] = useState({});
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
+  // Animation references
+  const logoScaleAnim = useRef(new Animated.Value(0)).current;
+  const logoOpacityAnim = useRef(new Animated.Value(0)).current;
+  const formTranslateYAnim = useRef(new Animated.Value(50)).current;
+  const formOpacityAnim = useRef(new Animated.Value(0)).current;
+  const registerButtonScaleAnim = useRef(new Animated.Value(1)).current;
+  const registerButtonOpacityAnim = useRef(new Animated.Value(1)).current;
+  const circleAnim1 = useRef(new Animated.Value(0)).current;
+  const circleAnim2 = useRef(new Animated.Value(0)).current;
+  const dropdownScaleAnim = useRef(new Animated.Value(0)).current;
+  const dropdownOpacityAnim = useRef(new Animated.Value(0)).current;
+
+  // Input field animation references
+  const inputAnimations = useRef({
+    personName: new Animated.Value(1),
+    companyName: new Animated.Value(1),
+    businessType: new Animated.Value(1),
+    gstNo: new Animated.Value(1),
+    phone: new Animated.Value(1),
+    email: new Animated.Value(1),
+    address: new Animated.Value(1),
+    password: new Animated.Value(1),
+    confirmPassword: new Animated.Value(1),
+  }).current;
+
   const businessTypes = [
     'Retail',
     'Wholesale',
@@ -48,28 +100,400 @@ const RegisterScreen = ({navigation}) => {
     'Technology',
   ];
 
-  const showErrorToast = message => {
-    setErrorMessage(message);
+  // Responsive styles
+  const responsiveStyles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: 'rgba(244, 249, 255,0.9)',
+      height: '100%',
+      width: '100%',
+    },
+    circle1: {
+      position: 'absolute',
+      top: isSmallDevice ? hp(-10) : hp(-8.5),
+      left: isSmallDevice ? -wp(40) : -wp(30),
+      width: isTablet ? wp(26) : isSmallDevice ? wp(50) : wp(50),
+      height: isTablet ? wp(26) : isSmallDevice ? wp(50) : wp(50),
+      borderRadius: isTablet ? wp(19) : isSmallDevice ? wp(30) : wp(37.5),
+      backgroundColor: '#8BA1C3',
+      opacity: 0.7,
+      zIndex: 1,
+    },
+    circle2: {
+      position: 'absolute',
+      top: isSmallDevice ? hp(-13) : hp(-11),
+      left: isSmallDevice ? wp(-5) : wp(2),
+      width: isTablet ? wp(22) : isSmallDevice ? wp(40) : wp(42.5),
+      height: isTablet ? wp(22) : isSmallDevice ? wp(40) : wp(42.5),
+      borderRadius: isTablet ? wp(12.5) : isSmallDevice ? wp(25) : wp(25),
+      backgroundColor: '#8BA1C3',
+      opacity: 0.7,
+      zIndex: 0,
+    },
+    logoContainer: {
+      alignItems: 'center',
+      marginTop: isSmallDevice ? hp(8) : hp(12),
+      marginBottom: isSmallDevice ? hp(4) : hp(6),
+      width: '100%',
+    },
+    logo: {
+      width: isTablet ? wp(26) : isSmallDevice ? wp(40) : wp(50),
+      height: isTablet ? wp(26) : isSmallDevice ? wp(40) : wp(50),
+      borderRadius: isTablet ? wp(13) : isSmallDevice ? wp(20) : wp(25),
+      backgroundColor: '#fff',
+      alignItems: 'center',
+      justifyContent: 'center',
+      shadowColor: '#555',
+      shadowOffset: {
+        width: 0,
+        height: 2,
+      },
+      shadowOpacity: 0.1,
+      shadowRadius: 3,
+    },
+    logoImage: {
+      width: isTablet ? wp(20) : isSmallDevice ? wp(25) : wp(35),
+      height: isTablet ? wp(20) : isSmallDevice ? wp(25) : wp(35),
+      marginLeft: wp(5),
+    },
+    formContainer: {
+      paddingHorizontal: isSmallDevice ? wp(8) : wp(10),
+      justifyContent: 'center',
+      width: '100%',
+      marginBottom: hp(2),
+    },
+    input: {
+      width: '100%',
+      height: isSmallDevice ? hp(6) : hp(6.5),
+      color: 'black',
+      backgroundColor: '#fff',
+      borderRadius: wp(6.25),
+      paddingHorizontal: wp(5),
+      borderWidth: 1,
+      borderColor: '#DDD',
+      marginBottom: hp(1.9),
+      fontSize: getFontSize(14, 16, 18, 20),
+      shadowColor: '#333',
+      shadowOffset: {
+        width: 0,
+        height: 1,
+      },
+      shadowOpacity: 0.08,
+      shadowRadius: 2,
+    },
+    inputEmpty: {
+      backgroundColor: '#FFF',
+      borderColor: '#e0e0e0',
+    },
+    inputError: {
+      borderColor: '#ff0000',
+      backgroundColor: '#fff9f9',
+    },
+    inputValid: {
+      borderColor: '#4CAF50',
+      backgroundColor: '#f8fff8',
+    },
+    loginButtonContainer: {
+      width: '100%',
+      height: isSmallDevice ? hp(5.5) : hp(6.25),
+      marginTop: hp(2.5),
+      borderRadius: wp(6.25),
+      overflow: 'hidden',
+      shadowColor: '#000',
+      shadowOffset: {
+        width: 0,
+        height: 1,
+      },
+      shadowOpacity: 0.08,
+      shadowRadius: 2,
+    },
+    loginButton: {
+      width: '100%',
+      height: '100%',
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: '#2B4C7E',
+    },
+    loginButtonDisabled: {
+      backgroundColor: '#a0a0a0',
+    },
+    loginButtonText: {
+      color: '#fff',
+      fontSize: getFontSize(16, 18, 20, 22),
+      fontWeight: '600',
+    },
+    signupContainer: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
+      paddingBottom: hp(5),
+      marginTop: hp(2.5),
+      width: '100%',
+    },
+    signupText: {
+      color: '#666',
+      fontSize: getFontSize(14, 16, 18, 20),
+    },
+    signupLink: {
+      color: '#2B4C7E',
+      fontWeight: '600',
+      marginLeft: wp(1.25),
+      fontSize: getFontSize(14, 16, 18, 20),
+    },
+    buttonDisabled: {
+      opacity: 0.7,
+    },
+    errorToast: {
+      position: 'absolute',
+      bottom: hp(2.5),
+      left: wp(5),
+      right: wp(5),
+      backgroundColor: '#ff6b6b',
+      padding: hp(1.9),
+      borderRadius: wp(2),
+      shadowColor: '#000',
+      shadowOffset: {
+        width: 0,
+        height: 2,
+      },
+      shadowOpacity: 0.25,
+      shadowRadius: 3.84,
+    },
+    errorToastText: {
+      color: 'white',
+      fontSize: getFontSize(12, 14, 16, 18),
+      textAlign: 'center',
+      fontWeight: '600',
+    },
+    errorText: {
+      color: '#ff0000',
+      fontSize: getFontSize(12, 14, 16, 18),
+      marginBottom: hp(2.5),
+      textAlign: 'center',
+    },
+    dropdownContainer: {
+      width: '100%',
+      marginBottom: hp(1.9),
+      zIndex: 10,
+    },
+    dropdownButton: {
+      width: '100%',
+      height: isSmallDevice ? hp(5.5) : hp(6.25),
+      backgroundColor: '#fff',
+      borderRadius: wp(6.25),
+      paddingHorizontal: wp(5),
+      borderWidth: 1,
+      borderColor: '#DDD',
+      flexDirection: 'row',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+    },
+    dropdownButtonText: {
+      color: '#555',
+      fontSize: getFontSize(14, 16, 18, 20),
+    },
+    dropdownArrow: {
+      color: '#555',
+      fontSize: getFontSize(14, 16, 18, 20),
+    },
+    dropdownList: {
+      position: 'absolute',
+      top: isSmallDevice ? hp(5.8) : hp(6.3),
+      width: '100%',
+      backgroundColor: '#fff',
+      borderRadius: wp(3),
+      borderWidth: 1,
+      borderColor: '#DDD',
+      zIndex: 100,
+      maxHeight: hp(40),
+    },
+    dropdownItem: {
+      padding: wp(4),
+      borderBottomWidth: 1,
+      borderBottomColor: '#f0f0f0',
+    },
+    dropdownItemText: {
+      fontSize: getFontSize(14, 16, 18, 20),
+      color: '#333',
+    },
+  });
 
-    Animated.sequence([
-      Animated.timing(errorToastAnim, {
-        toValue: 0,
-        duration: 300,
+  // Get input style based on state
+  const getInputStyle = fieldName => {
+    if (errors[fieldName]) return responsiveStyles.inputError;
+    if (formData[fieldName].length > 0) return responsiveStyles.inputValid;
+    return responsiveStyles.input;
+  };
+
+  // Haptic feedback functions
+  const lightHaptic = () => {
+    Vibration.vibrate(10);
+  };
+
+  const mediumHaptic = () => {
+    Vibration.vibrate([0, 50]);
+  };
+
+  const gentleHaptic = () => {
+    Vibration.vibrate(5);
+  };
+
+  // Initial entrance animations
+  useEffect(() => {
+    // Decorative circles animation
+    Animated.parallel([
+      Animated.timing(circleAnim1, {
+        toValue: 1,
+        duration: 1200,
         useNativeDriver: true,
       }),
-      Animated.delay(5000), // Stay visible for 5 seconds
-      Animated.timing(errorToastAnim, {
+      Animated.timing(circleAnim2, {
+        toValue: 1,
+        duration: 1400,
+        useNativeDriver: true,
+      }),
+    ]).start();
+
+    // Logo entrance with spring animation
+    Animated.parallel([
+      Animated.spring(logoScaleAnim, {
+        toValue: 1,
+        tension: 50,
+        friction: 8,
+        delay: 300,
+        useNativeDriver: true,
+      }),
+      Animated.timing(logoOpacityAnim, {
+        toValue: 1,
+        duration: 800,
+        delay: 300,
+        useNativeDriver: true,
+      }),
+    ]).start();
+
+    // Form entrance with gentle slide up
+    setTimeout(() => {
+      Animated.parallel([
+        Animated.spring(formTranslateYAnim, {
+          toValue: 0,
+          tension: 40,
+          friction: 8,
+          useNativeDriver: true,
+        }),
+        Animated.timing(formOpacityAnim, {
+          toValue: 1,
+          duration: 600,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }, 600);
+  }, []);
+
+  // Dropdown animation effects
+  useEffect(() => {
+    if (isDropdownOpen) {
+      Animated.parallel([
+        Animated.spring(dropdownScaleAnim, {
+          toValue: 1,
+          tension: 100,
+          friction: 8,
+          useNativeDriver: true,
+        }),
+        Animated.timing(dropdownOpacityAnim, {
+          toValue: 1,
+          duration: 200,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    } else {
+      Animated.parallel([
+        Animated.spring(dropdownScaleAnim, {
+          toValue: 0,
+          tension: 100,
+          friction: 8,
+          useNativeDriver: true,
+        }),
+        Animated.timing(dropdownOpacityAnim, {
+          toValue: 0,
+          duration: 150,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }
+  }, [isDropdownOpen]);
+
+  const showErrorToast = message => {
+    setErrorMessage(message);
+    mediumHaptic();
+
+    Animated.sequence([
+      Animated.spring(errorToastAnim, {
+        toValue: 0,
+        tension: 50,
+        friction: 7,
+        useNativeDriver: true,
+      }),
+      Animated.delay(5000),
+      Animated.spring(errorToastAnim, {
         toValue: -100,
-        duration: 300,
+        tension: 60,
+        friction: 8,
         useNativeDriver: true,
       }),
     ]).start(() => {
-      // After animation completes, clear the error message
       setErrorMessage('');
     });
   };
 
-  // Handle input changes
+  const handleInputFocus = inputName => {
+    gentleHaptic();
+    const scaleAnim = inputAnimations[inputName];
+
+    Animated.spring(scaleAnim, {
+      toValue: 1.02,
+      tension: 100,
+      friction: 7,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const isFormValid = () => {
+    const {
+      personName,
+      companyName,
+      businessType,
+      gstNo,
+      phone,
+      email,
+      address,
+      password,
+      confirmPassword,
+    } = formData;
+
+    return (
+      personName &&
+      companyName &&
+      businessType &&
+      gstNo &&
+      /^\d{10}$/.test(phone) &&
+      /\S+@\S+\.\S+/.test(email) &&
+      address &&
+      password.length >= 6 &&
+      password === confirmPassword
+    );
+  };
+
+  const handleInputBlur = inputName => {
+    const scaleAnim = inputAnimations[inputName];
+
+    Animated.spring(scaleAnim, {
+      toValue: 1,
+      tension: 100,
+      friction: 7,
+      useNativeDriver: true,
+    }).start();
+  };
+
   const handleChange = (field, value) => {
     setFormData(prev => ({
       ...prev,
@@ -83,13 +507,17 @@ const RegisterScreen = ({navigation}) => {
     }
   };
 
-  // Handle business type selection
   const handleBusinessTypeSelect = type => {
+    gentleHaptic();
     handleChange('businessType', type);
     setIsDropdownOpen(false);
   };
 
-  // Validation function
+  const handleDropdownToggle = () => {
+    gentleHaptic();
+    setIsDropdownOpen(!isDropdownOpen);
+  };
+
   const validateForm = () => {
     let tempErrors = {};
     if (!formData.personName) tempErrors.personName = 'Name is required';
@@ -116,7 +544,46 @@ const RegisterScreen = ({navigation}) => {
     return Object.keys(tempErrors).length === 0;
   };
 
-  // Handle registration
+  const handleRegisterPress = () => {
+    lightHaptic();
+
+    Animated.sequence([
+      Animated.parallel([
+        Animated.spring(registerButtonScaleAnim, {
+          toValue: 0.95,
+          tension: 150,
+          friction: 4,
+          useNativeDriver: true,
+        }),
+        Animated.timing(registerButtonOpacityAnim, {
+          toValue: 0.8,
+          duration: 100,
+          useNativeDriver: true,
+        }),
+      ]),
+      Animated.parallel([
+        Animated.spring(registerButtonScaleAnim, {
+          toValue: 1,
+          tension: 100,
+          friction: 6,
+          useNativeDriver: true,
+        }),
+        Animated.timing(registerButtonOpacityAnim, {
+          toValue: 1,
+          duration: 150,
+          useNativeDriver: true,
+        }),
+      ]),
+    ]).start(() => {
+      handleRegister();
+    });
+  };
+
+  const handleSignInPress = () => {
+    gentleHaptic();
+    navigation.navigate('Login');
+  };
+
   const handleRegister = async () => {
     if (!validateForm()) {
       showErrorToast('Please check all fields and try again');
@@ -138,7 +605,7 @@ const RegisterScreen = ({navigation}) => {
         }),
       ).unwrap();
 
-      // Show success message and navigate to OTP screen
+      mediumHaptic();
       navigation.navigate('OTP', {email: formData.email});
     } catch (error) {
       console.log(error);
@@ -158,188 +625,349 @@ const RegisterScreen = ({navigation}) => {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={responsiveStyles.container}>
       <KeyboardAwareScrollView
         contentContainerStyle={{flexGrow: 1}}
         enableOnAndroid={true}
         keyboardShouldPersistTaps="handled"
-        extraScrollHeight={170}
+        extraScrollHeight={hp(20)}
         showsVerticalScrollIndicator={false}>
-        <View style={styles.circle1} />
-        <View style={styles.circle2} />
+        {/* Decorative circles */}
+        <Animated.View
+          style={[
+            responsiveStyles.circle1,
+            {
+              transform: [
+                {
+                  scale: circleAnim1.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0.5, 1],
+                  }),
+                },
+                {
+                  translateX: circleAnim1.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [-wp(12.5), 0],
+                  }),
+                },
+              ],
+              opacity: circleAnim1,
+            },
+          ]}
+        />
+        <Animated.View
+          style={[
+            responsiveStyles.circle2,
+            {
+              transform: [
+                {
+                  scale: circleAnim2.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [0.3, 1],
+                  }),
+                },
+                {
+                  translateX: circleAnim2.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [wp(7.5), 0],
+                  }),
+                },
+              ],
+              opacity: circleAnim2,
+            },
+          ]}
+        />
+
         <ScrollView style={{flex: 1, width: '100%'}}>
           <View style={{flex: 1, width: '100%', alignItems: 'center'}}>
-            <View style={styles.logoContainer}>
-              <View style={styles.logo}>
-                <Image
-                  source={logo}
-                  style={{width: 80, marginLeft: 10, height: 80}}
-                />
-              </View>
+            {/* Logo */}
+            <View style={responsiveStyles.logoContainer}>
+              <Animated.View
+                style={[
+                  responsiveStyles.logo,
+                  {
+                    transform: [
+                      {scale: logoScaleAnim},
+                      {
+                        rotateY: logoScaleAnim.interpolate({
+                          inputRange: [0, 1],
+                          outputRange: ['180deg', '0deg'],
+                        }),
+                      },
+                    ],
+                    opacity: logoOpacityAnim,
+                  },
+                ]}>
+                <Image source={logo} style={responsiveStyles.logoImage} />
+              </Animated.View>
             </View>
 
             {/* Form */}
-            <View style={styles.formContainer}>
-              <TextInput
-                style={[styles.input, errors.personName && styles.inputError]}
-                placeholder="Person Name"
-                placeholderTextColor="#555"
-                value={formData.personName}
-                onChangeText={text => handleChange('personName', text)}
-              />
-              {/* {errors.personName && (
-              <Text style={styles.errorText}>{errors.personName}</Text>
-            )} */}
+            <Animated.View
+              style={[
+                responsiveStyles.formContainer,
+                {
+                  transform: [{translateY: formTranslateYAnim}],
+                  opacity: formOpacityAnim,
+                },
+              ]}>
+              <Animated.View
+                style={{transform: [{scale: inputAnimations.personName}]}}>
+                <TextInput
+                  style={[
+                    responsiveStyles.input,
+                    getInputStyle('personName'),
+                    errors.personName && responsiveStyles.inputError,
+                  ]}
+                  placeholder="Person Name"
+                  placeholderTextColor="#555"
+                  value={formData.personName}
+                  onChangeText={text => handleChange('personName', text)}
+                  onFocus={() => handleInputFocus('personName')}
+                  onBlur={() => handleInputBlur('personName')}
+                />
+              </Animated.View>
 
-              <TextInput
-                style={[styles.input, errors.companyName && styles.inputError]}
-                placeholder="Company Name"
-                placeholderTextColor="#555"
-                value={formData.companyName}
-                onChangeText={text => handleChange('companyName', text)}
-              />
-              {/* {errors.companyName && (
-              <Text style={styles.errorText}>{errors.companyName}</Text>
-            )} */}
+              <Animated.View
+                style={{transform: [{scale: inputAnimations.companyName}]}}>
+                <TextInput
+                  style={[
+                    responsiveStyles.input,
+                    getInputStyle('companyName'),
+                    errors.companyName && responsiveStyles.inputError,
+                  ]}
+                  placeholder="Company Name"
+                  placeholderTextColor="#555"
+                  value={formData.companyName}
+                  onChangeText={text => handleChange('companyName', text)}
+                  onFocus={() => handleInputFocus('companyName')}
+                  onBlur={() => handleInputBlur('companyName')}
+                />
+              </Animated.View>
 
               {/* Custom Dropdown */}
-              <View style={styles.dropdownContainer}>
+              <Animated.View
+                style={[
+                  responsiveStyles.dropdownContainer,
+                  {transform: [{scale: inputAnimations.businessType}]},
+                ]}>
                 <TouchableOpacity
                   style={[
-                    styles.dropdownButton,
-                    errors.businessType && styles.inputError,
+                    responsiveStyles.dropdownButton,
+                    errors.businessType && responsiveStyles.inputError,
+                    formData.businessType
+                      ? responsiveStyles.inputValid
+                      : responsiveStyles.input,
                   ]}
-                  onPress={() => setIsDropdownOpen(!isDropdownOpen)}>
-                  <Text style={styles.dropdownButtonText}>
+                  onPress={handleDropdownToggle}>
+                  <Text style={responsiveStyles.dropdownButtonText}>
                     {formData.businessType || 'Select Business Type'}
                   </Text>
-                  <Text style={styles.dropdownArrow}>▼</Text>
+                  <Animated.Text
+                    style={[
+                      responsiveStyles.dropdownArrow,
+                      {
+                        transform: [
+                          {
+                            rotate: isDropdownOpen ? '180deg' : '0deg',
+                          },
+                        ],
+                      },
+                    ]}>
+                    ▼
+                  </Animated.Text>
                 </TouchableOpacity>
                 {isDropdownOpen && (
-                  <View style={styles.dropdownList}>
+                  <Animated.View
+                    style={[
+                      responsiveStyles.dropdownList,
+                      {
+                        transform: [
+                          {scaleY: dropdownScaleAnim},
+                          {
+                            translateY: dropdownScaleAnim.interpolate({
+                              inputRange: [0, 1],
+                              outputRange: [-10, 0],
+                            }),
+                          },
+                        ],
+                        opacity: dropdownOpacityAnim,
+                      },
+                    ]}>
                     {businessTypes.map((type, index) => (
                       <TouchableOpacity
                         key={index}
-                        style={styles.dropdownItem}
+                        style={responsiveStyles.dropdownItem}
                         onPress={() => handleBusinessTypeSelect(type)}>
-                        <Text style={styles.dropdownItemText}>{type}</Text>
+                        <Text style={responsiveStyles.dropdownItemText}>
+                          {type}
+                        </Text>
                       </TouchableOpacity>
                     ))}
-                  </View>
+                  </Animated.View>
                 )}
-              </View>
-              {/* {errors.businessType && (
-              <Text style={styles.errorText}>{errors.businessType}</Text>
-            )} */}
+              </Animated.View>
 
-              <TextInput
-                style={[styles.input, errors.gstNo && styles.inputError]}
-                placeholder="GST No."
-                placeholderTextColor="#555"
-                value={formData.gstNo}
-                onChangeText={text => handleChange('gstNo', text)}
-              />
-              {/* {errors.gstNo && (
-              <Text style={styles.errorText}>{errors.gstNo}</Text>
-            )} */}
+              <Animated.View
+                style={{transform: [{scale: inputAnimations.gstNo}]}}>
+                <TextInput
+                  style={[
+                    responsiveStyles.input,
+                    getInputStyle('gstNo'),
+                    errors.gstNo && responsiveStyles.inputError,
+                  ]}
+                  placeholder="GST No."
+                  placeholderTextColor="#555"
+                  value={formData.gstNo}
+                  onChangeText={text => handleChange('gstNo', text)}
+                  onFocus={() => handleInputFocus('gstNo')}
+                  onBlur={() => handleInputBlur('gstNo')}
+                />
+              </Animated.View>
 
-              <TextInput
-                style={[styles.input, errors.phone && styles.inputError]}
-                placeholder="Phone"
-                placeholderTextColor="#555"
-                keyboardType="phone-pad"
-                value={formData.phone}
-                onChangeText={text => handleChange('phone', text)}
-              />
-              {/* {errors.phone && (
-              <Text style={styles.errorText}>{errors.phone}</Text>
-            )} */}
+              <Animated.View
+                style={{transform: [{scale: inputAnimations.phone}]}}>
+                <TextInput
+                  style={[
+                    responsiveStyles.input,
+                    getInputStyle('phone'),
+                    errors.phone && responsiveStyles.inputError,
+                  ]}
+                  placeholder="Phone"
+                  placeholderTextColor="#555"
+                  keyboardType="phone-pad"
+                  value={formData.phone}
+                  onChangeText={text => handleChange('phone', text)}
+                  onFocus={() => handleInputFocus('phone')}
+                  onBlur={() => handleInputBlur('phone')}
+                />
+              </Animated.View>
 
-              <TextInput
-                style={[styles.input, errors.email && styles.inputError]}
-                placeholder="Enter you email"
-                placeholderTextColor="#555"
-                keyboardType="email-address"
-                autoCapitalize="none"
-                value={formData.email}
-                onChangeText={text => handleChange('email', text)}
-              />
-              {/* {errors.email && (
-              <Text style={styles.errorText}>{errors.email}</Text>
-            )} */}
+              <Animated.View
+                style={{transform: [{scale: inputAnimations.email}]}}>
+                <TextInput
+                  style={[
+                    responsiveStyles.input,
+                    getInputStyle('email'),
+                    errors.email && responsiveStyles.inputError,
+                  ]}
+                  placeholder="Enter your email"
+                  placeholderTextColor="#555"
+                  keyboardType="email-address"
+                  autoCapitalize="none"
+                  value={formData.email}
+                  onChangeText={text => handleChange('email', text)}
+                  onFocus={() => handleInputFocus('email')}
+                  onBlur={() => handleInputBlur('email')}
+                />
+              </Animated.View>
 
-              <TextInput
-                style={[styles.input, errors.address && styles.inputError]}
-                placeholder="Company Address"
-                placeholderTextColor="#555"
-                multiline
-                value={formData.address}
-                onChangeText={text => handleChange('address', text)}
-              />
-              {/* {errors.address && (
-              <Text style={styles.errorText}>{errors.address}</Text>
-            )} */}
+              <Animated.View
+                style={{transform: [{scale: inputAnimations.address}]}}>
+                <TextInput
+                  style={[
+                    responsiveStyles.input,
+                    getInputStyle('address'),
+                    errors.address && responsiveStyles.inputError,
+                  ]}
+                  placeholder="Company Address"
+                  placeholderTextColor="#555"
+                  multiline
+                  value={formData.address}
+                  onChangeText={text => handleChange('address', text)}
+                  onFocus={() => handleInputFocus('address')}
+                  onBlur={() => handleInputBlur('address')}
+                />
+              </Animated.View>
 
-              <TextInput
-                style={[styles.input, errors.password && styles.inputError]}
-                placeholder="Password"
-                placeholderTextColor="#555"
-                secureTextEntry
-                value={formData.password}
-                onChangeText={text => handleChange('password', text)}
-              />
+              <Animated.View
+                style={{transform: [{scale: inputAnimations.password}]}}>
+                <TextInput
+                  style={[
+                    responsiveStyles.input,
+                    getInputStyle('password'),
+                    errors.password && responsiveStyles.inputError,
+                  ]}
+                  placeholder="Password"
+                  placeholderTextColor="#555"
+                  secureTextEntry
+                  value={formData.password}
+                  onChangeText={text => handleChange('password', text)}
+                  onFocus={() => handleInputFocus('password')}
+                  onBlur={() => handleInputBlur('password')}
+                />
+              </Animated.View>
 
-              <TextInput
-                style={[
-                  styles.input,
-                  errors.confirmPassword && styles.inputError,
-                ]}
-                placeholder="Confirm Password"
-                placeholderTextColor="#555"
-                secureTextEntry
-                value={formData.confirmPassword}
-                onChangeText={text => handleChange('confirmPassword', text)}
-              />
-              {/* {errors.confirmPassword && (
-              <Text style={styles.errorText}>{errors.confirmPassword}</Text>
-            )} */}
+              <Animated.View
+                style={{transform: [{scale: inputAnimations.confirmPassword}]}}>
+                <TextInput
+                  style={[
+                    responsiveStyles.input,
+                    getInputStyle('confirmPassword'),
+                    errors.confirmPassword && responsiveStyles.inputError,
+                  ]}
+                  placeholder="Confirm Password"
+                  placeholderTextColor="#555"
+                  secureTextEntry
+                  value={formData.confirmPassword}
+                  onChangeText={text => handleChange('confirmPassword', text)}
+                  onFocus={() => handleInputFocus('confirmPassword')}
+                  onBlur={() => handleInputBlur('confirmPassword')}
+                />
+              </Animated.View>
 
-              <TouchableOpacity
-                style={[
-                  styles.loginButtonContainer,
-                  isLoading && styles.buttonDisabled,
-                ]}
-                onPress={handleRegister}
-                disabled={isLoading}>
-                <LinearGradient
-                  colors={['#2B4C7E', '#121C29']}
-                  start={{x: 0, y: 0}}
-                  end={{x: 1, y: 0}}
-                  style={styles.loginButton}>
-                  <Text style={styles.loginButtonText}>
-                    {isLoading ? 'Registering...' : 'Register'}
-                  </Text>
-                </LinearGradient>
+              <Animated.View
+                style={{
+                  transform: [{scale: registerButtonScaleAnim}],
+                  opacity: registerButtonOpacityAnim,
+                }}>
+                <TouchableOpacity
+                  style={[
+                    responsiveStyles.loginButtonContainer,
+                    (!isFormValid() || isLoading) &&
+                      responsiveStyles.buttonDisabled,
+                  ]}
+                  onPress={handleRegisterPress}
+                  disabled={!isFormValid() || isLoading}>
+                  <LinearGradient
+                    colors={['#2B4C7E', '#121C29']}
+                    start={{x: 0, y: 0}}
+                    end={{x: 1, y: 0}}
+                    style={responsiveStyles.loginButton}>
+                    <Text style={responsiveStyles.loginButtonText}>
+                      {isLoading ? 'Registering...' : 'Register'}
+                    </Text>
+                  </LinearGradient>
+                </TouchableOpacity>
+              </Animated.View>
+            </Animated.View>
+
+            <Animated.View
+              style={[
+                responsiveStyles.signupContainer,
+                {
+                  opacity: formOpacityAnim,
+                },
+              ]}>
+              <Text style={responsiveStyles.signupText}>
+                Already have an account?{' '}
+              </Text>
+              <TouchableOpacity onPress={handleSignInPress}>
+                <Text style={responsiveStyles.signupLink}>Sign in</Text>
               </TouchableOpacity>
-            </View>
-
-            <View style={styles.signupContainer}>
-              <Text style={styles.signupText}>Already have an account? </Text>
-              <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-                <Text style={styles.signupLink}>Sign in</Text>
-              </TouchableOpacity>
-            </View>
+            </Animated.View>
           </View>
         </ScrollView>
+
         {errorMessage !== '' && (
           <Animated.View
             style={[
-              styles.errorToast,
+              responsiveStyles.errorToast,
               {
                 transform: [{translateY: errorToastAnim}],
               },
             ]}>
-            <Text style={styles.errorToastText}>{errorMessage}</Text>
+            <Text style={responsiveStyles.errorToastText}>{errorMessage}</Text>
           </Animated.View>
         )}
       </KeyboardAwareScrollView>

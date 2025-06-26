@@ -22,9 +22,9 @@ const styles = StyleSheet.create({
   },
   productCard: {
     display: 'flex',
+
     flexDirection: 'column',
-    // justifyContent: 'center',
-    alignItems: 'center',
+    alignItems: 'flex-start',
     width: 100,
 
     // marginRight: 10,

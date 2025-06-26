@@ -48,10 +48,10 @@ const CustomDrawerContent = props => {
     {title: 'Order History', route: ROUTES.HISTORY},
     {title: 'Order Tracking', route: ROUTES.TRACKING},
     {title: 'My Profile', route: ROUTES.PROFILE},
-    {title: 'Settings', route: 'Settings'},
-    {title: 'Help & Support', route: 'Support'},
-    {title: 'About Us', route: 'About'},
-    {title: 'Terms & Conditions', route: 'Terms'},
+    // {title: 'Settings', route: 'Settings'},
+    // {title: 'Help & Support', route: 'Support'},
+    // {title: 'About Us', route: 'About'},
+    // {title: 'Terms & Conditions', route: 'Terms'},
     {title: 'Logout', action: handleLogout},
   ];
 

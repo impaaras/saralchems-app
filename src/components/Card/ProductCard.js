@@ -25,6 +25,7 @@ import {fallbackImg} from '../../utils/images';
 import {selectVariant} from '../../utils/function/function';
 import styles from './Card.styles';
 import {setActiveProduct, setSelectedVariant} from '../../redux/slices/newCart';
+import {Plus} from 'lucide-react-native';
 
 const ProductCard = ({item, onAddPress, idx, ParentCategoryId}) => {
   const dispatch = useDispatch();
@@ -52,6 +53,7 @@ const ProductCard = ({item, onAddPress, idx, ParentCategoryId}) => {
   };
 
   const openAddModal = (product, index, currentIndex) => {
+    console.log(product);
     if (
       activeProduct?.selectedVariant === null ||
       activeProduct?._id !== currentIndex
@@ -165,7 +167,6 @@ const ProductCard = ({item, onAddPress, idx, ParentCategoryId}) => {
         <View
           style={{
             flexDirection: 'row',
-            justifyContent: 'space-between',
           }}>
           {item.variants.length > 0 && (
             <View style={styles.variantsContainer}>
@@ -210,6 +211,7 @@ const ProductCard = ({item, onAddPress, idx, ParentCategoryId}) => {
                     handleShowVariants(item.variants, idx, item._id)
                   }>
                   <Text style={styles.moreButtonText}>+</Text>
+                  {/* <Plus color="white" size={21} /> */}
                 </TouchableOpacity>
               )}
             </View>
