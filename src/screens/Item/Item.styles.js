@@ -38,6 +38,7 @@
 // });
 
 // export default styles;
+
 import {StyleSheet, Dimensions} from 'react-native';
 
 const {width: screenWidth, height: screenHeight} = Dimensions.get('window');
@@ -146,10 +147,8 @@ const styles = StyleSheet.create({
   },
   productInnerContainer: {
     flexDirection: 'row',
-    // justifyContent: 'space-around',
-    justifyContent: 'flex-start',
     flexWrap: 'wrap',
-    marginHorizontal: 10,
+    justifyContent: 'space-around',
   },
 });
 

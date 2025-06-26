@@ -48,6 +48,7 @@
 // };
 
 // export default AppNavigator;
+
 import React, {useEffect, useState, useRef} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import {fetchAuthState} from '../redux/slices/authSlice';

@@ -286,7 +286,11 @@ const ProductDetail = () => {
                       style={{
                         marginRight: 0,
                       }}>
-                      {size === 'loose' || size === 'losse' ? (
+                      {size === 'loose' ||
+                      size === 'losse' ||
+                      size === 'custom (kg)' ||
+                      size === 'Custom (kg)' ||
+                      size === 'Custom (Kg)' ? (
                         <View style={styles.customInputContainer}>
                           <TextInput
                             style={styles.customInput}
@@ -356,8 +360,16 @@ const ProductDetail = () => {
                   <Text style={styles.quantityBtnText}>+</Text>
                 </TouchableOpacity>
               </View>
+              <Text>{}</Text>
 
-              {categoryName === 'Machines' ? (
+              {categoryName === 'Machines' ||
+              !product?.variants?.length ||
+              categoryName === 'Textile Printing Machines' ? (
+                // {categoryName === 'Textile Printing Machines' ||
+                // !selectedProductItem?.variants.length ||
+                // activeProduct?.selectVariant ||
+                // categoryName === 'Machines' ? (
+
                 <LinearGradient
                   colors={['#1B2B48', '#2D4565']}
                   start={{x: 0, y: 0}}

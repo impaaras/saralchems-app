@@ -112,6 +112,16 @@ const styles = StyleSheet.create({
     fontSize: moderateScale(16),
     color: '#3C5D87',
   },
+  quantityInput: {
+    width: 25,
+    borderBottomWidth: 1,
+    borderBottomColor: '#AAA',
+    marginHorizontal: 8,
+    fontSize: 16,
+    color: '#000',
+    padding: 0,
+  },
+
   quantityText: {
     paddingHorizontal: scale(15),
     fontSize: moderateScale(16),

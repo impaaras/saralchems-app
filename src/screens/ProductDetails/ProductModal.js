@@ -732,7 +732,10 @@ const ProductModal = ({product}) => {
                         .slice(0, 3)
                         .map((size, index) => (
                           <View key={index}>
-                            {size === 'loose' || size === 'losse' ? (
+                            {size === 'loose' ||
+                            size === 'losse' ||
+                            size === 'Custom (Kg)' ||
+                            size === 'custom (kg)' ? (
                               <Animated.View
                                 style={{
                                   opacity: fadeAnim,
@@ -881,7 +884,9 @@ const ProductModal = ({product}) => {
                 unit={productData.unit}
                 enabled={customValue}
               />
+
               {categoryName === 'Textile Printing Machines' ||
+              !selectedProductItem?.variants.length ||
               activeProduct?.selectVariant ||
               categoryName === 'Machines' ? (
                 <LinearGradient
@@ -1263,15 +1268,14 @@ const styles = StyleSheet.create({
   addToCartText: {
     fontSize: 16,
     fontWeight: '600',
-    marginLeft: -10,
-    paddingRight: 10,
+    // marginLeft: -10,
+    // paddingRight: 10,
     color: 'white',
   },
   receiptButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    // backgroundColor: '#3C5D87',
-    // paddingVertical: 8,
+    backgroundColor: '#3C5D87',
     paddingHorizontal: 6,
     borderRadius: 100,
   },

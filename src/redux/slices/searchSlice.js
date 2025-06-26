@@ -16,6 +16,7 @@ export const searchProducts = createAsyncThunk(
   async (query, {rejectWithValue}) => {
     const token = storage.getString(StorageKeys.AUTH_TOKEN);
 
+    console.log(query, 'search query');
     try {
       const url = query
         ? `${API_URL}/product/search?query=${query}`
@@ -24,6 +25,7 @@ export const searchProducts = createAsyncThunk(
       const response = await axios.get(url, {
         headers: {Authorization: `Bearer ${token}`},
       });
+      console.log(response.data);
 
       return response.data;
     } catch (error) {

@@ -177,38 +177,48 @@ const GlobalModal = () => {
               </View>
               <ScrollView contentContainerStyle={styles.variantsContainer}>
                 <View style={styles.variantsGrid}>
-                  {variants.length > 0 ? (
-                    variants.map((variant, index) => (
-                      <View key={index}>
-                        <TouchableOpacity
-                          style={
-                            activeProduct?.selectedVariant !==
-                            `${variant.label}AFTER${index}${variant.parentIndex}${variant.parentId}`
-                              ? styles.variantItem
-                              : styles.selectedVariant
-                          }
-                          onPress={() =>
-                            handleVariantSelect(
-                              variant.label,
-                              index,
-                              variant.parentIndex,
-                              variant.parentId,
-                            )
-                          }>
-                          <Text
+                  {variants.filter(
+                    v =>
+                      v.label?.toLowerCase() !== 'loose' &&
+                      !v.label?.toLowerCase().includes('custom'),
+                  ).length > 0 ? (
+                    variants
+                      .filter(
+                        v =>
+                          v.label?.toLowerCase() !== 'loose' &&
+                          !v.label?.toLowerCase().includes('custom'),
+                      )
+                      .map((variant, index) => (
+                        <View key={index}>
+                          <TouchableOpacity
                             style={
                               activeProduct?.selectedVariant !==
                               `${variant.label}AFTER${index}${variant.parentIndex}${variant.parentId}`
-                                ? styles.variantText
-                                : styles.selectedVariantText
+                                ? styles.variantItem
+                                : styles.selectedVariant
+                            }
+                            onPress={() =>
+                              handleVariantSelect(
+                                variant.label,
+                                index,
+                                variant.parentIndex,
+                                variant.parentId,
+                              )
                             }>
-                            {variant.label ||
-                              variant.name ||
-                              `Variant ${index + 1}`}
-                          </Text>
-                        </TouchableOpacity>
-                      </View>
-                    ))
+                            <Text
+                              style={
+                                activeProduct?.selectedVariant !==
+                                `${variant.label}AFTER${index}${variant.parentIndex}${variant.parentId}`
+                                  ? styles.variantText
+                                  : styles.selectedVariantText
+                              }>
+                              {variant.label ||
+                                variant.name ||
+                                `Variant ${index + 1}`}
+                            </Text>
+                          </TouchableOpacity>
+                        </View>
+                      ))
                   ) : (
                     <Text style={{textAlign: 'center', marginTop: 10}}>
                       No Variants Available

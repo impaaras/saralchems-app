@@ -13,6 +13,7 @@ import {
   Easing,
   Platform,
   Vibration,
+  TextInput,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {useNavigation} from '@react-navigation/native';
@@ -150,7 +151,13 @@ const AnimatedTouchable = ({
 const CartItem = ({product, onRemove, onDecrement, onIncrement}) => {
   let [variantId, setVariantId] = useState(null);
   const navigation = useNavigation();
+  const [qty, setQty] = useState(product.quantity);
+
   const dispatch = useDispatch();
+
+  useEffect(() => {
+    setQty(product.quantity);
+  }, [product.quantity]);
 
   // Animation values
   const slideAnim = useRef(new Animated.Value(0)).current;
@@ -186,8 +193,8 @@ const CartItem = ({product, onRemove, onDecrement, onIncrement}) => {
   }, []);
 
   const calculateTotal = (variant, quantity) => {
-    const match = variant.match(/(\d+(\.\d+)?)\s*(kg|gm|ltr)/i);
-    if (!match) return `${variant}`;
+    const match = variant.match(/(\d+(\.\d+)?)\s*(kg|gm|ltr|ml)/i);
+    if (!match) return `${quantity} pcs`; // Fallback if no match
 
     const value = parseFloat(match[1]);
     const unit = match[3].toLowerCase();
@@ -201,7 +208,7 @@ const CartItem = ({product, onRemove, onDecrement, onIncrement}) => {
   };
 
   const removeTrailingDigits = variant => {
-    const match = variant?.match(/^\d+(\.\d+)?\s*(kg|gm|ml|ltr)/i);
+    const match = variant?.match(/^\d+(\.\d+)?\s*(kg|gm|ml|ltr|ml)/i);
     return match ? match[0].replace(/\s+/, '') : '';
   };
 
@@ -230,6 +237,30 @@ const CartItem = ({product, onRemove, onDecrement, onIncrement}) => {
         product: newProduct,
       }),
     );
+  };
+
+  const updateQuantity = newQty => {
+    const numericQty = parseInt(newQty, 10);
+    if (!isNaN(numericQty) && numericQty > 0) {
+      const difference = numericQty - product.quantity;
+
+      if (difference === 0) return; // nothing to update
+
+      setQty(numericQty);
+
+      dispatch(
+        updateCartItem({
+          productId: product.productId._id,
+          variant: product.variant,
+          quantity: difference, // ✅ Send the difference!
+        }),
+      )
+        .unwrap()
+        .then(() => dispatch(getCart()))
+        .catch(err => {
+          console.error('Update failed:', err);
+        });
+    }
   };
 
   const animatedRemove = () => {
@@ -288,12 +319,15 @@ const CartItem = ({product, onRemove, onDecrement, onIncrement}) => {
             </Animated.View>
           </AnimatedTouchable>
         </View>
-        <Text style={styles.cartItemSpec}>
-          <Text style={{fontWeight: '700'}}>Variant - </Text>
-          {removeTrailingDigits(product.variant) ||
-            product.variant ||
-            'Custom variant'}
-        </Text>
+        {product.variant !== 'no variant' && (
+          <Text style={styles.cartItemSpec}>
+            <Text style={{fontWeight: '700'}}>Variant - </Text>
+            {removeTrailingDigits(product.variant) ||
+              product.variant ||
+              'Custom variant'}
+          </Text>
+        )}
+
         <View
           style={{
             flexDirection: 'row',
@@ -313,7 +347,7 @@ const CartItem = ({product, onRemove, onDecrement, onIncrement}) => {
               hapticType="light">
               <Text style={styles.quantityBtnText}>−</Text>
             </AnimatedTouchable>
-            <Animated.Text
+            {/* <Animated.Text
               style={[
                 styles.quantityText,
                 {
@@ -321,7 +355,19 @@ const CartItem = ({product, onRemove, onDecrement, onIncrement}) => {
                 },
               ]}>
               {product.quantity}
-            </Animated.Text>
+            </Animated.Text> */}
+            <TextInput
+              value={String(qty)}
+              onChangeText={text => {
+                const numeric = text.replace(/[^0-9]/g, '');
+                setQty(numeric); // Immediate update for UX
+              }}
+              onEndEditing={() => updateQuantity(qty)}
+              keyboardType="numeric"
+              style={styles.quantityInput}
+              textAlign="center"
+            />
+
             <AnimatedTouchable
               style={styles.quantityBtn}
               onPress={onIncrement}

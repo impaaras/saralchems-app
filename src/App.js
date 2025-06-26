@@ -33,7 +33,7 @@ const AppContent = () => {
     <View style={styles.container}>
       <StatusBar backgroundColor="#3C5D87" barStyle="light-content" />
       <Navigation />
-      <Loader visible={loading} />
+      {/* <Loader visible={loading} /> */}
     </View>
   );
 };

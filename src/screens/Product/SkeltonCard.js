@@ -71,7 +71,7 @@ const ShimmerCard = () => {
       <View style={shimmerStyles.infoContainer}>
         {/* Variants Container */}
         <View style={shimmerStyles.variantsContainer}>
-          <Animated.View style={[shimmerStyles.shimmerVariant, {opacity}]} />
+          {/* <Animated.View style={[shimmerStyles.shimmerVariant, {opacity}]} /> */}
           <Animated.View
             style={[shimmerStyles.shimmerVariant, {opacity, width: wp(15)}]}
           />

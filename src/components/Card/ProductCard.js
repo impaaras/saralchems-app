@@ -177,41 +177,57 @@ const ProductCard = ({item, onAddPress, idx, ParentCategoryId}) => {
                   display: 'flex',
                   flexDirection: 'row',
                 }}>
-                {item.variants.slice(0, 3).map((variant, index) => (
-                  <TouchableOpacity
-                    key={index}
-                    style={
-                      activeProduct?.selectedVariant !==
-                      `${variant}AFTER${index}${idx}${item._id}`
-                        ? styles.variantItem
-                        : styles.selectedVariantItem
-                    }
-                    onPress={() =>
-                      handleVariantSelect(item, variant, index, idx, item?._id)
-                    }>
-                    <Text
+                {item.variants
+                  .filter(
+                    v =>
+                      v.toLowerCase() !== 'loose' &&
+                      v.toLowerCase() !== 'custom (kg)',
+                  )
+                  .slice(0, 3)
+                  .map((variant, index) => (
+                    <TouchableOpacity
+                      key={index}
                       style={
                         activeProduct?.selectedVariant !==
                         `${variant}AFTER${index}${idx}${item._id}`
-                          ? styles.variantText
-                          : styles.selectedVariantText
+                          ? styles.variantItem
+                          : styles.selectedVariantItem
+                      }
+                      onPress={() =>
+                        handleVariantSelect(
+                          item,
+                          variant,
+                          index,
+                          idx,
+                          item?._id,
+                        )
                       }>
-                      {variant.length > 50
-                        ? `${variant.substring(0, 50)}...`
-                        : variant}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
+                      <Text
+                        style={
+                          activeProduct?.selectedVariant !==
+                          `${variant}AFTER${index}${idx}${item._id}`
+                            ? styles.variantText
+                            : styles.selectedVariantText
+                        }>
+                        {variant.length > 50
+                          ? `${variant.substring(0, 50)}...`
+                          : variant}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
               </ScrollView>
 
-              {item.variants.length > 1 && (
+              {item.variants.filter(
+                v =>
+                  v.toLowerCase() !== 'loose' &&
+                  v.toLowerCase() !== 'custom (kg)',
+              ).length > 1 && (
                 <TouchableOpacity
                   style={styles.moreButton}
                   onPress={() =>
                     handleShowVariants(item.variants, idx, item._id)
                   }>
                   <Text style={styles.moreButtonText}>+</Text>
-                  {/* <Plus color="white" size={21} /> */}
                 </TouchableOpacity>
               )}
             </View>
