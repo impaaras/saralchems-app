@@ -615,7 +615,11 @@ export default function LoginScreen({navigation}) {
               />
             </Animated.View>
 
-            <TouchableOpacity onPress={handleForgotPasswordPress}>
+            <TouchableOpacity
+              onPress={handleForgotPasswordPress}
+              style={{
+                alignSelf: 'center',
+              }}>
               <Text style={responsiveStyles.forgotPassword}>
                 Forgot Password?
               </Text>

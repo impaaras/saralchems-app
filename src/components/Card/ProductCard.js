@@ -26,6 +26,7 @@ import {selectVariant} from '../../utils/function/function';
 import styles from './Card.styles';
 import {setActiveProduct, setSelectedVariant} from '../../redux/slices/newCart';
 import {Plus} from 'lucide-react-native';
+import SafeImage from '../SafeImage/SafeImage';
 
 const ProductCard = ({item, onAddPress, idx, ParentCategoryId}) => {
   const dispatch = useDispatch();
@@ -132,27 +133,24 @@ const ProductCard = ({item, onAddPress, idx, ParentCategoryId}) => {
       <View style={styles.imageContainer}>
         {!item.image || item.image.length === 0 ? (
           <TouchableOpacity>
-            <Image
-              source={{
-                uri:
-                  Array.isArray(item.image) && item.image.length > 0
-                    ? `https://api.saraldyechems.com/upload/image/${item.image[0]}`
-                    : fallbackImg(),
-              }}
+            <SafeImage
+              sourceUri={
+                Array.isArray(item.image) && item.image.length > 0
+                  ? `https://api.saraldyechems.com/upload/image/${item.image[0]}`
+                  : null
+              }
               style={styles.productImage}
             />
           </TouchableOpacity>
         ) : (
           <TouchableOpacity
             onPress={() => handleImageZoom(item, item?.image, 0)}>
-            <Image
-              source={{
-                uri:
-                  Array.isArray(item.image) && item.image.length > 0
-                    ? `https://api.saraldyechems.com/upload/image/${item.image[0]}`
-                    : fallbackImg(),
-              }}
-              resizeMode="contain"
+            <SafeImage
+              sourceUri={
+                Array.isArray(item.image) && item.image.length > 0
+                  ? `https://api.saraldyechems.com/upload/image/${item.image[0]}`
+                  : null
+              }
               style={styles.productImage}
             />
           </TouchableOpacity>

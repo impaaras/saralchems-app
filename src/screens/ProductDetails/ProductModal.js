@@ -635,14 +635,17 @@ const ProductModal = ({product}) => {
             contentContainerStyle={styles.contentContainer}
             showsVerticalScrollIndicator={false}
             style={{opacity: fadeAnim}}>
-            <Animated.View style={{transform: [{scale: bounceAnim}]}}>
+            <Animated.View
+              style={{
+                transform: [{scale: bounceAnim}],
+                marginLeft: -23,
+              }}>
               {!product?.image || product?.item?.length === 0 ? (
                 <ScrollImage product={images} />
               ) : (
                 <ScrollImage product={product} />
               )}
             </Animated.View>
-
             <Animated.View
               style={{
                 marginHorizontal: 10,

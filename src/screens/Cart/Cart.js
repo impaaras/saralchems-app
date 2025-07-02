@@ -39,6 +39,7 @@ import {useAlert} from '../../context/CustomAlertContext';
 import {useLoader} from '../../context/LoaderContext';
 import ScrollImage from '../../components/ScrollImage/Index';
 import CartShimmer from './CartShimmer';
+import {Trash2} from 'lucide-react-native';
 
 // Enhanced TouchableOpacity with animations and haptic feedback
 const AnimatedTouchable = ({
@@ -194,7 +195,7 @@ const CartItem = ({product, onRemove, onDecrement, onIncrement}) => {
 
   const calculateTotal = (variant, quantity) => {
     const match = variant.match(/(\d+(\.\d+)?)\s*(kg|gm|ltr|ml)/i);
-    if (!match) return `${quantity} pcs`; // Fallback if no match
+    if (!match) return `${quantity}`; // Fallback if no match
 
     const value = parseFloat(match[1]);
     const unit = match[3].toLowerCase();
@@ -264,26 +265,7 @@ const CartItem = ({product, onRemove, onDecrement, onIncrement}) => {
   };
 
   const animatedRemove = () => {
-    Animated.parallel([
-      // Animated.timing(fadeAnim, {
-      //   toValue: 0,
-      //   duration: 300,
-      //   easing: Easing.in(Easing.quad),
-      //   useNativeDriver: true,
-      // }),
-      // Animated.spring(scaleAnim, {
-      //   toValue: 0.8,
-      //   useNativeDriver: true,
-      //   tension: 100,
-      //   friction: 6,
-      // }),
-      // Animated.timing(slideAnim, {
-      //   toValue: 0,
-      //   duration: 250,
-      //   easing: Easing.in(Easing.back(1.2)),
-      //   useNativeDriver: true,
-      // }),
-    ]).start(() => {
+    Animated.parallel([]).start(() => {
       onRemove();
     });
   };
@@ -309,19 +291,20 @@ const CartItem = ({product, onRemove, onDecrement, onIncrement}) => {
       <View style={styles.cartItemDetails}>
         <View style={styles.cartItemHeader}>
           <AnimatedTouchable
-            onPress={() => openAddModal(product, 0, product?._id)}
+            // onPress={() => openAddModal(product, 0, product?._id)}
             hapticType="light">
-            <Text style={styles.cartItemName}>{product.productId.name}</Text>
+            <Text style={styles.cartItemName}>{product?.productId?.name}</Text>
           </AnimatedTouchable>
           <AnimatedTouchable onPress={animatedRemove} hapticType="medium">
             <Animated.View>
-              <Icon name="delete" size={22} color="#666" />
+              <Trash2 name="delete" size={18} color="#001" />
+              {/* <Icon name="delete" size={22} color="#666" /> */}
             </Animated.View>
           </AnimatedTouchable>
         </View>
         {product.variant !== 'no variant' && (
           <Text style={styles.cartItemSpec}>
-            <Text style={{fontWeight: '700'}}>Variant - </Text>
+            {/* <Text style={{fontWeight: '700'}}>Variant - </Text> */}
             {removeTrailingDigits(product.variant) ||
               product.variant ||
               'Custom variant'}
@@ -342,20 +325,11 @@ const CartItem = ({product, onRemove, onDecrement, onIncrement}) => {
           </Text>
           <View style={styles.cartItemQuantity}>
             <AnimatedTouchable
-              style={styles.quantityBtn}
+              style={[styles.quantityBtn]}
               onPress={onDecrement}
               hapticType="light">
               <Text style={styles.quantityBtnText}>−</Text>
             </AnimatedTouchable>
-            {/* <Animated.Text
-              style={[
-                styles.quantityText,
-                {
-                  transform: [{scale: scaleAnim}],
-                },
-              ]}>
-              {product.quantity}
-            </Animated.Text> */}
             <TextInput
               value={String(qty)}
               onChangeText={text => {
@@ -390,6 +364,9 @@ const Cart = () => {
   const {setLoading} = useLoader();
   const [alertVisible, setAlertVisible] = useState(true);
 
+  // New state for initial loading
+  const [initialLoading, setInitialLoading] = useState(true);
+
   // Animation values
   const containerFadeAnim = useRef(new Animated.Value(0)).current;
   const buttonSlideAnim = useRef(new Animated.Value(50)).current;
@@ -397,32 +374,35 @@ const Cart = () => {
 
   useEffect(() => {
     // Screen entrance animation
-    Animated.parallel([
-      Animated.timing(containerFadeAnim, {
-        toValue: 1,
-        duration: 400,
-        easing: Easing.out(Easing.quad),
-        useNativeDriver: true,
-      }),
-      Animated.sequence([
-        Animated.delay(200),
-        Animated.parallel([
-          Animated.spring(buttonSlideAnim, {
-            toValue: 0,
-            useNativeDriver: true,
-            tension: 60,
-            friction: 8,
-          }),
-          Animated.timing(buttonFadeAnim, {
-            toValue: 1,
-            duration: 500,
-            easing: Easing.out(Easing.quad),
-            useNativeDriver: true,
-          }),
+    if (!initialLoading) {
+      // Only animate after initial load is complete
+      Animated.parallel([
+        Animated.timing(containerFadeAnim, {
+          toValue: 1,
+          duration: 400,
+          easing: Easing.out(Easing.quad),
+          useNativeDriver: true,
+        }),
+        Animated.sequence([
+          Animated.delay(200),
+          Animated.parallel([
+            Animated.spring(buttonSlideAnim, {
+              toValue: 0,
+              useNativeDriver: true,
+              tension: 60,
+              friction: 8,
+            }),
+            Animated.timing(buttonFadeAnim, {
+              toValue: 1,
+              duration: 500,
+              easing: Easing.out(Easing.quad),
+              useNativeDriver: true,
+            }),
+          ]),
         ]),
-      ]),
-    ]).start();
-  }, [items]);
+      ]).start();
+    }
+  }, [items, initialLoading]); // Add initialLoading to dependencies
 
   useEffect(() => {
     const unsubscribe = navigation.addListener('focus', () => {
@@ -436,6 +416,7 @@ const Cart = () => {
   const {showAlert} = useAlert();
 
   const fetchCartData = useCallback(async () => {
+    setInitialLoading(true); // Set initialLoading to true before fetching
     try {
       await dispatch(getCart()).unwrap();
     } catch (err) {
@@ -444,13 +425,18 @@ const Cart = () => {
         message: 'Failed to load cart',
         rejectText: 'Cancel',
       });
+      // The `error` from useSelector might not be immediately available
+      // if the `unwrap` call catches the error.
+      // Consider using the `err` object directly or re-dispatching an error action.
       showAlert({
         title: 'Error',
-        message: error.message,
+        message: err.message, // Use err.message here
         acceptText: 'OK',
       });
+    } finally {
+      setInitialLoading(false); // Set initialLoading to false after fetch attempt
     }
-  }, [dispatch]);
+  }, [dispatch, showAlert]); // Add showAlert to dependencies
 
   const handleCartOperation = async (
     operation,
@@ -472,7 +458,7 @@ const Cart = () => {
     } catch (err) {
       showAlert({
         title: 'Error',
-        message: error.message,
+        message: err.message, // Use err.message here
         acceptText: 'OK',
       });
     } finally {
@@ -515,7 +501,7 @@ const Cart = () => {
         rejectText: 'Cancel',
       });
     },
-    [dispatch, fetchCartData],
+    [dispatch, fetchCartData, showAlert], // Add showAlert to dependencies
   );
 
   useEffect(() => {
@@ -566,6 +552,8 @@ const Cart = () => {
             message: error.message,
             acceptText: 'OK',
           });
+        } finally {
+          setLoading(false); // Ensure loading is turned off even on error
         }
       },
       acceptText: 'Yes',
@@ -573,7 +561,8 @@ const Cart = () => {
     });
   };
 
-  if (loading) {
+  // Only show CartShimmer if initialLoading is true
+  if (initialLoading) {
     return (
       <SafeAreaView style={styles.container}>
         <DashboardHeader />
@@ -601,10 +590,7 @@ const Cart = () => {
                     variants: item.productId?.variants || item.variants || [],
                     image: Array.isArray(item?.productId?.image)
                       ? item?.productId?.image
-                      : [
-                          item?.productId?.image ||
-                            'https://via.placeholder.com/150',
-                        ],
+                      : [item?.productId?.image || null],
                   }}
                   onRemove={() =>
                     handleRemoveItem(item.productId._id, item.variant)

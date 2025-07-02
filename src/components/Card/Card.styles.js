@@ -83,13 +83,13 @@ const styles = StyleSheet.create({
   variantText: {
     fontSize: responsiveFontSize(12),
     color: '#333',
-    flexShrink: 1, // Allow text to shrink if needed
+    // flexShrink: 1, // Allow text to shrink if needed
   },
 
   selectedVariantText: {
     fontSize: responsiveFontSize(12),
     color: '#FFF',
-    flexShrink: 1,
+    // flexShrink: 1,
   },
 
   moreButton: {

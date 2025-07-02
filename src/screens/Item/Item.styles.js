@@ -148,7 +148,7 @@ const styles = StyleSheet.create({
   productInnerContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'space-around',
+    // justifyContent: 'space-around',
   },
 });
 

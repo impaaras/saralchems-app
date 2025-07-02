@@ -31,6 +31,7 @@ import styles from './Item.styles';
 import {fallbackImg} from '../../utils/images';
 import {useLoader} from '../../context/LoaderContext';
 import ShimmerCard from '../Product/SkeltonCard';
+import SafeImage from '../../components/SafeImage/SafeImage';
 
 const ItemScreen = ({route}) => {
   const navigation = useNavigation();
@@ -153,12 +154,12 @@ const ItemScreen = ({route}) => {
                   selectedCategory === category.name && styles.selectedItem,
                 ]}
                 onPress={() => handleCategorySelection(category)}>
-                <Image
-                  source={{
-                    uri: category.image
+                <SafeImage
+                  sourceUri={
+                    category.image
                       ? `https://api.saraldyechems.com/upload/image/${category.image}`
-                      : fallbackImg(),
-                  }}
+                      : null
+                  }
                   style={styles.image}
                 />
                 {selectedCategory === category.name ? (

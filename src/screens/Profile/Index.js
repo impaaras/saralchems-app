@@ -113,6 +113,7 @@ import {
   verticalScale,
   moderateScale,
 } from '../../utils/Responsive/responsive';
+import {useAlert} from '../../context/CustomAlertContext';
 
 const {width: screenWidth} = Dimensions.get('window');
 const MenuItem = ({title, onPress, iconName}) => {
@@ -137,8 +138,17 @@ const Profile = () => {
   const userName = user?.name || 'John Deo';
   const userEmail = user?.email || 'JohnDeo@gmail.com';
 
+  const {showAlert} = useAlert();
   const handleLogout = () => {
-    dispatch(logout());
+    showAlert({
+      title: 'Are you sure?',
+      message: 'Do you want to logout?',
+      onConfirm: async () => {
+        dispatch(logout());
+      },
+      acceptText: 'Yes',
+      rejectText: 'Cancel',
+    });
   };
 
   return (

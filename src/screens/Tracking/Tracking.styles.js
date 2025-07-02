@@ -1,4 +1,19 @@
-import {StyleSheet} from 'react-native';
+import {Dimensions, StyleSheet} from 'react-native';
+// Get screen dimensions
+const {width: screenWidth, height: screenHeight} = Dimensions.get('window');
+
+// Responsive helper functions
+const wp = percentage => {
+  return (percentage * screenWidth) / 100;
+};
+
+const hp = percentage => {
+  return (percentage * screenHeight) / 100;
+};
+
+// Device type detection
+const isTablet = screenWidth >= 768;
+const isSmallScreen = screenWidth < 380;
 
 const styles = StyleSheet.create({
   container: {
@@ -17,12 +32,31 @@ const styles = StyleSheet.create({
 
     zIndex: 1,
   },
+
+  orderCard: {
+    margin: wp(3),
+    borderWidth: 1,
+    borderColor: '#CCC',
+    backgroundColor: '#FFF',
+    borderRadius: wp(3),
+    marginBottom: hp(2),
+    overflow: 'hidden',
+
+    // ✅ iOS Shadow
+    shadowColor: '#CCC',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+
+    // ✅ Android Shadow
+    elevation: 4,
+  },
   orderHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    paddingHorizontal: wp(2.5),
+    paddingBottom: hp(1.2),
   },
   orderInfo: {
     justifyContent: 'center',
@@ -108,7 +142,7 @@ const styles = StyleSheet.create({
     color: '#E0E0E0',
   },
   trackingContainer: {
-    padding: 16,
+    paddingHorizontal: 15,
     backgroundColor: '#fff',
     borderBottomLeftRadius: 12,
     borderBottomRightRadius: 12,
@@ -124,7 +158,7 @@ const styles = StyleSheet.create({
   },
   trackingTitle: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: '500',
     color: '#000',
   },
   expandText: {
@@ -159,8 +193,7 @@ const styles = StyleSheet.create({
   },
   stepContent: {
     flex: 1,
-
-    marginLeft: 12,
+    marginLeft: 30,
   },
   stepTitle: {
     fontSize: 16,
@@ -235,13 +268,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500',
   },
-
   orderDetails: {
-    // marginTop: 8,
-
+    marginTop: 5,
     flexDirection: 'row',
-    alignItems: 'center',
-
     justifyContent: 'space-between',
   },
   orderIdText: {
@@ -262,15 +291,6 @@ const styles = StyleSheet.create({
     fontWeight: '500',
     color: '#001',
   },
-  ratingContainer: {
-    backgroundColor: '#1E3A8A',
-    height: 24,
-    width: 24,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-    alignSelf: 'flex-start',
-  },
   productImage: {
     width: 70,
     height: 70,
@@ -279,13 +299,11 @@ const styles = StyleSheet.create({
   },
   orderItem: {
     borderWidth: 1,
-    // backgroundColor: 'white',
-    // borderRadius: 10,
-    padding: 10,
-
-    borderRadius: 8,
+    borderRadius: wp(2.5),
     borderColor: '#CCC',
     flexDirection: 'row',
+    marginTop: hp(1.2),
+    padding: wp(3.8),
   },
   productName: {
     fontSize: 15,
@@ -311,6 +329,19 @@ const styles = StyleSheet.create({
     flex: 1,
     marginLeft: 16,
     justifyContent: 'center',
+  },
+  ratingContainer: {
+    height: hp(2.5),
+    width: wp(7.5),
+    borderRadius: wp(3),
+    justifyContent: 'center',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+  },
+  ratingText: {
+    color: 'white',
+    fontSize: isTablet ? 14 : isSmallScreen ? 10 : 12,
+    fontWeight: '600',
   },
 });
 export default styles;

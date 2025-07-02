@@ -17,88 +17,134 @@ const isTablet = screenWidth >= 768;
 const isSmallScreen = screenWidth < 380;
 
 const styles = StyleSheet.create({
-  filterContainer: {
-    marginHorizontal: wp(4),
-    marginBottom: hp(1),
-    zIndex: 1000,
-    position: 'absolute',
-    right: 0,
+  // filterContainer: {
+  //   marginHorizontal: wp(4),
+  //   marginBottom: hp(1),
+  //   zIndex: 1000,
+  //   position: 'absolute',
+  //   right: 50,
+  //   left: 50,
+  // },
+  // filterContainer: {
+  //   zIndex: 1000,
+  //   paddingHorizontal: wp(2),
+  // },
+
+  // dropdownToggle: {
+  //   zIndex: 1001,
+  //   // width: wp(40),
+  // },
+  // dropdownButton: {
+  //   flexDirection: 'row',
+  //   alignItems: 'center',
+  //   justifyContent: 'space-between',
+  //   borderRadius: wp(2.5),
+  //   elevation: 3,
+  //   shadowColor: '#000',
+  //   shadowOffset: {width: 0, height: 2},
+  //   shadowOpacity: 0.1,
+  //   shadowRadius: 4,
+  // },
+  // dropdownButtonText: {
+  //   color: '#FFF',
+  //   paddingHorizontal: wp(4),
+  //   paddingVertical: hp(1.5),
+  //   fontSize: isTablet ? 16 : isSmallScreen ? 12 : 14,
+  //   fontWeight: '600',
+  // },
+  // dropdownMenu: {
+  //   position: 'relative',
+  //   top: 0,
+  //   left: 0,
+  //   backgroundColor: '#FFF',
+  //   borderRadius: wp(2.5),
+  //   marginTop: hp(0.5),
+  //   elevation: 8,
+  //   shadowColor: '#000',
+  //   shadowOffset: {width: 0, height: 4},
+  //   shadowOpacity: 0.15,
+  //   shadowRadius: 8,
+  //   borderWidth: 1,
+  //   borderColor: '#E0E0E0',
+  //   overflow: 'hidden',
+  //   maxHeight: hp(42),
+  // },
+  // dropdownItem: {
+  //   paddingHorizontal: wp(4),
+  //   paddingVertical: hp(1.5),
+  //   borderBottomWidth: 0.5,
+  //   borderBottomColor: '#F0F0F0',
+  // },
+  // lastDropdownItem: {
+  //   borderBottomWidth: 0,
+  // },
+  // activeDropdownItem: {
+  //   backgroundColor: '#F8F9FA',
+  // },
+  // dropdownItemContent: {
+  //   flexDirection: 'row',
+  //   alignItems: 'center',
+  //   justifyContent: 'space-between',
+  // },
+  // dropdownItemText: {
+  //   fontSize: isTablet ? 15 : isSmallScreen ? 11 : 13,
+  //   color: '#333',
+  //   fontWeight: '500',
+  // },
+  // activeDropdownItemText: {
+  //   color: '#38587F',
+  //   fontWeight: '600',
+  // },
+  // dropdownOverlay: {
+  //   position: 'absolute',
+  //   top: 0,
+  //   left: 0,
+  //   right: 0,
+  //   bottom: 0,
+  //   backgroundColor: 'transparent',
+  //   zIndex: 999,
+  // },
+  filterTabsContainer: {
+    paddingHorizontal: wp(2),
   },
-  dropdownToggle: {
-    zIndex: 1001,
-    width: wp(50),
-  },
-  dropdownButton: {
+
+  tabScrollContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: wp(4),
-    paddingVertical: hp(1.5),
-    borderRadius: wp(2.5),
-    elevation: 3,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2},
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
   },
-  dropdownButtonText: {
-    color: '#FFF',
-    fontSize: isTablet ? 16 : isSmallScreen ? 12 : 14,
-    fontWeight: '600',
-    flex: 1,
-  },
-  dropdownMenu: {
-    position: 'relative',
-    top: 0,
-    left: 0,
-    backgroundColor: '#FFF',
-    borderRadius: wp(2.5),
-    marginTop: hp(0.5),
-    elevation: 8,
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 4},
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
+
+  tabButton: {
+    borderRadius: wp(5),
     borderWidth: 1,
-    borderColor: '#E0E0E0',
-    overflow: 'hidden',
-    maxHeight: hp(40),
+    borderColor: '#DADADA',
   },
-  dropdownItem: {
-    paddingHorizontal: wp(4),
-    paddingVertical: hp(1.5),
-    borderBottomWidth: 0.5,
-    borderBottomColor: '#F0F0F0',
+
+  activeGradient: {
+    paddingVertical: hp(1),
+    paddingHorizontal: wp(3),
+    borderRadius: wp(5),
   },
-  lastDropdownItem: {
-    borderBottomWidth: 0,
+
+  activeTabButton: {
+    borderWidth: 0,
   },
-  activeDropdownItem: {
-    backgroundColor: '#F8F9FA',
+
+  activeTabText: {
+    color: '#FFF',
+    fontWeight: '600',
+    fontSize: isTablet ? 16 : isSmallScreen ? 12 : 14,
+    textAlign: 'center',
   },
-  dropdownItemContent: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  dropdownItemText: {
-    fontSize: isTablet ? 15 : isSmallScreen ? 11 : 13,
+
+  inactiveTabText: {
     color: '#333',
     fontWeight: '500',
+    fontSize: isTablet ? 16 : isSmallScreen ? 11 : 13,
+    textAlign: 'center',
+    paddingVertical: hp(1),
+    paddingHorizontal: wp(2),
+    borderRadius: wp(5),
   },
-  activeDropdownItemText: {
-    color: '#38587F',
-    fontWeight: '600',
-  },
-  dropdownOverlay: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    backgroundColor: 'transparent',
-    zIndex: 999,
-  },
+
   container: {
     flex: 1,
     zIndex: 1,
@@ -125,9 +171,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   userAvatar: {
-    width: wp(12),
-    height: wp(12),
-    borderRadius: wp(6),
+    width: wp(15),
+    height: wp(15),
+    borderRadius: wp(10),
     backgroundColor: '#E0E0E0',
   },
   userTextContainer: {
@@ -176,7 +222,7 @@ const styles = StyleSheet.create({
   },
   ordersContainer: {
     backgroundColor: '#FFF',
-    marginTop: hp(5),
+    marginTop: hp(0.5),
     paddingBottom: hp(12),
     paddingTop: hp(1.2),
     paddingHorizontal: wp(2.5),
@@ -185,23 +231,36 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: wp(3),
 
     //anroid
-    elevation: 10,
+    elevation: 5,
 
     // iOS
     shadowColor: '#3C5D87',
     shadowOffset: {width: 0, height: 1},
-    shadowOpacity: 0.07,
+    shadowOpacity: 0.1,
     shadowRadius: 2,
   },
   orderCard: {
     borderWidth: 1,
     borderColor: '#CCC',
+    backgroundColor: '#FFF',
     borderRadius: wp(3),
     marginBottom: hp(2),
     overflow: 'hidden',
+
+    // ✅ iOS Shadow
+    shadowColor: '#CCC',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+
+    // ✅ Android Shadow
+    elevation: 4,
   },
   orderHeader: {
-    paddingHorizontal: wp(4),
+    paddingHorizontal: wp(2.5),
     paddingBottom: hp(1.2),
   },
   statusDot: {
@@ -243,9 +302,6 @@ const styles = StyleSheet.create({
   expandIcon: {
     fontSize: isTablet ? 18 : 16,
     color: '#757575',
-  },
-  orderItemsContainer: {
-    // Keeping original styles
   },
   orderItem: {
     borderWidth: 1,
