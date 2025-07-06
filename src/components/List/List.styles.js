@@ -27,7 +27,7 @@ const styles = StyleSheet.create({
     color: '#333',
   },
   viewAll: {
-    fontSize: moderateScale(14),
+    fontSize: moderateScale(16),
     color: '#666',
   },
   productCard: {
@@ -43,7 +43,7 @@ const styles = StyleSheet.create({
   },
   productName: {
     marginTop: verticalScale(5),
-    fontSize: moderateScale(10),
+    fontSize: moderateScale(11),
     width: '90%',
     fontWeight: '500',
     color: '#333',

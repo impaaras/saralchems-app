@@ -236,7 +236,7 @@ const ProductCard = ({item, onAddPress, idx, ParentCategoryId}) => {
         </TouchableOpacity>
         <View style={styles.brandInfo}>
           <Text style={styles.brandText}>
-            Brand:{' '}
+            Brand:
             {item.brand
               ? item.brand.length > 8
                 ? `${item.brand.substring(0, 8)}...`

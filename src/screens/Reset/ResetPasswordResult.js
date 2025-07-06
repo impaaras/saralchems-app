@@ -20,6 +20,7 @@ import {ROUTES} from '../../constants/routes';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import Loader from '../../utils/Loader';
 import SuccessAnimation from '../../utils/Modal/SuccessAnimation';
+import {moderateScale} from '../../utils/Responsive/responsive';
 
 const OTP_TYPE = 'passwordReset';
 
@@ -159,7 +160,7 @@ export default function ResetPasswordResult({navigation, route}) {
       borderWidth: 1,
       borderColor: '#DDD',
       marginBottom: hp(1.9),
-      fontSize: getFontSize(14, 16, 18, 20),
+      fontSize: moderateScale(14),
       shadowColor: '#333',
       shadowOffset: {
         width: 0,
@@ -215,25 +216,27 @@ export default function ResetPasswordResult({navigation, route}) {
       flexDirection: 'row',
       justifyContent: 'center',
       alignItems: 'center',
-      paddingBottom: hp(5),
       marginTop: hp(2.5),
       width: '100%',
+    },
+    signupText: {
+      width: moderateScale(190),
+      color: '#666',
+      textAlign: 'center',
+      fontSize: moderateScale(14),
+    },
+    signupLink: {
+      color: '#2B4C7E',
+      fontWeight: '600',
+      textAlign: 'center',
+      marginLeft: wp(1.25),
+      fontSize: moderateScale(14),
     },
     forgotPassword: {
       color: '#2B4C7E',
       textAlign: 'center',
       marginVertical: hp(1.25),
-      fontSize: getFontSize(14, 16, 18, 20),
-    },
-    signupText: {
-      color: '#666',
-      fontSize: getFontSize(14, 16, 18, 20),
-    },
-    signupLink: {
-      color: '#2B4C7E',
-      fontWeight: '600',
-      marginLeft: wp(1.25),
-      fontSize: getFontSize(14, 16, 18, 20),
+      fontSize: moderateScale(14),
     },
     buttonDisabled: {
       opacity: 0.7,

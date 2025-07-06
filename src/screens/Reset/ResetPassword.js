@@ -18,6 +18,8 @@ import {requestPasswordReset} from '../../redux/slices/authSlice';
 import {ROUTES} from '../../constants/routes';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import Loader from '../../utils/Loader';
+import {scale} from '../Cart/responsive';
+import {moderateScale} from '../../utils/Responsive/responsive';
 
 // Get screen dimensions
 const {width: screenWidth, height: screenHeight} = Dimensions.get('window');
@@ -136,7 +138,7 @@ export default function ResetPassword({navigation}) {
       borderWidth: 1,
       borderColor: '#DDD',
       marginBottom: hp(1.9),
-      fontSize: getFontSize(14, 16, 18, 20),
+      fontSize: moderateScale(14),
       shadowColor: '#333',
       shadowOffset: {
         width: 0,
@@ -190,19 +192,21 @@ export default function ResetPassword({navigation}) {
       flexDirection: 'row',
       justifyContent: 'center',
       alignItems: 'center',
-      paddingBottom: hp(5),
       marginTop: hp(2.5),
       width: '100%',
     },
     signupText: {
+      width: scale(190),
       color: '#666',
-      fontSize: getFontSize(14, 16, 18, 20),
+      textAlign: 'center',
+      fontSize: moderateScale(14),
     },
     signupLink: {
       color: '#2B4C7E',
       fontWeight: '600',
+      textAlign: 'center',
       marginLeft: wp(1.25),
-      fontSize: getFontSize(14, 16, 18, 20),
+      fontSize: moderateScale(14),
     },
     buttonDisabled: {
       opacity: 0.7,

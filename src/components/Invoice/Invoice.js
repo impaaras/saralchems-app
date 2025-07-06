@@ -1,681 +1,3 @@
-// import React, {useRef} from 'react';
-// import {
-//   StyleSheet,
-//   Text,
-//   View,
-//   ScrollView,
-//   TouchableOpacity,
-//   Alert,
-//   Dimensions,
-//   Share,
-// } from 'react-native';
-// import {
-//   widthPercentageToDP as wp,
-//   heightPercentageToDP as hp,
-// } from 'react-native-responsive-screen';
-// import LinearGradient from 'react-native-linear-gradient';
-// import ViewShot from 'react-native-view-shot';
-// import RNFS from 'react-native-fs';
-
-// const {width: screenWidth} = Dimensions.get('window');
-// const isSmallScreen = screenWidth < 400;
-
-// const Invoice = ({invoiceData, onClose}) => {
-//   const viewShotRef = useRef();
-
-//   // Dummy data - using the provided sample data
-//   const dummyInvoiceData = {
-//     _id: '685702c3c222813447a6a311',
-//     userId: {
-//       _id: '67bda8384c7cd1ebc0827394',
-//       companyName: 'Devops',
-//       name: 'Dhruv Bansal',
-//       phone: '9953849721',
-//       email: 'bansaldhruv2609@gmail.com',
-//       companyAddress: 'Chandigarh',
-//     },
-//     items: [
-//       {
-//         productId: {
-//           _id: '67c0703e1345e617848cc586',
-//           name: 'Araldite (Resin + Hardener)',
-//           image: [
-//             '683876b5e33447f07dbcc8c5',
-//             '683876b5e33447f07dbcc8c7',
-//             '683876b5e33447f07dbcc8c9',
-//           ],
-//           id: '67c0703e1345e617848cc586',
-//         },
-//         variant: 'no variant',
-//         quantity: 2,
-//         _id: '685702c3c222813447a6a312',
-//       },
-//     ],
-//     originalOrder: '685701db7329c9c27b464eeb',
-//     isPartialOrder: false,
-//     backorders: [],
-//     status: 'Invoice Uploaded',
-//     reworkReason: '',
-//     originalItems: [],
-//     createdAt: '2025-06-21T19:06:43.354Z',
-//     updatedAt: '2025-06-21T20:43:02.136Z',
-//     __v: 0,
-//     invoice: {
-//       _id: '68571956f587f474672ddd29',
-//       invoiceNumber: 'SC/24-25/002147',
-//       date: '2025-03-31T00:00:00.000Z',
-//       orderId: '685702c3c222813447a6a311',
-//       partyName: 'JUMBO INTERNATIONAL',
-//       partyAddress: 'SHED 2 D, PHASE VI, SECTOR 37, Gurugram, Haryana, 122001',
-//       gstinBuyer: '06ANLPA5517C1ZH',
-//       transport: '-',
-//       items: [
-//         {
-//           description: 'EZYCOAT- 828',
-//           hsn: '350699',
-//           quantity: 10,
-//           unit: 'LTR',
-//           unitPrice: 193,
-//           discount: 0,
-//           amount: 2277.4,
-//           taxRate: '18%',
-//           taxAmount: 347.4,
-//         },
-//         {
-//           description: 'IMAGE MATE-DZ-343',
-//           hsn: '37079090',
-//           quantity: 10,
-//           unit: 'LTR',
-//           unitPrice: 730,
-//           discount: 0,
-//           amount: 8614,
-//           taxRate: '18%',
-//           taxAmount: 1314,
-//         },
-//         {
-//           description: 'GREY CLOTH',
-//           hsn: '54071029',
-//           quantity: 142.5,
-//           unit: 'Metre',
-//           unitPrice: 51,
-//           discount: 0,
-//           amount: 7630.88,
-//           taxRate: '5%',
-//           taxAmount: 363.38,
-//         },
-//         {
-//           description: 'CARTAGE 18%',
-//           hsn: '9965',
-//           quantity: 0,
-//           unit: 'N.A.',
-//           unitPrice: 0,
-//           discount: 0,
-//           amount: 295,
-//           taxRate: '18%',
-//           taxAmount: 45,
-//         },
-//       ],
-//       totalQuantity: 162.5,
-//       totalAmount: 16747.5,
-//       totalTax: 2069.78,
-//       grandTotal: 18817,
-//       createdAt: '2025-06-21T20:43:02.115Z',
-//       updatedAt: '2025-06-21T20:43:02.115Z',
-//       __v: 0,
-//     },
-//     id: '685702c3c222813447a6a311',
-//   };
-//   // Extract data from the invoice object
-//   const invoice = dummyInvoiceData?.invoice;
-//   const userInfo = dummyInvoiceData?.userId;
-
-//   if (!invoice) {
-//     return (
-//       <View style={styles.container}>
-//         <Text style={styles.errorText}>No invoice data available</Text>
-//       </View>
-//     );
-//   }
-
-//   const formatDate = dateString => {
-//     const date = new Date(dateString);
-//     return date.toLocaleDateString('en-IN', {
-//       day: '2-digit',
-//       month: '2-digit',
-//       year: 'numeric',
-//     });
-//   };
-
-//   const formatCurrency = amount => {
-//     return `₹${amount.toLocaleString('en-IN')}`;
-//   };
-
-//   const downloadInvoice = async () => {
-//     try {
-//       const uri = await viewShotRef.current.capture();
-//       const fileName = `Invoice_${invoice.invoiceNumber.replace('/', '_')}.jpg`;
-//       const destPath = `${RNFS.DownloadDirectoryPath}/${fileName}`;
-
-//       await RNFS.copyFile(uri, destPath);
-
-//       Alert.alert(
-//         'Success',
-//         `Invoice downloaded successfully to Downloads folder as ${fileName}`,
-//         [{text: 'OK'}],
-//       );
-//     } catch (error) {
-//       console.error('Error downloading invoice:', error);
-//       Alert.alert('Error', 'Failed to download invoice. Please try again.');
-//     }
-//   };
-
-//   const shareInvoice = async () => {
-//     try {
-//       const uri = await viewShotRef.current.capture();
-//       await Share.share({
-//         url: uri,
-//         title: `Invoice ${invoice.invoiceNumber}`,
-//         message: `Invoice ${invoice.invoiceNumber} from Saral Chemicals`,
-//       });
-//     } catch (error) {
-//       console.error('Error sharing invoice:', error);
-//       Alert.alert('Error', 'Failed to share invoice. Please try again.');
-//     }
-//   };
-
-//   return (
-//     <View style={styles.container}>
-//       <View style={styles.header}>
-//         <Text style={styles.headerTitle}>Invoice Details</Text>
-//         <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-//           <Text style={styles.closeButtonText}>✕</Text>
-//         </TouchableOpacity>
-//       </View>
-
-//       <ScrollView
-//         style={styles.scrollView}
-//         showsVerticalScrollIndicator={false}>
-//         <ViewShot ref={viewShotRef} options={{format: 'jpg', quality: 0.9}}>
-//           <View style={styles.invoiceContainer}>
-//             {/* Company Header */}
-//             <View style={styles.companyHeader}>
-//               <Text style={styles.companyName}>SARAL CHEMICALS</Text>
-//               <Text style={styles.companyAddress}>A-262/2, PHASE-1</Text>
-//               <Text style={styles.companyAddress}>
-//                 ASHOK VIHAR, DELHI 110052
-//               </Text>
-//               <Text style={styles.companyContact}>
-//                 email: saraldyes@gmail.com
-//               </Text>
-//               <Text style={styles.companyContact}>
-//                 Mob: +91 9810024522, 9810166261, Tel: 41501969, 23913616
-//               </Text>
-//               <Text style={styles.gstin}>GSTIN: 07AESPG4279D2Z9</Text>
-//             </View>
-
-//             <View style={styles.invoiceTypeHeader}>
-//               <Text style={styles.invoiceType}>TAX INVOICE</Text>
-//               <Text style={styles.originalCopy}>Original Copy</Text>
-//             </View>
-
-//             {/* Invoice and Party Details */}
-//             <View style={styles.detailsSection}>
-//               <View style={styles.leftColumn}>
-//                 <Text style={styles.sectionTitle}>Party Details:</Text>
-//                 <Text style={styles.partyName}>{invoice.partyName}</Text>
-//                 <Text style={styles.partyAddress}>{invoice.partyAddress}</Text>
-//                 <Text style={styles.gstin}>
-//                   GSTIN/UIN: {invoice.gstinBuyer}
-//                 </Text>
-//               </View>
-
-//               <View style={styles.rightColumn}>
-//                 <View style={styles.invoiceDetail}>
-//                   <Text style={styles.detailLabel}>Invoice No.:</Text>
-//                   <Text style={styles.detailValue}>
-//                     {invoice.invoiceNumber}
-//                   </Text>
-//                 </View>
-//                 <View style={styles.invoiceDetail}>
-//                   <Text style={styles.detailLabel}>Dated:</Text>
-//                   <Text style={styles.detailValue}>
-//                     {formatDate(invoice.date)}
-//                   </Text>
-//                 </View>
-//                 <View style={styles.invoiceDetail}>
-//                   <Text style={styles.detailLabel}>Place of Supply:</Text>
-//                   <Text style={styles.detailValue}>Haryana (06)</Text>
-//                 </View>
-//                 <View style={styles.invoiceDetail}>
-//                   <Text style={styles.detailLabel}>Reverse Charge:</Text>
-//                   <Text style={styles.detailValue}>N</Text>
-//                 </View>
-//               </View>
-//             </View>
-
-//             {/* Items Table */}
-//             <View style={styles.tableContainer}>
-//               <View style={styles.tableHeader}>
-//                 <Text style={[styles.tableHeaderText, {flex: 0.5}]}>S.N.</Text>
-//                 <Text style={[styles.tableHeaderText, {flex: 2.5}]}>
-//                   Description
-//                 </Text>
-//                 <Text style={[styles.tableHeaderText, {flex: 1}]}>HSN/SAC</Text>
-//                 <Text style={[styles.tableHeaderText, {flex: 1}]}>Qty.</Text>
-//                 <Text style={[styles.tableHeaderText, {flex: 0.8}]}>Unit</Text>
-//                 <Text style={[styles.tableHeaderText, {flex: 1}]}>Rate</Text>
-//                 <Text style={[styles.tableHeaderText, {flex: 1}]}>Tax%</Text>
-//                 <Text style={[styles.tableHeaderText, {flex: 1.2}]}>
-//                   Amount
-//                 </Text>
-//               </View>
-
-//               {invoice.items.map((item, index) => (
-//                 <View key={index} style={styles.tableRow}>
-//                   <Text style={[styles.tableCell, {flex: 0.5}]}>
-//                     {index + 1}
-//                   </Text>
-//                   <Text style={[styles.tableCell, {flex: 2.5}]}>
-//                     {item.description}
-//                   </Text>
-//                   <Text style={[styles.tableCell, {flex: 1}]}>{item.hsn}</Text>
-//                   <Text style={[styles.tableCell, {flex: 1}]}>
-//                     {item.quantity}
-//                   </Text>
-//                   <Text style={[styles.tableCell, {flex: 0.8}]}>
-//                     {item.unit}
-//                   </Text>
-//                   <Text style={[styles.tableCell, {flex: 1}]}>
-//                     {item.unitPrice}
-//                   </Text>
-//                   <Text style={[styles.tableCell, {flex: 1}]}>
-//                     {item.taxRate}
-//                   </Text>
-//                   <Text style={[styles.tableCell, {flex: 1.2}]}>
-//                     {formatCurrency(item.amount)}
-//                   </Text>
-//                 </View>
-//               ))}
-//             </View>
-
-//             {/* Tax Summary */}
-//             <View style={styles.taxSummary}>
-//               <View style={styles.taxRow}>
-//                 <Text style={styles.taxLabel}>Taxable Amount:</Text>
-//                 <Text style={styles.taxValue}>
-//                   {formatCurrency(invoice.totalAmount)}
-//                 </Text>
-//               </View>
-//               <View style={styles.taxRow}>
-//                 <Text style={styles.taxLabel}>Total Tax:</Text>
-//                 <Text style={styles.taxValue}>
-//                   {formatCurrency(invoice.totalTax)}
-//                 </Text>
-//               </View>
-//               <View style={[styles.taxRow, styles.grandTotalRow]}>
-//                 <Text style={styles.grandTotalLabel}>Grand Total:</Text>
-//                 <Text style={styles.grandTotalValue}>
-//                   {formatCurrency(invoice.grandTotal)}
-//                 </Text>
-//               </View>
-//             </View>
-
-//             {/* Terms and Conditions */}
-//             <View style={styles.termsSection}>
-//               <Text style={styles.sectionTitle}>Terms & Conditions:</Text>
-//               <Text style={styles.termText}>
-//                 1. Goods once sold will not be taken back.
-//               </Text>
-//               <Text style={styles.termText}>
-//                 2. Interest @ 18% p.a. will be charged if payment is not made
-//                 within 45 days.
-//               </Text>
-//               <Text style={styles.termText}>
-//                 3. Subject to 'Delhi' Jurisdiction only.
-//               </Text>
-//             </View>
-
-//             {/* Footer */}
-//             <View style={styles.footer}>
-//               <View style={styles.bankDetails}>
-//                 <Text style={styles.sectionTitle}>Bank Details:</Text>
-//                 <Text style={styles.bankText}>
-//                   HDFC BANK A/C NO. 50200027518030
-//                 </Text>
-//                 <Text style={styles.bankText}>IFSC CODE: HDFC0000158</Text>
-//                 <Text style={styles.msmeText}>
-//                   MSME NO. UDYAM-DL-03-0015844
-//                 </Text>
-//               </View>
-
-//               <View style={styles.signatureSection}>
-//                 <Text style={styles.signatureText}>for SARAL CHEMICALS</Text>
-//                 <View style={styles.signatureLine} />
-//                 <Text style={styles.signatureText}>Authorised Signatory</Text>
-//               </View>
-//             </View>
-//           </View>
-//         </ViewShot>
-//       </ScrollView>
-
-//       {/* Action Buttons */}
-//       <View style={styles.actionButtons}>
-//         <LinearGradient
-//           colors={['#101924', '#38587F']}
-//           start={{x: 0, y: 0}}
-//           end={{x: 1, y: 0}}
-//           style={[styles.actionButton, {marginRight: wp(2)}]}>
-//           <TouchableOpacity
-//             style={styles.buttonTouchable}
-//             onPress={downloadInvoice}>
-//             <Text style={[styles.buttonText, {color: '#FFF'}]}>Download</Text>
-//           </TouchableOpacity>
-//         </LinearGradient>
-
-//         <LinearGradient
-//           colors={['#FFF', '#FFF']}
-//           start={{x: 0, y: 0}}
-//           end={{x: 1, y: 0}}
-//           style={[
-//             styles.actionButton,
-//             {borderColor: '#101924', borderWidth: 1},
-//           ]}>
-//           <TouchableOpacity
-//             style={styles.buttonTouchable}
-//             onPress={shareInvoice}>
-//             <Text style={[styles.buttonText, {color: '#101924'}]}>Share</Text>
-//           </TouchableOpacity>
-//         </LinearGradient>
-//       </View>
-//     </View>
-//   );
-// };
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     backgroundColor: '#F5F5F5',
-//   },
-//   header: {
-//     flexDirection: 'row',
-//     justifyContent: 'space-between',
-//     alignItems: 'center',
-//     paddingHorizontal: wp(4),
-//     paddingVertical: hp(2),
-//     backgroundColor: '#101924',
-//   },
-//   headerTitle: {
-//     fontSize: wp(5),
-//     fontWeight: 'bold',
-//     color: '#FFF',
-//   },
-//   closeButton: {
-//     width: wp(8),
-//     height: wp(8),
-//     borderRadius: wp(4),
-//     backgroundColor: 'rgba(255,255,255,0.2)',
-//     justifyContent: 'center',
-//     alignItems: 'center',
-//   },
-//   closeButtonText: {
-//     color: '#FFF',
-//     fontSize: wp(4),
-//     fontWeight: 'bold',
-//   },
-//   scrollView: {
-//     flex: 1,
-//   },
-//   invoiceContainer: {
-//     backgroundColor: '#FFF',
-//     // margin: wp(2),
-//     // padding: wp(4),
-//     borderRadius: wp(2),
-//     elevation: 3,
-//     shadowColor: '#000',
-//     shadowOffset: {width: 0, height: 2},
-//     shadowOpacity: 0.1,
-//     shadowRadius: 4,
-//   },
-//   companyHeader: {
-//     alignItems: 'center',
-//     borderBottomWidth: 2,
-//     borderBottomColor: '#101924',
-//     paddingBottom: hp(2),
-//     // marginBottom: hp(2),
-//   },
-//   companyName: {
-//     fontSize: wp(6),
-//     fontWeight: 'bold',
-//     color: '#101924',
-//     marginBottom: hp(0.5),
-//   },
-//   companyAddress: {
-//     fontSize: wp(3.5),
-//     color: '#333',
-//     marginBottom: hp(0.2),
-//   },
-//   companyContact: {
-//     fontSize: wp(3),
-//     color: '#666',
-//     marginBottom: hp(0.2),
-//   },
-//   gstin: {
-//     fontSize: wp(3.5),
-//     fontWeight: '600',
-//     color: '#101924',
-//     marginTop: hp(0.5),
-//   },
-//   invoiceTypeHeader: {
-//     flexDirection: 'row',
-//     justifyContent: 'space-between',
-//     alignItems: 'center',
-//     marginBottom: hp(2),
-//   },
-//   invoiceType: {
-//     fontSize: wp(5),
-//     fontWeight: 'bold',
-//     color: '#101924',
-//   },
-//   originalCopy: {
-//     fontSize: wp(3.5),
-//     color: '#666',
-//     fontStyle: 'italic',
-//   },
-//   detailsSection: {
-//     flexDirection: 'row',
-//     marginBottom: hp(3),
-//     borderWidth: 1,
-//     borderColor: '#DDD',
-//     padding: wp(1),
-//   },
-//   leftColumn: {
-//     flex: 1,
-//     paddingRight: wp(2),
-//   },
-//   rightColumn: {
-//     flex: 1,
-//     paddingLeft: wp(2),
-//   },
-//   sectionTitle: {
-//     fontSize: wp(4),
-//     fontWeight: 'bold',
-//     color: '#101924',
-//     marginBottom: hp(1),
-//   },
-//   partyName: {
-//     fontSize: wp(4),
-//     fontWeight: '600',
-//     color: '#333',
-//     marginBottom: hp(0.5),
-//   },
-//   partyAddress: {
-//     fontSize: wp(3.5),
-//     color: '#666',
-//     marginBottom: hp(0.3),
-//   },
-//   invoiceDetail: {
-//     flexDirection: 'row',
-//     marginBottom: hp(0.5),
-//   },
-//   detailLabel: {
-//     fontSize: wp(3.5),
-//     color: '#666',
-//     flex: 1,
-//   },
-//   detailValue: {
-//     fontSize: wp(3.5),
-//     color: '#333',
-//     fontWeight: '500',
-//     flex: 1.5,
-//   },
-//   tableContainer: {
-//     borderWidth: 1,
-//     borderColor: '#DDD',
-//     marginBottom: hp(2),
-//   },
-//   tableHeader: {
-//     flexDirection: 'row',
-//     backgroundColor: '#F0F0F0',
-//     paddingVertical: hp(1),
-//     paddingHorizontal: wp(2),
-//     borderBottomWidth: 1,
-//     borderBottomColor: '#DDD',
-//   },
-//   tableHeaderText: {
-//     fontSize: wp(3),
-//     fontWeight: 'bold',
-//     color: '#333',
-//     textAlign: 'center',
-//   },
-//   tableRow: {
-//     flexDirection: 'row',
-//     paddingVertical: hp(1),
-//     paddingHorizontal: wp(2),
-//     borderBottomWidth: 0.5,
-//     borderBottomColor: '#EEE',
-//   },
-//   tableCell: {
-//     fontSize: wp(3),
-//     color: '#333',
-//     textAlign: 'center',
-//   },
-//   taxSummary: {
-//     alignSelf: 'flex-end',
-//     width: '50%',
-//     borderWidth: 1,
-//     borderColor: '#DDD',
-//     padding: wp(3),
-//     marginBottom: hp(2),
-//   },
-//   taxRow: {
-//     flexDirection: 'row',
-//     justifyContent: 'space-between',
-//     marginBottom: hp(0.5),
-//   },
-//   taxLabel: {
-//     fontSize: wp(3.5),
-//     color: '#666',
-//   },
-//   taxValue: {
-//     fontSize: wp(3.5),
-//     color: '#333',
-//     fontWeight: '500',
-//   },
-//   grandTotalRow: {
-//     borderTopWidth: 1,
-//     borderTopColor: '#DDD',
-//     paddingTop: hp(0.5),
-//     marginTop: hp(0.5),
-//   },
-//   grandTotalLabel: {
-//     fontSize: wp(4),
-//     fontWeight: 'bold',
-//     color: '#101924',
-//   },
-//   grandTotalValue: {
-//     fontSize: wp(4),
-//     fontWeight: 'bold',
-//     color: '#101924',
-//   },
-//   termsSection: {
-//     marginBottom: hp(3),
-//     padding: wp(3),
-//     backgroundColor: '#FAFAFA',
-//     borderRadius: wp(1),
-//   },
-//   termText: {
-//     fontSize: wp(3),
-//     color: '#666',
-//     marginBottom: hp(0.3),
-//   },
-//   footer: {
-//     flexDirection: 'row',
-//     justifyContent: 'space-between',
-//     alignItems: 'flex-end',
-//   },
-//   bankDetails: {
-//     flex: 1,
-//   },
-//   bankText: {
-//     fontSize: wp(3),
-//     color: '#666',
-//     marginBottom: hp(0.2),
-//   },
-//   msmeText: {
-//     fontSize: wp(3),
-//     color: '#101924',
-//     fontWeight: '600',
-//     marginTop: hp(1),
-//   },
-//   signatureSection: {
-//     alignItems: 'center',
-//     flex: 1,
-//   },
-//   signatureText: {
-//     fontSize: wp(3),
-//     color: '#333',
-//     marginBottom: hp(0.5),
-//   },
-//   signatureLine: {
-//     width: wp(25),
-//     height: 1,
-//     backgroundColor: '#DDD',
-//     marginVertical: hp(3),
-//   },
-//   actionButtons: {
-//     flexDirection: 'row',
-//     paddingHorizontal: wp(4),
-//     paddingVertical: hp(2),
-//     backgroundColor: '#FFF',
-//     elevation: 3,
-//     shadowColor: '#000',
-//     shadowOffset: {width: 0, height: -2},
-//     shadowOpacity: 0.1,
-//     shadowRadius: 4,
-//   },
-//   actionButton: {
-//     flex: 1,
-//     borderRadius: wp(2),
-//   },
-//   buttonTouchable: {
-//     paddingVertical: hp(1.5),
-//     alignItems: 'center',
-//     justifyContent: 'center',
-//   },
-//   buttonText: {
-//     fontSize: wp(4),
-//     fontWeight: 'bold',
-//   },
-//   errorText: {
-//     fontSize: wp(4),
-//     color: '#FF6B6B',
-//     textAlign: 'center',
-//     marginTop: hp(10),
-//   },
-// });
-
-// export default Invoice;
-
 import React, {useRef, useState} from 'react';
 import {
   StyleSheet,
@@ -688,6 +10,7 @@ import {
   Share,
   Modal,
   ActivityIndicator,
+  Image,
 } from 'react-native';
 import {
   widthPercentageToDP as wp,
@@ -697,12 +20,12 @@ import LinearGradient from 'react-native-linear-gradient';
 import ViewShot from 'react-native-view-shot';
 import RNFS from 'react-native-fs';
 import RNHTMLtoPDF from 'react-native-html-to-pdf';
+import {moderateScale} from '../../utils/Responsive/responsive';
 
 const {width: screenWidth, height: screenHeight} = Dimensions.get('window');
 
-const InvoiceModal = ({visible, onClose}) => {
+const InvoiceModal = ({visible, invoiceData, onClose}) => {
   const viewShotRef = useRef();
-  console.log(visible);
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
 
   // Using the provided sample data
@@ -825,12 +148,8 @@ const InvoiceModal = ({visible, onClose}) => {
     id: '685702c3c222813447a6a311',
   };
 
-  const invoice = dummyInvoiceData?.invoice;
-  const userInfo = dummyInvoiceData?.userId;
+  const invoice = invoiceData;
 
-  if (!invoice) {
-    return null;
-  }
   const formatCurrency = amount => {
     return `₹${amount.toLocaleString('en-IN', {
       minimumFractionDigits: 2,
@@ -1668,16 +987,18 @@ const InvoiceModal = ({visible, onClose}) => {
                 <View style={styles.detailsSection}>
                   <View style={styles.leftColumn}>
                     <Text style={styles.sectionTitle}>Party Details :</Text>
-                    <Text style={styles.partyName}>{invoice.partyName}</Text>
+                    <Text style={styles.partyName}>{invoice?.partyName}</Text>
                     <Text style={styles.partyAddress}>
-                      {invoice.partyAddress}
+                      {invoice?.partyAddress}
                     </Text>
                     <View style={[styles.detailRow, {marginTop: hp(1)}]}>
                       <View style={styles.detailLabelContainer}>
                         <Text style={styles.detailLabelText}>Transport</Text>
                         <Text style={styles.detailColon}>:</Text>
                       </View>
-                      <Text style={styles.detailValue}></Text>
+                      <Text style={styles.detailValue}>
+                        {invoice?.transport}
+                      </Text>
                     </View>
                     <View style={styles.detailRow}>
                       <View style={styles.detailLabelContainer}>
@@ -1685,7 +1006,7 @@ const InvoiceModal = ({visible, onClose}) => {
                         <Text style={styles.detailColon}>:</Text>
                       </View>
                       <Text style={styles.detailValue}>
-                        {invoice.gstinBuyer}
+                        {invoice?.gstinBuyer}
                       </Text>
                     </View>
                     <View style={styles.detailRow}>
@@ -1704,7 +1025,7 @@ const InvoiceModal = ({visible, onClose}) => {
                         <Text style={styles.detailColon}>:</Text>
                       </View>
                       <Text style={styles.detailValue}>
-                        {invoice.invoiceNumber}
+                        {invoice?.invoiceNumber}
                       </Text>
                     </View>
                     <View style={styles.detailRow}>
@@ -1713,7 +1034,7 @@ const InvoiceModal = ({visible, onClose}) => {
                         <Text style={styles.detailColon}>:</Text>
                       </View>
                       <Text style={styles.detailValue}>
-                        {formatDate(invoice.date)}
+                        {formatDate(invoice?.date)}
                       </Text>
                     </View>
                     <View style={styles.detailRow}>
@@ -1764,15 +1085,19 @@ const InvoiceModal = ({visible, onClose}) => {
                 <View style={styles.irnInfoContainer}>
                   <View style={styles.irnInfoBlock}>
                     <Text style={styles.irnInfoLabel}>IRN:</Text>
-                    <Text style={styles.irnInfoValue}>2b0e165d6d159607605</Text>
+                    <Text style={styles.irnInfoValue}>{invoice?.irn}</Text>
                   </View>
-                  <View style={styles.irnInfoBlock}>
-                    <Text style={styles.irnInfoLabel}>Ack. No.:</Text>
-                    <Text style={styles.irnInfoValue}>172517158175532</Text>
-                  </View>
-                  <View style={styles.irnInfoBlock}>
-                    <Text style={styles.irnInfoLabel}>Ack. Date:</Text>
-                    <Text style={styles.irnInfoValue}>31/05/2025</Text>
+                  <View style={styles.ack}>
+                    <View style={styles.irnInfoBlock}>
+                      <Text style={styles.irnInfoLabel}>Ack. No.:</Text>
+                      <Text style={styles.irnInfoValue}>{invoice?.ackNo}</Text>
+                    </View>
+                    <View style={styles.irnInfoBlock}>
+                      <Text style={styles.irnInfoLabel}>Ack. Date:</Text>
+                      <Text style={styles.irnInfoValue}>
+                        {formatDate(invoice?.ackDate)}
+                      </Text>
+                    </View>
                   </View>
                 </View>
 
@@ -1815,7 +1140,7 @@ const InvoiceModal = ({visible, onClose}) => {
                     </Text>
                   </View>
 
-                  {invoice.items.map((item, index) => (
+                  {invoice?.items.map((item, index) => (
                     <View key={index} style={[styles.tableRow]}>
                       <Text style={[styles.tableCell, {flex: 0.4}]}>
                         {index + 1}.
@@ -1825,33 +1150,36 @@ const InvoiceModal = ({visible, onClose}) => {
                           styles.tableCell,
                           {flex: 2, textAlign: 'left'},
                         ]}>
-                        {item.description}
+                        {item.name}
                       </Text>
                       <Text style={[styles.tableCell, {flex: 0.8}]}>
                         {item.hsn}
                       </Text>
                       <Text style={[styles.tableCell, {flex: 0.6}]}>
-                        {item.quantity === 0 ? '--' : item.quantity.toFixed(3)}
+                        {item.quantity === 0 ? '--' : item?.quantity.toFixed(3)}
                       </Text>
                       <Text style={[styles.tableCell, {flex: 0.5}]}>
                         {item.unit}
                       </Text>
                       <Text style={[styles.tableCell, {flex: 0.7}]}>
-                        {item.unitPrice === 0
+                        {item?.unitPrice}
+                        {/* {item?.unitPrice === 0
                           ? '--'
-                          : formatCurrencyWithoutSymbol(item.unitPrice)}
+                          : formatCurrencyWithoutSymbol(item?.unitPrice)} */}
                       </Text>
                       <Text style={[styles.tableCell, {flex: 0.7}]}>
                         {item.discount.toFixed(2)} %
                       </Text>
                       <Text style={[styles.tableCell, {flex: 0.6}]}>
-                        {parseFloat(item.igstRate).toFixed(2)}%
+                        --
+                        {/* {parseFloat(item.igstRate).toFixed(2)}% */}
                       </Text>
                       <Text style={[styles.tableCell, {flex: 0.8}]}>
-                        {formatCurrencyWithoutSymbol(item.igstAmount)}
+                        --
+                        {/* {formatCurrencyWithoutSymbol(item.igstAmount)} */}
                       </Text>
                       <Text style={[styles.tableCell, {flex: 1.5}]}>
-                        {formatCurrencyWithoutSymbol(item.totalAmount)}
+                        {formatCurrencyWithoutSymbol(item.amount)}
                       </Text>
                     </View>
                   ))}
@@ -1879,7 +1207,7 @@ const InvoiceModal = ({visible, onClose}) => {
                         styles.tableCell,
                         {flex: 1.5, fontWeight: 'bold'},
                       ]}>
-                      {formatCurrencyWithoutSymbol(invoice.totalAmount)}
+                      {formatCurrencyWithoutSymbol(invoice?.totalAmount)}
                     </Text>
                   </View>
 
@@ -1893,9 +1221,7 @@ const InvoiceModal = ({visible, onClose}) => {
                       Less : Rounded off (-)
                     </Text>
                     <Text style={[styles.tableCell, {flex: 1.5}]}>
-                      {formatCurrencyWithoutSymbol(
-                        Math.abs(invoice.roundedOff),
-                      )}
+                      {formatCurrencyWithoutSymbol(Math.abs(invoice?.roundOff))}
                     </Text>
                   </View>
 
@@ -1918,13 +1244,11 @@ const InvoiceModal = ({visible, onClose}) => {
                         styles.tableCell,
                         {flex: 1.5, fontWeight: 'bold'},
                       ]}>
-                      {invoice.totalQuantity} Units
+                      {invoice?.totalQuantity} Units
                     </Text>
                     <Text style={[styles.tableCell, {flex: 5.8}]}></Text>
                     <Text
                       style={[
-                        // styles.tableCell,
-
                         {
                           flex: 1.7,
                           fontWeight: 'bold',
@@ -1935,7 +1259,7 @@ const InvoiceModal = ({visible, onClose}) => {
                           paddingHorizontal: wp(0.3),
                         },
                       ]}>
-                      {formatCurrencyWithoutSymbol(invoice.finalTotal)}
+                      {formatCurrencyWithoutSymbol(invoice?.grandTotal)}
                     </Text>
                   </View>
                 </View>
@@ -1958,36 +1282,29 @@ const InvoiceModal = ({visible, onClose}) => {
                   </View>
 
                   {/* Tax row for 18% */}
-                  <View
-                    style={[
-                      styles.tableRow,
-                      {borderTopWidth: 1, borderTopColor: '#000'},
-                    ]}>
-                    <Text style={[styles.taxCell, {flex: 1}]}>18%</Text>
-                    <Text style={[styles.taxCell, {flex: 1.2}]}>
-                      {formatCurrencyWithoutSymbol(9480.0)}
-                    </Text>
-                    <Text style={[styles.taxCell, {flex: 1.2}]}>
-                      {formatCurrencyWithoutSymbol(1706.4)}
-                    </Text>
-                    <Text style={[styles.taxCell, {flex: 1.2}]}>
-                      {formatCurrencyWithoutSymbol(1706.4)}
-                    </Text>
-                  </View>
-
-                  {/* Tax row for 5% */}
-                  <View style={styles.tableRow}>
-                    <Text style={[styles.taxCell, {flex: 1}]}>5%</Text>
-                    <Text style={[styles.taxCell, {flex: 1.2}]}>
-                      {formatCurrencyWithoutSymbol(7267.5)}
-                    </Text>
-                    <Text style={[styles.taxCell, {flex: 1.2}]}>
-                      {formatCurrencyWithoutSymbol(363.38)}
-                    </Text>
-                    <Text style={[styles.taxCell, {flex: 1.2}]}>
-                      {formatCurrencyWithoutSymbol(363.38)}
-                    </Text>
-                  </View>
+                  {Object.entries(invoice.taxBreakdown).map(
+                    ([rate, tax], index) => (
+                      <View
+                        key={index}
+                        style={[
+                          styles.tableRow,
+                          {borderTopWidth: 1, borderTopColor: '#000'},
+                        ]}>
+                        <Text style={[styles.taxCell, {flex: 1}]}>{rate}</Text>
+                        <Text style={[styles.taxCell, {flex: 1.2}]}>
+                          {formatCurrencyWithoutSymbol(
+                            tax.taxableAmount - tax.taxAmount,
+                          )}
+                        </Text>
+                        <Text style={[styles.taxCell, {flex: 1.2}]}>
+                          {formatCurrencyWithoutSymbol(tax.taxAmount)}
+                        </Text>
+                        <Text style={[styles.taxCell, {flex: 1.2}]}>
+                          {formatCurrencyWithoutSymbol(tax.taxAmount)}
+                        </Text>
+                      </View>
+                    ),
+                  )}
 
                   {/* Total Tax Row */}
                   <View
@@ -2007,15 +1324,15 @@ const InvoiceModal = ({visible, onClose}) => {
                     </Text>
                     <Text
                       style={[styles.taxCell, {flex: 1.2, fontWeight: 'bold'}]}>
-                      {formatCurrencyWithoutSymbol(16747.5)}
+                      {formatCurrencyWithoutSymbol(invoice?.totalTaxableAmount)}
                     </Text>
                     <Text
                       style={[styles.taxCell, {flex: 1.2, fontWeight: 'bold'}]}>
-                      {formatCurrencyWithoutSymbol(2069.78)}
+                      {formatCurrencyWithoutSymbol(invoice?.totalTax)}
                     </Text>
                     <Text
                       style={[styles.taxCell, {flex: 1.2, fontWeight: 'bold'}]}>
-                      {formatCurrencyWithoutSymbol(2069.78)}
+                      {formatCurrencyWithoutSymbol(invoice?.totalTax)}
                     </Text>
                   </View>
                 </View>
@@ -2023,7 +1340,10 @@ const InvoiceModal = ({visible, onClose}) => {
                 {/* Amount in Words */}
                 <View style={styles.amountWordsSection}>
                   <Text style={styles.amountWordsText}>
-                    Rupees Eighteen Thousand Eight Hundred Seventeen Only
+                    {`Rupees ${
+                      toWords(invoice?.totalAmount).charAt(0).toUpperCase() +
+                      toWords(invoice?.totalAmount).slice(1)
+                    } Only`}
                   </Text>
                 </View>
                 <View
@@ -2083,8 +1403,11 @@ const InvoiceModal = ({visible, onClose}) => {
                   <View style={styles.middleFooter}>
                     <Text style={styles.qrTitle}>E-Invoice QR Code</Text>
                     {/* Placeholder for QR Code image, replace with actual Image component later */}
-                    <View style={styles.qrPlaceholder} />
-                    {/* <Image source={{uri: 'URL_TO_YOUR_QR_CODE'}} style={styles.qrCodeImage} /> */}
+                    {/* <View style={styles.qrPlaceholder} /> */}
+                    <Image
+                      source={{uri: invoice?.qrCodeImage}}
+                      style={styles.qrCodeImage}
+                    />
                   </View>
 
                   <View style={styles.rightFooter}>
@@ -2259,12 +1582,14 @@ const styles = StyleSheet.create({
   companyAddress: {
     fontSize: wp(3.2),
     color: '#000',
+    textAlign: 'center',
     marginBottom: hp(0.1),
   },
   companyContact: {
     fontSize: wp(2.8),
     color: '#000',
     marginBottom: hp(0.1),
+    textAlign: 'center',
   },
   detailsSection: {
     flexDirection: 'row',
@@ -2298,7 +1623,8 @@ const styles = StyleSheet.create({
   detailLabelText: {
     fontSize: wp(3),
     color: '#000',
-    flexShrink: 1,
+    // flexShrink: 1,
+    flex: 1,
   },
 
   detailColon: {
@@ -2343,19 +1669,20 @@ const styles = StyleSheet.create({
     color: '#000',
   },
   irnInfoContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
     borderBottomWidth: 1,
     borderBottomColor: '#001',
     paddingVertical: hp(0.5),
     paddingHorizontal: wp(1),
     width: '100%',
   },
+  ack: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
   irnInfoBlock: {
     flexDirection: 'row',
     alignItems: 'center',
-    width: wp(30), // Adjust this based on content
   },
   irnInfoLabel: {
     fontSize: wp(2.2),
@@ -2364,7 +1691,7 @@ const styles = StyleSheet.create({
     marginRight: wp(1),
   },
   irnInfoValue: {
-    fontSize: wp(2.2),
+    fontSize: moderateScale(8),
     color: '#000',
     flexShrink: 1,
   },
@@ -2517,11 +1844,14 @@ const styles = StyleSheet.create({
     borderColor: '#000',
     backgroundColor: '#f0f0f0', // Visual placeholder
   },
-  // qrCodeImage: { // For when you integrate actual QR code image
-  //   width: wp(18),
-  //   height: wp(18),
-  //   marginBottom: hp(2),
-  // },
+  qrCodeImage: {
+    // For when you integrate actual QR code image
+    width: wp(18),
+    height: wp(18),
+    borderWidth: 1,
+    borderColor: '#000',
+    // marginBottom: hp(2),
+  },
   signatureContainer: {
     width: '100%', // Take full width of middle footer
     alignItems: 'center',

@@ -30,6 +30,11 @@ import {selectVariant} from '../../utils/function/function';
 import {extractQuantityPrefix} from '../../utils/function/removeVariantCharacter';
 import {fallbackImg} from '../../utils/images';
 import ScrollImage from '../../components/ScrollImage/Index';
+import {
+  moderateScale,
+  verticalScale,
+  scale,
+} from '../../utils/Responsive/responsive';
 
 // Enhanced haptic feedback helper
 const triggerHaptic = (type = 'light') => {
@@ -689,13 +694,12 @@ const ProductModal = ({product}) => {
                 <View
                   style={{
                     display: 'flex',
-                    marginBottom: 10,
                     flexDirection: 'row',
-                    width: '40%',
-                    alignItems: 'flex-start',
+                    width: '65%',
+                    alignItems: 'center',
                   }}>
                   <Text style={styles.infoLabel}>Category :</Text>
-                  <Text style={{fontSize: 14}}>
+                  <Text style={{fontSize: moderateScale(12), flex: 1}}>
                     {product?.categorySubcategoryPairs[0]?.categoryId.name}
                   </Text>
                 </View>
@@ -705,6 +709,7 @@ const ProductModal = ({product}) => {
                     marginBottom: 10,
                     width: '40%',
                     flexDirection: 'row',
+                    alignItems: 'right',
                   }}>
                   <Text style={styles.infoLabel}>Brand :</Text>
                   <Text style={styles.infoValue}>
@@ -952,14 +957,18 @@ const ProductModal = ({product}) => {
               display: 'flex',
               flexDirection: 'row',
               alignSelf: 'center',
-              paddingTop: 8,
-              paddingBottom: 2,
+              paddingVertical: verticalScale(4),
               alignItems: 'center',
             }}
             onPress={handleClose}
             activeOpacity={0.8}>
-            <X size={18} />
-            <Text style={{marginLeft: 0, fontSize: 16, fontWeight: '500'}}>
+            <X size={moderateScale(18)} />
+            <Text
+              style={{
+                marginLeft: 0,
+                fontSize: moderateScale(14),
+                fontWeight: '500',
+              }}>
               Close
             </Text>
           </TouchableOpacity>
@@ -991,7 +1000,7 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   title: {
-    fontSize: 20,
+    fontSize: scale(16),
     fontWeight: '600',
     color: '#000',
   },
@@ -1039,14 +1048,15 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   infoLabel: {
-    fontSize: 14,
+    fontSize: moderateScale(12),
     fontWeight: '500',
     color: '#000',
     marginRight: 5,
   },
   infoValue: {
-    fontSize: 14,
+    fontSize: moderateScale(12),
     color: '#000',
+    flex: 1,
   },
   optionsSection: {
     flexDirection: 'row',
@@ -1071,11 +1081,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#3C5D86',
   },
   optionButtonText: {
-    fontSize: 14,
+    fontSize: moderateScale(12),
     color: '#000',
     fontWeight: '500',
   },
   selectedOptionText: {
+    fontSize: moderateScale(12),
     color: 'white',
   },
   addButton: {
@@ -1179,22 +1190,22 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   descriptionTitle: {
-    fontSize: 16,
+    fontSize: moderateScale(16),
     fontWeight: '600',
     color: '#000',
     marginBottom: 5,
   },
   descriptionText: {
-    fontSize: 14,
+    fontSize: moderateScale(12),
     color: '#555',
-    lineHeight: 20,
+    // lineHeight: 20,
   },
   showMoreButton: {
     marginTop: 10,
     alignSelf: 'flex-end',
   },
   showMoreText: {
-    fontSize: 14,
+    fontSize: moderateScale(14),
     color: '#3C5D86',
     fontWeight: '500',
   },
@@ -1203,7 +1214,8 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   totalQtyText: {
-    fontSize: 14,
+    fontSize: moderateScale(14),
+
     fontWeight: '500',
     color: '#333',
     textAlign: 'center',
@@ -1221,7 +1233,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   quantityLabel: {
-    fontSize: 14,
+    fontSize: scale(10),
     color: '#333',
     marginRight: 10,
   },
@@ -1232,12 +1244,11 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     overflow: 'hidden',
     borderWidth: 1,
-
     borderColor: '#CCC',
   },
   quantityButton: {
-    width: 36,
-    height: 36,
+    width: scale(30),
+    height: scale(30),
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'white',
@@ -1247,29 +1258,29 @@ const styles = StyleSheet.create({
     borderRightColor: '#CCC',
   },
   quantityButtonText: {
-    fontSize: 18,
+    fontSize: moderateScale(15),
     fontWeight: 'bold',
     color: '#3C5D86',
   },
   quantityValueContainer: {
-    paddingHorizontal: 15,
+    paddingHorizontal: moderateScale(12),
   },
   quantityValue: {
-    fontSize: 16,
+    fontSize: moderateScale(14),
     fontWeight: '500',
     color: '#333',
   },
   unitText: {
-    fontSize: 14,
+    fontSize: moderateScale(14),
     color: '#555',
     marginLeft: 10,
   },
   addToCartButton: {
-    paddingVertical: 7,
-    paddingHorizontal: 10,
+    paddingVertical: verticalScale(5),
+    paddingHorizontal: scale(7),
   },
   addToCartText: {
-    fontSize: 16,
+    fontSize: moderateScale(14),
     fontWeight: '600',
     // marginLeft: -10,
     // paddingRight: 10,

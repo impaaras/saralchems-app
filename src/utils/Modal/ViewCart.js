@@ -6,6 +6,8 @@ import {ROUTES} from '../../constants/routes';
 import {useDispatch} from 'react-redux';
 import {closeModal} from '../../redux/slices/modalSlice';
 import {useSelector} from 'react-redux';
+import {scale} from '../Responsive/responsive';
+import {moderateScale} from '../../screens/Cart/responsive';
 
 const ViewCart = () => {
   const navigation = useNavigation();
@@ -37,7 +39,7 @@ const ViewCart = () => {
   return (
     <Animated.View style={[styles.container, {transform: [{translateY}]}]}>
       <View style={styles.iconContainer}>
-        <Rotate3D size={30} />
+        <Rotate3D size={moderateScale(30)} />
       </View>
       <View>
         <Text style={styles.title}>View Cart</Text>
@@ -48,7 +50,7 @@ const ViewCart = () => {
       <TouchableOpacity
         onPress={handleCartOption}
         style={styles.arrowContainer}>
-        <ChevronRight size={30} />
+        <ChevronRight size={moderateScale(30)} />
       </TouchableOpacity>
     </Animated.View>
   );
@@ -85,10 +87,11 @@ const styles = StyleSheet.create({
   title: {
     color: 'white',
     fontWeight: '600',
-    fontSize: 17,
+    fontSize: moderateScale(18),
   },
   subtitle: {
     color: 'white',
     fontWeight: '500',
+    fontSize: moderateScale(14),
   },
 });

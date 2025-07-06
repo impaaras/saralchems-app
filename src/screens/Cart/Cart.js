@@ -40,6 +40,7 @@ import {useLoader} from '../../context/LoaderContext';
 import ScrollImage from '../../components/ScrollImage/Index';
 import CartShimmer from './CartShimmer';
 import {Trash2} from 'lucide-react-native';
+import {moderateScale, scale, verticalScale} from './responsive';
 
 // Enhanced TouchableOpacity with animations and haptic feedback
 const AnimatedTouchable = ({
@@ -297,20 +298,18 @@ const CartItem = ({product, onRemove, onDecrement, onIncrement}) => {
           </AnimatedTouchable>
           <AnimatedTouchable onPress={animatedRemove} hapticType="medium">
             <Animated.View>
-              <Trash2 name="delete" size={18} color="#001" />
+              <Trash2 name="delete" size={scale(20)} color="#001" />
               {/* <Icon name="delete" size={22} color="#666" /> */}
             </Animated.View>
           </AnimatedTouchable>
         </View>
         {product.variant !== 'no variant' && (
           <Text style={styles.cartItemSpec}>
-            {/* <Text style={{fontWeight: '700'}}>Variant - </Text> */}
             {removeTrailingDigits(product.variant) ||
               product.variant ||
               'Custom variant'}
           </Text>
         )}
-
         <View
           style={{
             flexDirection: 'row',
@@ -318,7 +317,9 @@ const CartItem = ({product, onRemove, onDecrement, onIncrement}) => {
             alignItems: 'center',
           }}>
           <Text style={styles.cartItemQuality}>
-            <Text style={{fontWeight: '700'}}>Total Qty: </Text>
+            <Text style={{fontWeight: '500', fontSize: scale(15)}}>
+              Total Qty:{' '}
+            </Text>
             {product.variant === 'no variant'
               ? product.quantity
               : calculateTotal(product.variant, product.quantity)}
@@ -610,7 +611,7 @@ const Cart = () => {
             ) : (
               <Animated.View
                 style={[
-                  {alignItems: 'center', marginTop: 50},
+                  {alignItems: 'center', marginTop: verticalScale(50)},
                   {opacity: containerFadeAnim},
                 ]}>
                 <EmptyCartScreen />
@@ -636,13 +637,17 @@ const Cart = () => {
                   style={{
                     borderWidth: 1,
                     borderColor: '#3C5D87',
-                    paddingVertical: 12,
-                    paddingHorizontal: 15,
-                    borderRadius: 25,
+                    paddingVertical: verticalScale(5),
+                    paddingHorizontal: scale(10),
+                    borderRadius: scale(25),
                   }}
                   hapticType="light">
                   <Text
-                    style={{fontSize: 14, fontWeight: '600', color: '#3C5D87'}}>
+                    style={{
+                      fontSize: moderateScale(16),
+                      fontWeight: '600',
+                      color: '#3C5D87',
+                    }}>
                     Add Product
                   </Text>
                 </AnimatedTouchable>

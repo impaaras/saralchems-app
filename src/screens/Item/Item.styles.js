@@ -1,45 +1,5 @@
-// import {StyleSheet} from 'react-native';
-
-// const styles = StyleSheet.create({
-//   screen: {backgroundColor: '#F2F7FE', flex: 1},
-//   scrollWrapper: {
-//     marginTop: -80,
-//     marginLeft: 10,
-//   },
-//   container: {
-//     backgroundColor: '#E5F1FF',
-//     flexDirection: 'row',
-//     borderRadius: 15,
-//     paddingHorizontal: 10,
-//   },
-//   itemContainer: {
-//     marginTop: 20,
-//     marginLeft: 10,
-//     marginRight: 10,
-//     alignItems: 'center',
-//   },
-//   selectedItem: {opacity: 1},
-//   image: {width: 95, height: 95, borderRadius: 15},
-//   itemTitle: {fontSize: 14, textAlign: 'center', marginTop: 5, width: 95},
-//   borderBottom: {
-//     width: '100%',
-//     height: 4,
-//     borderRadius: 10,
-//     backgroundColor: '#3C5D85',
-//     marginTop: 5,
-//   },
-//   productsContainer: {
-//     backgroundColor: 'white',
-//     borderRadius: 20,
-//     paddingTop: 20,
-//     marginHorizontal: 0,
-//     marginBottom: 20,
-//   },
-// });
-
-// export default styles;
-
 import {StyleSheet, Dimensions} from 'react-native';
+import {moderateScale, scale} from '../../utils/Responsive/responsive';
 
 const {width: screenWidth, height: screenHeight} = Dimensions.get('window');
 
@@ -86,13 +46,12 @@ const styles = StyleSheet.create({
     // minHeight: hp(15), // Minimum height for touch targets
   },
   itemContainer: {
-    // marginTop: hp(2.5),
     marginLeft: wp(3),
     marginTop: wp(3),
+    // marginBottom: scale(10),
     marginRight: wp(3),
-    alignItems: 'center',
+    // alignItems: 'center',
     minWidth: wp(20), // Minimum width to prevent squishing
-    // paddingVertical: hp(1.5),
   },
   selectedItem: {
     opacity: 1,
@@ -104,22 +63,24 @@ const styles = StyleSheet.create({
     resizeMode: 'cover',
   },
   itemTitle: {
-    fontSize: responsiveFontSize(14),
-    textAlign: 'center',
-    marginTop: hp(0.6),
-    width: getImageSize(),
-    flexWrap: 'wrap',
-    lineHeight: responsiveFontSize(16),
-  },
-  bolditemTitle: {
-    fontSize: responsiveFontSize(14),
+    flex: 1,
+    fontSize: moderateScale(12),
     textAlign: 'center',
     color: '#3C5D87',
     fontWeight: '600',
     marginTop: hp(0.6),
     width: getImageSize(),
     flexWrap: 'wrap',
-    lineHeight: responsiveFontSize(16),
+  },
+  bolditemTitle: {
+    flex: 1,
+    fontSize: moderateScale(12),
+    textAlign: 'center',
+    color: '#3C5D87',
+    fontWeight: '600',
+    marginTop: hp(0.6),
+    width: getImageSize(),
+    flexWrap: 'wrap',
   },
   borderBottom: {
     width: '100%',

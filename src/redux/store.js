@@ -10,6 +10,7 @@ import addCartReducer from './slices/addToCartSlice';
 import productReducer from './slices/productSlice';
 import searchHistoryReducer from './slices/searchHistory';
 import newCart from './slices/newCart';
+import invoice from './slices/orderHistory';
 
 export const store = configureStore({
   reducer: {
@@ -23,5 +24,6 @@ export const store = configureStore({
     product: productReducer,
     searchHistory: searchHistoryReducer,
     newCart: newCart,
+    invoiceSlice: invoice,
   },
 });

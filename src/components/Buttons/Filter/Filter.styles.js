@@ -1,4 +1,5 @@
 import {StyleSheet} from 'react-native';
+import {scale} from '../../../screens/Cart/responsive';
 
 const styles = StyleSheet.create({
   container: {
@@ -9,7 +10,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   title: {
-    fontSize: 18,
+    fontSize: scale(16),
     fontWeight: '700',
     color: '#333',
     fontFamily: 'Poppins-SemiBold', // Use your Poppins font
@@ -30,7 +31,7 @@ const styles = StyleSheet.create({
   },
   actionText: {
     marginLeft: 4,
-    fontSize: 14,
+    fontSize: scale(12),
     color: '#000',
     fontFamily: 'Poppins-Medium', // Use your Poppins font
   },

@@ -1,94 +1,3 @@
-// import React from 'react';
-// import {
-//   SafeAreaView,
-//   StyleSheet,
-//   Text,
-//   View,
-//   Image,
-//   TouchableOpacity,
-//   StatusBar,
-// } from 'react-native';
-// import {useSafeAreaInsets} from 'react-native-safe-area-context';
-// import Icon from 'react-native-vector-icons/Feather';
-// import DashboardHeader from '../../components/Header/DashBoardHeader';
-// import {useDispatch, useSelector} from 'react-redux';
-// import {logout} from '../../redux/slices/authSlice';
-
-// import {ROUTES} from '../../constants/routes';
-// import {useNavigation} from '@react-navigation/native';
-// import {fallbackImg} from '../../utils/images';
-// import styles from './Profile.styles';
-
-// const MenuItem = ({title, onPress}) => {
-//   return (
-//     <TouchableOpacity style={styles.menuItem} onPress={onPress}>
-//       <View style={styles.menuIconContainer}>
-//         <View style={styles.menuIcon} />
-//       </View>
-//       <Text style={styles.menuText}>{title}</Text>
-//       <Icon name="chevron-right" size={20} color="#000" />
-//     </TouchableOpacity>
-//   );
-// };
-
-// const Profile = () => {
-//   const insets = useSafeAreaInsets();
-//   const dispatch = useDispatch();
-//   const navigation = useNavigation();
-
-//   const user = useSelector(state => state.auth.user); // Make sure the path is correct
-
-//   // Check if user exists, else fallback to default value
-//   const userName = user?.name || 'John Deo';
-//   const userEmail = user?.email || 'JohnDeo@gmail.com';
-
-//   // Logout function
-//   const handleLogout = () => {
-//     // navigation.navigate(ROUTES.LOGIN);
-//     dispatch(logout());
-//   };
-//   return (
-//     <>
-//       <StatusBar barStyle="light-content" />
-//       <DashboardHeader />
-//       <View style={[styles.container, {paddingTop: insets.top}]}>
-//         <View style={styles.profileContainer}>
-//           <View style={styles.profileHeader}>
-//             <Image
-//               source={{
-//                 uri: fallbackImg(),
-//               }}
-//               style={styles.profileAvatar}
-//             />
-//             <View style={styles.profileInfo}>
-//               <Text style={styles.profileName}>{userName}</Text>
-//               <Text style={styles.profileEmail}>{userEmail}</Text>
-//             </View>
-//           </View>
-
-//           <View style={styles.divider} />
-
-//           <Text style={styles.sectionTitle}>YOUR INFORMATION</Text>
-//           <MenuItem title="Order Traking" onPress={() => {}} />
-//           <View style={styles.divider} />
-//           <MenuItem title="Order history" onPress={() => {}} />
-//           <View style={styles.divider} />
-
-//           <Text style={styles.sectionTitle}>OTHER INFORMATION</Text>
-//           <MenuItem title="Share the app" onPress={() => {}} />
-//           <View style={styles.divider} />
-//           <MenuItem title="About us" onPress={() => {}} />
-//           <View style={styles.divider} />
-//           <MenuItem title="Log out" onPress={handleLogout} />
-//           <View style={styles.divider} />
-//         </View>
-//       </View>
-//     </>
-//   );
-// };
-
-// export default Profile;
-
 import React from 'react';
 import {
   SafeAreaView,
@@ -120,10 +29,11 @@ const MenuItem = ({title, onPress, iconName}) => {
   return (
     <TouchableOpacity style={styles.menuItem} onPress={onPress}>
       <View style={styles.menuIconContainer}>
-        <Icon name={iconName} size={moderateScale(20)} color="#000" />
+        <View style={styles.menuIcon}></View>
+        {/* <Icon name={iconName} size={moderateScale(16)} color="#000" /> */}
       </View>
       <Text style={styles.menuText}>{title}</Text>
-      <Icon name="chevron-right" size={moderateScale(20)} color="#000" />
+      <Icon name="chevron-right" size={moderateScale(18)} color="#000" />
     </TouchableOpacity>
   );
 };
@@ -155,7 +65,7 @@ const Profile = () => {
     <>
       <StatusBar barStyle="light-content" />
       <DashboardHeader />
-      <View style={[styles.container, {paddingTop: insets.top}]}>
+      <View style={[styles.container, {paddingTop: 0}]}>
         <View style={styles.profileContainer}>
           <View style={styles.profileHeader}>
             <Image
@@ -169,22 +79,30 @@ const Profile = () => {
               <Text style={styles.profileEmail}>{userEmail}</Text>
             </View>
           </View>
-          <View style={styles.divider} />
-          <Text style={styles.sectionTitle}>YOUR INFORMATION</Text>
-          <MenuItem
-            title="Order Tracking"
-            iconName="map-pin"
-            onPress={() => {}}
-          />
-          <View style={styles.divider} />
-          <MenuItem title="Order history" iconName="clock" onPress={() => {}} />
-
-          <Text style={styles.sectionTitle}>OTHER INFORMATION</Text>
-          <View style={styles.divider} />
-          <MenuItem title="About us" iconName="info" onPress={() => {}} />
-          <View style={styles.divider} />
-          <MenuItem title="Log out" iconName="log-out" onPress={handleLogout} />
-          <View style={styles.divider} />
+          <View style={{paddingHorizontal: scale(5)}}>
+            <Text style={styles.sectionTitle}>YOUR INFORMATION</Text>
+            <View style={{paddingHorizontal: scale(20)}}>
+              <MenuItem
+                title="Order Tracking"
+                iconName="map-pin"
+                onPress={() => {}}
+              />
+              <MenuItem
+                title="Order history"
+                iconName="clock"
+                onPress={() => {}}
+              />
+            </View>
+            <Text style={styles.sectionTitle}>OTHER INFORMATION</Text>
+            <View style={{paddingHorizontal: scale(20)}}>
+              <MenuItem title="About us" iconName="info" onPress={() => {}} />
+              <MenuItem
+                title="Log out"
+                iconName="log-out"
+                onPress={handleLogout}
+              />
+            </View>
+          </View>
         </View>
       </View>
     </>
@@ -232,26 +150,31 @@ const styles = StyleSheet.create({
     backgroundColor: '#d3d3d3',
   },
   profileContainer: {
-    backgroundColor: 'white',
+    backgroundColor: '#FFF',
     marginTop: verticalScale(-40),
-    // marginHorizontal: scale(10),
     borderRadius: moderateScale(20),
     paddingBottom: verticalScale(50),
     overflow: 'hidden',
-    shadowColor: '#F4F9FF',
-    shadowOffset: {width: 0, height: 2},
+    // ✅ iOS Shadow
+    shadowColor: '#CCC',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 100,
-    // Ensure container doesn't exceed screen width
-    // maxWidth: screenWidth - scale(20),
-    // alignSelf: 'center',
+
+    // ✅ Android Shadow
+    elevation: 4,
   },
   profileHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: moderateScale(20),
+    // padding: moderateScale(20),
     paddingVertical: verticalScale(20),
+    marginHorizontal: scale(20),
+    borderBottomColor: '#AAA',
+    borderBottomWidth: 1,
   },
   profileAvatar: {
     width: moderateScale(60),
@@ -264,7 +187,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   profileName: {
-    fontSize: moderateScale(18),
+    fontSize: moderateScale(14),
     fontWeight: 'bold',
     color: '#000',
   },
@@ -276,10 +199,10 @@ const styles = StyleSheet.create({
   divider: {
     height: 1,
     marginHorizontal: scale(20),
-    backgroundColor: '#e0e0e0',
+    backgroundColor: '#000000',
   },
   sectionTitle: {
-    fontSize: moderateScale(14),
+    fontSize: moderateScale(15),
     fontWeight: '500',
     color: '#666',
     marginVertical: verticalScale(12),
@@ -290,8 +213,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: verticalScale(15),
-    paddingHorizontal: scale(20),
-    minHeight: verticalScale(60),
+    paddingHorizontal: scale(5),
+    marginHorizontal: scale(6),
+    borderBottomColor: '#AAA',
+    borderBottomWidth: 1,
   },
   menuIconContainer: {
     width: moderateScale(40),
@@ -303,12 +228,12 @@ const styles = StyleSheet.create({
     width: moderateScale(30),
     height: moderateScale(30),
     borderRadius: moderateScale(15),
-    backgroundColor: '#cad3e0',
+    backgroundColor: '#3B5C8580',
   },
   menuText: {
     flex: 1,
-    fontSize: moderateScale(16),
-    marginLeft: scale(10),
+    fontSize: moderateScale(15),
+    marginLeft: moderateScale(5),
     color: '#000',
   },
 });

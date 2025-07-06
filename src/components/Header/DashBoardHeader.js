@@ -28,7 +28,7 @@ import {
 } from '@react-navigation/native';
 import {useDispatch, useSelector} from 'react-redux';
 import {openDrawer, toggleDrawer} from '../../redux/slices/drawerSlice';
-import {ChevronLeft, Route} from 'lucide-react-native';
+import {ChevronLeft, Route, TextIcon} from 'lucide-react-native';
 import DropdownMenu from '../Dropdown/DropwDownComponent';
 import {
   clearSearchResults,
@@ -45,6 +45,9 @@ import {
 import {API_URL} from '../../utils/ApiService';
 import {previousRouteName} from '../../navigation/navigationService';
 import {fetchUserProfile} from '../../redux/slices/authSlice';
+import {scale} from '../../screens/Cart/responsive';
+import {moderateScale} from '../../utils/Responsive/responsive';
+
 const {width} = Dimensions.get('window');
 
 const DashboardHeader = ({name}) => {
@@ -251,7 +254,8 @@ const DashboardHeader = ({name}) => {
               <TouchableOpacity
                 style={styles.menuContainer}
                 onPress={() => navigation.openDrawer()}>
-                <Image source={menuIcon} />
+                {/* <Image source={menuIcon} /> */}
+                <TextIcon size={scale(26)} color="#FFF" />
               </TouchableOpacity>
             ) : (
               <TouchableOpacity
@@ -259,10 +263,10 @@ const DashboardHeader = ({name}) => {
                 style={{
                   borderWidth: 1,
                   borderColor: '#CCC',
-                  padding: 6,
+                  padding: moderateScale(6),
                   borderRadius: 100,
                 }}>
-                <ChevronLeft color="#FFF" size={26} />
+                <ChevronLeft color="#FFF" size={scale(26)} />
               </TouchableOpacity>
             )}
 
@@ -335,7 +339,7 @@ const DashboardHeader = ({name}) => {
                 style={styles.searchButton}>
                 <Icon
                   name={openInput ? 'search' : 'search'}
-                  size={26}
+                  size={scale(26)}
                   color="#FFF"
                 />
               </TouchableOpacity>
@@ -345,7 +349,7 @@ const DashboardHeader = ({name}) => {
                 <View style={styles.badge}>
                   <Text style={styles.badgeText}>5</Text>
                 </View>
-                <Icon3 name="user" size={24} color="#5A5A5A" />
+                <Icon3 name="user" size={scale(22)} color="#5A5A5A" />
               </TouchableOpacity>
             </View>
           </View>

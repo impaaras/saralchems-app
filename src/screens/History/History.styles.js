@@ -1,5 +1,9 @@
 import {StyleSheet, Dimensions} from 'react-native';
-
+import {
+  scale,
+  moderateScale,
+  verticalScale,
+} from '../../utils/Responsive/responsive';
 // Get screen dimensions
 const {width: screenWidth, height: screenHeight} = Dimensions.get('window');
 
@@ -17,93 +21,6 @@ const isTablet = screenWidth >= 768;
 const isSmallScreen = screenWidth < 380;
 
 const styles = StyleSheet.create({
-  // filterContainer: {
-  //   marginHorizontal: wp(4),
-  //   marginBottom: hp(1),
-  //   zIndex: 1000,
-  //   position: 'absolute',
-  //   right: 50,
-  //   left: 50,
-  // },
-  // filterContainer: {
-  //   zIndex: 1000,
-  //   paddingHorizontal: wp(2),
-  // },
-
-  // dropdownToggle: {
-  //   zIndex: 1001,
-  //   // width: wp(40),
-  // },
-  // dropdownButton: {
-  //   flexDirection: 'row',
-  //   alignItems: 'center',
-  //   justifyContent: 'space-between',
-  //   borderRadius: wp(2.5),
-  //   elevation: 3,
-  //   shadowColor: '#000',
-  //   shadowOffset: {width: 0, height: 2},
-  //   shadowOpacity: 0.1,
-  //   shadowRadius: 4,
-  // },
-  // dropdownButtonText: {
-  //   color: '#FFF',
-  //   paddingHorizontal: wp(4),
-  //   paddingVertical: hp(1.5),
-  //   fontSize: isTablet ? 16 : isSmallScreen ? 12 : 14,
-  //   fontWeight: '600',
-  // },
-  // dropdownMenu: {
-  //   position: 'relative',
-  //   top: 0,
-  //   left: 0,
-  //   backgroundColor: '#FFF',
-  //   borderRadius: wp(2.5),
-  //   marginTop: hp(0.5),
-  //   elevation: 8,
-  //   shadowColor: '#000',
-  //   shadowOffset: {width: 0, height: 4},
-  //   shadowOpacity: 0.15,
-  //   shadowRadius: 8,
-  //   borderWidth: 1,
-  //   borderColor: '#E0E0E0',
-  //   overflow: 'hidden',
-  //   maxHeight: hp(42),
-  // },
-  // dropdownItem: {
-  //   paddingHorizontal: wp(4),
-  //   paddingVertical: hp(1.5),
-  //   borderBottomWidth: 0.5,
-  //   borderBottomColor: '#F0F0F0',
-  // },
-  // lastDropdownItem: {
-  //   borderBottomWidth: 0,
-  // },
-  // activeDropdownItem: {
-  //   backgroundColor: '#F8F9FA',
-  // },
-  // dropdownItemContent: {
-  //   flexDirection: 'row',
-  //   alignItems: 'center',
-  //   justifyContent: 'space-between',
-  // },
-  // dropdownItemText: {
-  //   fontSize: isTablet ? 15 : isSmallScreen ? 11 : 13,
-  //   color: '#333',
-  //   fontWeight: '500',
-  // },
-  // activeDropdownItemText: {
-  //   color: '#38587F',
-  //   fontWeight: '600',
-  // },
-  // dropdownOverlay: {
-  //   position: 'absolute',
-  //   top: 0,
-  //   left: 0,
-  //   right: 0,
-  //   bottom: 0,
-  //   backgroundColor: 'transparent',
-  //   zIndex: 999,
-  // },
   filterTabsContainer: {
     paddingHorizontal: wp(2),
   },
@@ -119,8 +36,6 @@ const styles = StyleSheet.create({
   },
 
   activeGradient: {
-    paddingVertical: hp(1),
-    paddingHorizontal: wp(3),
     borderRadius: wp(5),
   },
 
@@ -128,21 +43,17 @@ const styles = StyleSheet.create({
     borderWidth: 0,
   },
 
-  activeTabText: {
-    color: '#FFF',
-    fontWeight: '600',
-    fontSize: isTablet ? 16 : isSmallScreen ? 12 : 14,
-    textAlign: 'center',
-  },
-
   inactiveTabText: {
     color: '#333',
     fontWeight: '500',
-    fontSize: isTablet ? 16 : isSmallScreen ? 11 : 13,
-    textAlign: 'center',
-    paddingVertical: hp(1),
-    paddingHorizontal: wp(2),
-    borderRadius: wp(5),
+    fontSize: isTablet
+      ? moderateScale(14)
+      : isSmallScreen
+      ? moderateScale(10)
+      : moderateScale(12),
+    paddingHorizontal: scale(10),
+    paddingVertical: scale(8),
+    borderRadius: scale(5),
   },
 
   container: {
@@ -177,16 +88,16 @@ const styles = StyleSheet.create({
     backgroundColor: '#E0E0E0',
   },
   userTextContainer: {
-    marginLeft: wp(4),
+    marginLeft: scale(10),
     flex: 1,
   },
   userName: {
-    fontSize: isTablet ? 18 : isSmallScreen ? 14 : 16,
+    fontSize: isTablet ? scale(15) : isSmallScreen ? scale(12) : scale(14),
     fontWeight: '600',
     color: '#212121',
   },
   userEmail: {
-    fontSize: isTablet ? 16 : isSmallScreen ? 12 : 14,
+    fontSize: isTablet ? scale(15) : isSmallScreen ? scale(12) : scale(14),
     color: '#757575',
   },
   tabsContainer: {
@@ -207,9 +118,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#CCC',
   },
-
   activeTabButton: {
     borderWidth: 0,
+    // paddingVertical: hp(1),
   },
   tabText: {
     fontSize: isTablet ? 15 : isSmallScreen ? 11 : 13,
@@ -218,6 +129,13 @@ const styles = StyleSheet.create({
   },
   activeTabText: {
     color: 'white',
+    fontSize: isTablet
+      ? moderateScale(14)
+      : isSmallScreen
+      ? moderateScale(10)
+      : moderateScale(12),
+    paddingHorizontal: scale(10),
+    paddingVertical: scale(8),
     fontWeight: '600',
   },
   ordersContainer: {
@@ -229,15 +147,6 @@ const styles = StyleSheet.create({
     minHeight: hp(50),
     borderBottomLeftRadius: wp(3),
     borderBottomRightRadius: wp(3),
-
-    //anroid
-    elevation: 5,
-
-    // iOS
-    shadowColor: '#3C5D87',
-    shadowOffset: {width: 0, height: 1},
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
   },
   orderCard: {
     borderWidth: 1,
@@ -270,22 +179,21 @@ const styles = StyleSheet.create({
     marginRight: wp(2),
   },
   orderStatus: {
-    fontSize: isTablet ? 16 : isSmallScreen ? 12 : 14,
+    fontSize: isTablet ? scale(15) : isSmallScreen ? scale(8) : scale(10),
     color: '#757575',
   },
   orderDetails: {
-    marginTop: hp(1),
+    marginTop: scale(4),
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
   },
   orderIdText: {
-    fontSize: isTablet ? 17 : isSmallScreen ? 13 : 15,
+    fontSize: isTablet ? scale(15) : isSmallScreen ? scale(8) : scale(11),
     fontWeight: '600',
     color: '#212121',
   },
   orderDateText: {
-    fontSize: isTablet ? 15 : isSmallScreen ? 11 : 13,
+    fontSize: isTablet ? scale(15) : isSmallScreen ? scale(8) : scale(10),
     color: '#001',
     fontWeight: '500',
   },
@@ -320,20 +228,20 @@ const styles = StyleSheet.create({
   productDetails: {
     flex: 1,
     marginLeft: wp(4),
-    justifyContent: 'center',
+    justifyContent: 'space-around',
   },
   productName: {
-    fontSize: isTablet ? 17 : isSmallScreen ? 13 : 15,
+    fontSize: isTablet ? scale(15) : isSmallScreen ? scale(10) : scale(11),
     fontWeight: '500',
     color: '#212121',
   },
   productSize: {
-    fontSize: isTablet ? 15 : isSmallScreen ? 11 : 13,
+    fontSize: isTablet ? scale(12) : isSmallScreen ? scale(7) : scale(9),
     color: '#757575',
     marginTop: hp(0.5),
   },
   productQuantity: {
-    fontSize: isTablet ? 15 : isSmallScreen ? 11 : 13,
+    fontSize: isTablet ? scale(13) : isSmallScreen ? scale(8) : scale(9),
     color: '#757575',
     marginTop: hp(0.5),
   },
@@ -470,28 +378,26 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
   emptyTitle: {
-    fontSize: 20,
+    fontSize: moderateScale(20),
     fontWeight: '700',
     color: '#1B2B48',
     marginBottom: 10,
   },
   emptySubtitle: {
-    fontSize: 14,
+    fontSize: moderateScale(14),
     color: '#6E7A8A',
     textAlign: 'center',
     marginBottom: 30,
   },
   goBackButton: {
-    // backgroundColor: '#FDBD34',
-    paddingHorizontal: 32,
-    paddingVertical: 12,
+    paddingHorizontal: scale(20),
+    paddingVertical: scale(8),
     borderRadius: 24,
-    // elevation: 2,
   },
   goBackText: {
     color: '#FFF',
     fontWeight: '600',
-    fontSize: 14,
+    fontSize: moderateScale(14),
   },
 });
 

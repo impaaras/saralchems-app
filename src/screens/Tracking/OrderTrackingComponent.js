@@ -1,6 +1,8 @@
 import React from 'react';
 import {View, Text, StyleSheet, Dimensions} from 'react-native';
 import {Package, Truck, Box, CheckCircle} from 'lucide-react-native';
+import {scale, moderateScale} from '../Cart/responsive';
+import {verticalScale} from '../../utils/Responsive/responsive';
 
 const {width: screenWidth, height: screenHeight} = Dimensions.get('window');
 
@@ -137,7 +139,8 @@ const TrackingStep = ({
               styles.stepLine,
               {
                 backgroundColor: getLineColor(),
-                height: getLineHeight(),
+                minHeight:
+                  isActive || isCompleted ? getLineHeight() : moderateScale(70),
               },
             ]}
           />
@@ -157,31 +160,32 @@ const TrackingStep = ({
           <View
             style={{
               flexDirection: 'row',
-
               alignItems: 'center',
             }}>
-            <View style={{alignItems: 'center', marginRight: hp(3)}}>
-              <View
-                style={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: 30,
-                  backgroundColor: '#D9D9D9',
-                }}></View>
-              <View
-                style={{
-                  width: 2,
-                  height: 40,
-                  backgroundColor: '#808080',
-                }}></View>
-              <View
-                style={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: 30,
-                  backgroundColor: '#D9D9D9',
-                }}></View>
-            </View>
+            {isActive && (
+              <View style={{alignItems: 'center', marginRight: hp(3)}}>
+                <View
+                  style={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: 30,
+                    backgroundColor: '#D9D9D9',
+                  }}></View>
+                <View
+                  style={{
+                    width: 2,
+                    minHeight: getLineHeight() / 2,
+                    backgroundColor: '#808080',
+                  }}></View>
+                <View
+                  style={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: 30,
+                    backgroundColor: '#D9D9D9',
+                  }}></View>
+              </View>
+            )}
             <View>
               {(isActive || isCompleted) &&
                 dates.length > 0 &&
@@ -206,10 +210,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: wp(4),
   },
   trackingHeader: {
-    paddingVertical: hp(2),
+    paddingBottom: scale(10),
   },
   trackingTitle: {
-    fontSize: isTablet ? 20 : isSmallScreen ? 16 : 18,
+    fontSize: isTablet
+      ? moderateScale(22)
+      : isSmallScreen
+      ? moderateScale(16)
+      : moderateScale(18),
     fontWeight: '600',
     color: '#101924',
   },
@@ -219,21 +227,20 @@ const styles = StyleSheet.create({
   stepContainer: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    paddingHorizontal: hp(3),
+    paddingHorizontal: scale(30),
   },
   stepIconColumn: {
     alignItems: 'center',
-    marginRight: wp(4),
+    marginRight: scale(40),
   },
   stepIconContainer: {
-    width: wp(12),
-    height: wp(12),
-    borderRadius: wp(6),
+    width: scale(60),
+    height: scale(60),
+    borderRadius: scale(30),
     justifyContent: 'center',
-    backgroundColor: 'red',
     alignItems: 'center',
     elevation: 5,
-    shadowColor: '#CCC',
+    shadowColor: '#FFF',
     shadowOffset: {
       width: 0,
       height: 1,
@@ -242,35 +249,50 @@ const styles = StyleSheet.create({
     shadowRadius: 1.5,
   },
   stepLine: {
-    width: 1.5,
-    // marginTop: hp(1),
+    width: scale(2),
   },
   stepContent: {
     flex: 1,
-    paddingTop: hp(1),
+    paddingVertical: verticalScale(10),
   },
   stepTitle: {
-    fontSize: isTablet ? 18 : isSmallScreen ? 14 : 16,
+    fontSize: isTablet
+      ? moderateScale(18)
+      : isSmallScreen
+      ? moderateScale(14)
+      : moderateScale(16),
     fontWeight: '500',
-    color: '#3C5D88',
-    marginBottom: hp(1),
+    color: '#555555',
+    marginBottom: scale(10),
   },
   stepTitleActive: {
+    fontSize: isTablet
+      ? moderateScale(18)
+      : isSmallScreen
+      ? moderateScale(14)
+      : moderateScale(16),
     color: '#3C5D86',
     fontWeight: '600',
   },
   dateContainer: {
-    marginBottom: hp(1.5),
-    // paddingLeft: wp(2),
+    marginBottom: scale(10),
   },
   dateText: {
-    fontSize: isTablet ? 15 : isSmallScreen ? 12 : 14,
+    fontSize: isTablet
+      ? moderateScale(16)
+      : isSmallScreen
+      ? moderateScale(12)
+      : moderateScale(14),
     color: '#555',
   },
   statusLabel: {
-    fontSize: isTablet ? 14 : isSmallScreen ? 11 : 13,
+    fontSize: isTablet
+      ? moderateScale(16)
+      : isSmallScreen
+      ? moderateScale(12)
+      : moderateScale(14),
     color: '#555',
-    marginTop: hp(0.5),
+    marginTop: scale(5),
   },
 });
 

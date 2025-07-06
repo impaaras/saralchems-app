@@ -11,6 +11,7 @@ import React, {useRef, useState} from 'react';
 import {useDispatch} from 'react-redux';
 import {openModal} from '../../redux/slices/modalSlice';
 import Icon from 'react-native-vector-icons/Entypo';
+import {scale} from '../../utils/Responsive/responsive';
 
 const Index = ({product, reffer}) => {
   const dispatch = useDispatch();
@@ -79,7 +80,7 @@ const Index = ({product, reffer}) => {
       // Show placeholder if error or URI is invalid/empty
       return (
         <View style={[customStyle, styles.container]}>
-          <Icon name="images" color="#AAA" size={32} />
+          <Icon name="images" color="#AAA" size={scale(24)} />
         </View>
       );
     } else {
@@ -181,7 +182,6 @@ const Index = ({product, reffer}) => {
         <View style={styles.imageContainer}>
           <FlatList
             ref={flatListRef}
-            // data={product?.image}
             data={reffer === 'cart' ? [product?.image?.[0]] : product?.image}
             renderItem={renderImageItem}
             keyExtractor={(premium, index) => index.toString()}
@@ -264,7 +264,6 @@ const styles = StyleSheet.create({
   },
   imageContainer: {
     alignItems: 'center',
-    // marginLeft: -23,
     backgroundColor: 'rgba(0, 0, 0, 0.04)',
     borderRadius: 8,
   },
@@ -546,8 +545,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   cartItemImage: {
-    width: 80,
-    height: 80,
+    width: scale(70),
+    height: scale(70),
     // backgroundColor: '#F0F0F0',
   },
 });

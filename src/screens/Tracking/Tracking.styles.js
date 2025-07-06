@@ -1,5 +1,6 @@
 import {Dimensions, StyleSheet} from 'react-native';
-// Get screen dimensions
+import {scale} from '../Cart/responsive';
+import {moderateScale} from '../../utils/Responsive/responsive';
 const {width: screenWidth, height: screenHeight} = Dimensions.get('window');
 
 // Responsive helper functions
@@ -35,24 +36,10 @@ const styles = StyleSheet.create({
 
   orderCard: {
     margin: wp(3),
-    borderWidth: 1,
-    borderColor: '#CCC',
     backgroundColor: '#FFF',
     borderRadius: wp(3),
     marginBottom: hp(2),
     overflow: 'hidden',
-
-    // ✅ iOS Shadow
-    shadowColor: '#CCC',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-
-    // ✅ Android Shadow
-    elevation: 4,
   },
   orderHeader: {
     paddingHorizontal: wp(2.5),
@@ -221,10 +208,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#3C5D87',
-    paddingVertical: 8,
-
-    paddingHorizontal: 16,
-    borderRadius: 20,
+    borderRadius: 40,
   },
   receiptIcon: {
     marginRight: 8,
@@ -235,67 +219,77 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   supportContainer: {
-    marginTop: 24,
+    marginTop: scale(32),
+    marginBottom: scale(16),
+    flexDirection: 'row',
+    paddingHorizontal: scale(15),
+    alignItems: 'center',
   },
   supportText: {
-    fontSize: 16,
+    flex: 1,
+    fontSize: moderateScale(14),
     color: '#666',
-
     textAlign: 'center',
   },
   supportButtons: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    gap: 16,
+    gap: scale(16),
   },
   callButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    // paddingVertical: 8,
-    // paddingHorizontal: 16,
-    borderRadius: 4,
+    paddingVertical: scale(8),
+    paddingHorizontal: scale(16),
+    borderRadius: scale(30),
     gap: 8,
   },
   whatsappButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: 4,
-    gap: 8,
+    paddingVertical: scale(8),
+    paddingHorizontal: scale(16),
+    borderRadius: scale(30),
+    gap: scale(8),
   },
   buttonText: {
     color: '#fff',
-    fontSize: 14,
+    fontSize: moderateScale(14),
     fontWeight: '500',
   },
+  orderStatus: {
+    fontSize: isTablet ? scale(15) : isSmallScreen ? scale(8) : scale(10),
+    color: '#757575',
+  },
   orderDetails: {
-    marginTop: 5,
+    marginTop: scale(4),
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
   orderIdText: {
-    fontSize: 15,
+    fontSize: isTablet ? scale(15) : isSmallScreen ? scale(8) : scale(11),
     fontWeight: '600',
     color: '#212121',
   },
-
   orderDateText: {
-    fontSize: 13,
+    fontSize: isTablet ? scale(15) : isSmallScreen ? scale(8) : scale(10),
     color: '#001',
-    textAlign: 'right',
     fontWeight: '500',
   },
   orderValueText: {
-    fontSize: 13,
-    textAlign: 'right',
+    fontSize: isTablet ? 15 : isSmallScreen ? 11 : 13,
     fontWeight: '500',
     color: '#001',
   },
-  productImage: {
-    width: 70,
-    height: 70,
-    borderRadius: 8,
-    backgroundColor: '#E0E0E0',
+  expandIconContainer: {
+    position: 'absolute',
+    right: wp(4),
+    top: wp(4),
+  },
+  expandIcon: {
+    fontSize: isTablet ? scale(16) : scale(14),
+    color: '#757575',
   },
   orderItem: {
     borderWidth: 1,
@@ -305,30 +299,37 @@ const styles = StyleSheet.create({
     marginTop: hp(1.2),
     padding: wp(3.8),
   },
+  productImage: {
+    width: wp(17.5),
+    height: wp(17.5),
+    borderRadius: wp(2),
+    backgroundColor: '#E0E0E0',
+  },
+  productDetails: {
+    flex: 1,
+    marginLeft: wp(4),
+    justifyContent: 'space-around',
+  },
   productName: {
-    fontSize: 15,
+    fontSize: isTablet ? scale(15) : isSmallScreen ? scale(10) : scale(11),
     fontWeight: '500',
     color: '#212121',
   },
   productSize: {
-    fontSize: 13,
+    fontSize: isTablet ? scale(12) : isSmallScreen ? scale(7) : scale(9),
     color: '#757575',
-    marginTop: 4,
+    marginTop: hp(0.5),
   },
   productQuantity: {
-    fontSize: 13,
+    fontSize: isTablet ? scale(13) : isSmallScreen ? scale(8) : scale(9),
     color: '#757575',
+    marginTop: hp(0.5),
   },
   productPrice: {
-    fontSize: 15,
+    fontSize: isTablet ? 17 : isSmallScreen ? 13 : 15,
     fontWeight: '600',
     color: '#212121',
-    marginTop: 4,
-  },
-  productDetails: {
-    flex: 1,
-    marginLeft: 16,
-    justifyContent: 'center',
+    marginTop: hp(0.5),
   },
   ratingContainer: {
     height: hp(2.5),

@@ -24,10 +24,6 @@ export const AlertProvider = ({children}) => {
         visible={alertVisible}
         title={alertConfig.title}
         message={alertConfig.message}
-        // onConfirm={() => {
-        // alertConfig.onConfirm && alertConfig.onConfirm();
-        // hideAlert();
-        // }}
         onAccept={() => {
           alertConfig.onConfirm && alertConfig.onConfirm();
           hideAlert();

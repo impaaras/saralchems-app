@@ -246,6 +246,7 @@ import {
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import HapticFeedback from 'react-native-haptic-feedback';
 import LinearGradient from 'react-native-linear-gradient';
+import {moderateScale, scale} from '../Responsive/responsive';
 
 const {width} = Dimensions.get('window');
 const modalWidth = width > 500 ? 420 : width * 0.85;
@@ -351,7 +352,11 @@ const GlobalAlert = ({
                   style={styles.closeButton}
                   onPress={handleClose}
                   hitSlop={{top: 10, right: 10, bottom: 10, left: 10}}>
-                  <Ionicons name="close" size={24} color="#000" />
+                  <Ionicons
+                    name="close"
+                    size={moderateScale(20)}
+                    color="#000"
+                  />
                 </TouchableOpacity>
 
                 {/* Modal Content */}
@@ -422,28 +427,28 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   title: {
-    fontSize: 22,
-    fontWeight: '700',
+    fontSize: moderateScale(16),
+    fontWeight: '500',
     color: '#000',
     marginBottom: 10,
     textAlign: 'center',
   },
   message: {
-    fontSize: 16,
+    minWidth: scale(200),
+    fontSize: moderateScale(14),
     color: '#666',
     textAlign: 'center',
     marginBottom: 24,
-    lineHeight: 22,
   },
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     width: '100%',
-    marginTop: 8,
+    marginTop: scale(4),
   },
   rejectButton: {
     flex: 1,
-    height: 48,
+    height: scale(36),
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 8,
@@ -452,13 +457,13 @@ const styles = StyleSheet.create({
     marginRight: 8,
   },
   rejectButtonText: {
-    fontSize: 16,
+    fontSize: moderateScale(14),
     fontWeight: '600',
     color: '#000',
   },
   acceptButton: {
     flex: 1,
-    height: 48,
+    height: scale(36),
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 8,
@@ -466,7 +471,7 @@ const styles = StyleSheet.create({
     marginLeft: 8,
   },
   acceptButtonText: {
-    fontSize: 16,
+    fontSize: moderateScale(14),
     fontWeight: '600',
     color: '#fff',
   },

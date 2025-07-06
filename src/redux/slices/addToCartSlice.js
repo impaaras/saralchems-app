@@ -25,6 +25,7 @@ export const addToCart = createAsyncThunk(
   'cart/addToCart',
   async ({productId, variant, quantity}, {getState, rejectWithValue}) => {
     try {
+      console.log(productId, variant, quantity);
       const token = storage.getString(StorageKeys.AUTH_TOKEN);
       const response = await axios.post(
         `${BASE_URL}/cart/add`,
@@ -58,6 +59,7 @@ export const updateCartItem = createAsyncThunk(
   'cart/updateCartItem',
   async ({productId, variant, quantity}, {getState, rejectWithValue}) => {
     try {
+      console.log(productId, variant, quantity, 'data');
       const token = storage.getString(StorageKeys.AUTH_TOKEN);
       const response = await axios.put(
         `${BASE_URL}/cart/update`,

@@ -1,4 +1,5 @@
 import {StyleSheet} from 'react-native';
+import {scale} from '../Cart/responsive';
 
 const styles = StyleSheet.create({
   container: {
@@ -29,6 +30,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFF',
     borderTopLeftRadius: 15,
     borderTopRightRadius: 15,
+    paddingVertical: scale(10),
     marginTop: -80,
   },
   footerShimmerWrapper: {

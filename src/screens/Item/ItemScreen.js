@@ -98,7 +98,7 @@ const ItemScreen = ({route}) => {
           `${API_URL}/product/category/${categoryId}/subcategory/${currentSubcategoryId}`,
           {headers: {Authorization: `Bearer ${token}`}},
         );
-        setProduct(response.data);
+        setProduct(response.data.products);
       } catch (error) {
         setErrorMsg(
           error.response?.data?.message || 'Failed to fetch products',
@@ -184,7 +184,7 @@ const ItemScreen = ({route}) => {
       <ScrollView
         style={styles.productsContainer}
         showsVerticalScrollIndicator={false}>
-        {sortedProducts.length > 0 ? (
+        {sortedProducts && sortedProducts.length > 0 ? (
           <View style={styles.productInnerContainer}>
             {sortedProducts &&
               sortedProducts.map((product, index) => (

@@ -31,37 +31,20 @@ import Invoice from '../../components/Invoice/Invoice';
 import InvoicePDFGenerator from '../../components/Invoice/Invoice';
 import InvoiceModal from '../../components/Invoice/Invoice';
 import {ROUTES} from '../../constants/routes';
-
-// Get screen dimensions
-const {width: screenWidth, height: screenHeight} = Dimensions.get('window');
-
-// Responsive helper functions
-const wp = percentage => {
-  return (percentage * screenWidth) / 100;
-};
-
-const hp = percentage => {
-  return (percentage * screenHeight) / 100;
-};
-
-const isTablet = screenWidth >= 768;
-const isSmallScreen = screenWidth < 380;
-
-// Helper to format the date
-const formatDate = dateString => {
-  const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  });
-};
+import {
+  scale,
+  wp,
+  hp,
+  isTablet,
+  isSmallScreen,
+  formatDate,
+} from '../../utils/Responsive/responsive';
+import TrackingCard from '../../components/TrackingCard/TrackingCard';
 
 const OrderHistory = () => {
   const [activeTab, setActiveTab] = useState('All Orders');
   const [expandedOrders, setExpandedOrders] = useState([]);
   const [orders, setOrders] = useState([]);
-  const [dropdownVisible, setDropdownVisible] = useState(false);
   const [dropdownAnimation] = useState(new Animated.Value(0));
   const {setLoading} = useLoader();
 
@@ -195,25 +178,6 @@ const OrderHistory = () => {
     );
   };
 
-  const getStatusColor = status => {
-    switch (status) {
-      case 'Delivered':
-        return '#4CAF50';
-      case 'Quote Sent':
-        return '#FF9800';
-      case 'Confirmed':
-        return '#2196F3';
-      case 'Processing':
-        return '#FF9800';
-      case 'Shipped':
-        return '#2196F3';
-      case 'Rework':
-        return '#F44336';
-      default:
-        return '#757575';
-    }
-  };
-
   // Define filter tabs based on available status values in your data
   const filterTabs = [
     'All Orders',
@@ -260,8 +224,6 @@ const OrderHistory = () => {
     order => activeTab === 'All Orders' || order.status === activeTab,
   );
 
-  // console.log(orders, 'data');
-
   const user = useSelector(state => state.auth.user);
 
   const dispatch = useDispatch();
@@ -278,41 +240,8 @@ const OrderHistory = () => {
     );
   };
 
-  // Dropdown animation functions
-  const toggleDropdown = () => {
-    const toValue = dropdownVisible ? 0 : 1;
-
-    Animated.timing(dropdownAnimation, {
-      toValue,
-      duration: 300,
-      useNativeDriver: false,
-    }).start();
-
-    setDropdownVisible(!dropdownVisible);
-  };
-
   const selectFilter = filter => {
     setActiveTab(filter);
-    toggleDropdown();
-  };
-
-  const dropdownHeight = dropdownAnimation.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0, filterTabs.length * hp(6)], // Adjust height based on number of items
-  });
-
-  const dropdownOpacity = dropdownAnimation.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0, 1],
-  });
-
-  const rotateIcon = dropdownAnimation.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['0deg', '180deg'],
-  });
-
-  const handleTrackingPress = order => {
-    navigation.navigate(ROUTES.TRACKING, {orders: order});
   };
 
   return (
@@ -323,9 +252,9 @@ const OrderHistory = () => {
           style={[
             styles.userInfoCard,
             {
-              marginTop: hp(-6),
-              margin: wp(4),
-              padding: wp(4),
+              marginTop: scale(-40),
+              margin: scale(15),
+              padding: scale(15),
             },
           ]}>
           <Image
@@ -334,7 +263,7 @@ const OrderHistory = () => {
             }}
             style={[styles.userAvatar]}
           />
-          <View style={[styles.userTextContainer, {marginLeft: wp(4)}]}>
+          <View style={[styles.userTextContainer]}>
             <Text style={[styles.userName]}>{user?.name}</Text>
             <Text style={[styles.userEmail]}>{user?.email}</Text>
           </View>
@@ -369,83 +298,6 @@ const OrderHistory = () => {
             ))}
           </ScrollView>
         </View>
-
-        {/* <View
-          style={{
-            borderTopLeftRadius: 20,
-            borderTopRightRadius: 20,
-          }}>
-
-          <View style={styles.filterContainer}>
-            <TouchableOpacity
-              style={styles.dropdownToggle}
-              onPress={toggleDropdown}
-              activeOpacity={0.8}>
-              <LinearGradient
-                colors={['#38587F', '#101924']}
-                start={{x: 0, y: 0}}
-                end={{x: 1, y: 0}}
-                style={styles.dropdownButton}>
-                <Text style={styles.dropdownButtonText}>{activeTab}</Text>
-                <Animated.View
-                  style={{
-                    paddingHorizontal: 10,
-                    transform: [{rotate: rotateIcon}],
-                  }}>
-                  <Icon
-                    name="chevron-down"
-                    size={isTablet ? 22 : 18}
-                    color="#FFF"
-                  />
-                </Animated.View>
-              </LinearGradient>
-            </TouchableOpacity>
-
-            <Animated.View
-              style={[
-                styles.dropdownMenu,
-                {
-                  height: dropdownHeight,
-                  opacity: dropdownOpacity,
-                },
-              ]}>
-              <ScrollView
-                showsVerticalScrollIndicator={false}
-                nestedScrollEnabled={true}>
-                {filterTabs.map((filter, index) => (
-                  <TouchableOpacity
-                    key={filter}
-                    style={[
-                      styles.dropdownItem,
-                      activeTab === filter && styles.activeDropdownItem,
-                      index === filterTabs.length - 1 &&
-                        styles.lastDropdownItem,
-                    ]}
-                    onPress={() => selectFilter(filter)}
-                    activeOpacity={0.7}>
-                    <View style={styles.dropdownItemContent}>
-                      <Text
-                        style={[
-                          styles.dropdownItemText,
-                          activeTab === filter && styles.activeDropdownItemText,
-                        ]}>
-                        {filter}
-                      </Text>
-                      {activeTab === filter && (
-                        <Icon
-                          name="check"
-                          size={isTablet ? 20 : 16}
-                          color="#38587F"
-                        />
-                      )}
-                    </View>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-            </Animated.View>
-          </View>
-        </View> */}
-
         <ScrollView
           style={[styles.ordersContainer]}
           showsVerticalScrollIndicator={false}>
@@ -482,350 +334,11 @@ const OrderHistory = () => {
             </ScrollView>
           ) : (
             filteredOrders.map((order, index) => (
-              <View key={index} style={[styles.orderCard]}>
-                <View style={[styles.orderHeader]}>
-                  <View style={[styles.orderDetails]}>
-                    <View>
-                      <TouchableOpacity
-                        onPress={() => handleTrackingPress(order)}>
-                        <Text style={[styles.orderIdText]}>
-                          Order #{order?._id.slice(-9)}
-                        </Text>
-                      </TouchableOpacity>
-                      <View
-                        style={{flexDirection: 'row', alignItems: 'center'}}>
-                        <View
-                          style={[
-                            styles.statusDot,
-                            {
-                              backgroundColor: getStatusColor(order.status),
-                              width: wp(2.5),
-                              height: wp(2.5),
-                              borderRadius: wp(1.25),
-                              marginRight: wp(2),
-                            },
-                          ]}
-                        />
-                        <Text style={[styles.orderStatus]}>{order.status}</Text>
-                      </View>
-                    </View>
-                    <View>
-                      <Text style={[styles.orderDateText]}>
-                        Placed on {formatDate(order.createdAt)}
-                      </Text>
-                      {!order.isPartialOrder && (
-                        <View
-                          style={{flexDirection: 'row', alignItems: 'center'}}>
-                          <InfoIcon
-                            name="info-with-circle"
-                            size={isTablet ? 20 : isSmallScreen ? 16 : 18}
-                            color="#101924"
-                          />
-                          <Text
-                            style={{
-                              fontSize: isTablet ? 15 : isSmallScreen ? 11 : 13,
-                              color: 'black',
-                              marginLeft: wp(0.8),
-                            }}>
-                            Partial Order
-                          </Text>
-                        </View>
-                      )}
-                    </View>
-                  </View>
-                  <View
-                    style={{
-                      backgroundColor: '#3C5D87',
-                      marginTop: hp(1.2),
-                      borderRadius: 10,
-                    }}>
-                    <View
-                      style={{
-                        backgroundColor: '#FFF',
-                        borderBottomLeftRadius: 10,
-                        borderBottomRightRadius: 10,
-                      }}>
-                      {!expandedOrders.includes(order._id) &&
-                        order.items.length > 0 && (
-                          <View>
-                            <View
-                              style={[
-                                styles.orderItem,
-                                {
-                                  marginTop: hp(1.2),
-                                  padding: wp(3.8),
-                                },
-                              ]}>
-                              <ScrollImage
-                                product={order.items[0]?.productId}
-                                reffer="cart"
-                              />
-                              <View
-                                style={[
-                                  styles.productDetails,
-                                  {
-                                    marginLeft: wp(4),
-                                  },
-                                ]}>
-                                <Text style={[styles.productName]}>
-                                  {order.items[0].productId.name}
-                                </Text>
-                                <Text style={[styles.productSize]}>
-                                  <Text style={{fontWeight: '700'}}>
-                                    Variant
-                                  </Text>
-                                  : {order.items[0].variant}
-                                </Text>
-                                <Text style={[styles.productQuantity]}>
-                                  Quantity: {order.items[0].quantity}
-                                </Text>
-                              </View>
-                              {order.items.length > 1 && (
-                                <View>
-                                  <LinearGradient
-                                    colors={['#38587F', '#101924']}
-                                    start={{x: 0, y: 0}}
-                                    end={{x: 1, y: 0}}
-                                    style={[styles.ratingContainer]}>
-                                    <Text style={[styles.ratingText]}>
-                                      +{order.items.length - 1}
-                                    </Text>
-                                  </LinearGradient>
-                                </View>
-                              )}
-                            </View>
-                          </View>
-                        )}
-
-                      {expandedOrders.includes(order._id) && (
-                        <View style={styles.orderItemsContainer}>
-                          {order.items.map((item, itemIndex) => (
-                            <View key={itemIndex} style={[styles.orderItem]}>
-                              <ScrollImage
-                                product={order.items[itemIndex]?.productId}
-                                reffer="cart"
-                              />
-                              <View
-                                style={[
-                                  styles.productDetails,
-                                  {
-                                    marginLeft: wp(4),
-                                  },
-                                ]}>
-                                <Text style={[styles.productName]}>
-                                  {item.productId.name}
-                                </Text>
-                                <Text style={[styles.productSize]}>
-                                  Variant: {item.variant}
-                                </Text>
-                                <Text style={[styles.productQuantity]}>
-                                  Quantity: {item.quantity}
-                                </Text>
-                              </View>
-                            </View>
-                          ))}
-                        </View>
-                      )}
-                    </View>
-                    {order.items.length > 1 && (
-                      <TouchableOpacity
-                        onPress={() => toggleOrderExpand(order._id)}
-                        style={{
-                          borderBottomLeftRadius: 10,
-                          borderBottomRightRadius: 10,
-                          marginTop: -10,
-                          paddingTop: hp(0.9),
-                        }}>
-                        <Icon
-                          name={
-                            expandedOrders.includes(order._id)
-                              ? 'chevron-up'
-                              : 'chevron-down'
-                          }
-                          style={{alignSelf: 'center'}}
-                          size={isTablet ? 28 : isSmallScreen ? 20 : 24}
-                          color="#fff"
-                        />
-                      </TouchableOpacity>
-                    )}
-                  </View>
-                  <View style={{marginTop: hp(1.2)}}>
-                    {
-                      // order.status === 'Invoice Uploaded' ||
-                      order.status === 'Quote Sent' ||
-                      order.status === 'Partially Fulfilled' ? (
-                        <View
-                          style={{
-                            flexDirection: isSmallScreen ? 'column' : 'row',
-                            justifyContent: 'space-between',
-                            gap: isSmallScreen ? hp(1) : 0,
-                          }}>
-                          <LinearGradient
-                            colors={['#101924', '#38587F']}
-                            start={{x: 0, y: 0}}
-                            end={{x: 1, y: 0}}
-                            style={[
-                              styles.confirmButton,
-                              {
-                                width: isSmallScreen ? '100%' : '45%',
-                              },
-                            ]}>
-                            <TouchableOpacity
-                              style={[
-                                styles.quoteButton,
-                                {
-                                  paddingVertical: hp(1.2),
-                                },
-                              ]}
-                              onPress={() => handleConfirmOrder(order._id)}
-                              disabled={processing}>
-                              <Text
-                                style={[
-                                  styles.quoteButtonText,
-                                  {
-                                    color: '#FFF',
-                                  },
-                                ]}>
-                                {processing ? 'Processing...' : 'Confirm'}
-                              </Text>
-                            </TouchableOpacity>
-                          </LinearGradient>
-                          <LinearGradient
-                            colors={['#FFF', '#FFF']}
-                            start={{x: 0, y: 0}}
-                            end={{x: 1, y: 0}}
-                            style={[
-                              styles.confirmButton,
-                              {
-                                borderColor: '#101924',
-                                borderWidth: 1,
-                                width: isSmallScreen ? '100%' : '45%',
-                              },
-                            ]}>
-                            <TouchableOpacity
-                              style={[
-                                styles.quoteButton,
-                                {
-                                  paddingVertical: hp(1.2),
-                                },
-                              ]}
-                              onPress={() => handleReworkOrder(order._id)}
-                              disabled={processing}>
-                              <Text
-                                style={[
-                                  styles.quoteButtonText,
-                                  {
-                                    color: '#101924',
-                                  },
-                                ]}>
-                                {processing ? 'Processing...' : 'Rework'}
-                              </Text>
-                            </TouchableOpacity>
-                          </LinearGradient>
-                        </View>
-                      ) : null
-                    }
-                  </View>
-                  <View style={{flex: 1}}>
-                    {!showInvoice ? (
-                      <View style={{flex: 1}}>
-                        <View style={{marginTop: hp(1.2)}}>
-                          {order.status === 'Invoice Uploaded' ? (
-                            <View
-                              style={{
-                                flexDirection: isSmallScreen ? 'column' : 'row',
-                                justifyContent: 'space-between',
-                                gap: isSmallScreen ? hp(1) : 0,
-                              }}>
-                              <LinearGradient
-                                colors={['#101924', '#38587F']}
-                                start={{x: 0, y: 0}}
-                                end={{x: 1, y: 0}}
-                                style={[
-                                  styles.confirmButton,
-                                  {
-                                    width: isSmallScreen ? '100%' : '45%',
-                                  },
-                                ]}>
-                                <TouchableOpacity
-                                  style={[
-                                    styles.quoteButton,
-                                    {
-                                      paddingVertical: hp(1.2),
-                                    },
-                                  ]}
-                                  onPress={() =>
-                                    handleInvoiceConfirmOrder(order._id)
-                                  }
-                                  disabled={processing}>
-                                  <Text
-                                    style={[
-                                      styles.quoteButtonText,
-                                      {
-                                        color: '#FFF',
-                                      },
-                                    ]}>
-                                    {processing
-                                      ? 'Processing...'
-                                      : 'View the Invoice'}
-                                  </Text>
-                                </TouchableOpacity>
-                              </LinearGradient>
-                              <LinearGradient
-                                colors={['#FFF', '#FFF']}
-                                start={{x: 0, y: 0}}
-                                end={{x: 1, y: 0}}
-                                style={[
-                                  styles.confirmButton,
-                                  {
-                                    borderColor: '#101924',
-                                    borderWidth: 1,
-                                    width: isSmallScreen ? '100%' : '45%',
-                                  },
-                                ]}>
-                                <TouchableOpacity
-                                  style={[
-                                    styles.quoteButton,
-                                    {
-                                      paddingVertical: hp(1.2),
-                                    },
-                                  ]}
-                                  onPress={() =>
-                                    handleInvoiceReworkOrder(order._id)
-                                  }
-                                  disabled={processing}>
-                                  <Text
-                                    style={[
-                                      styles.quoteButtonText,
-                                      {
-                                        color: '#101924',
-                                      },
-                                    ]}>
-                                    {processing
-                                      ? 'Processing...'
-                                      : 'Download the Invoice'}
-                                  </Text>
-                                </TouchableOpacity>
-                              </LinearGradient>
-                            </View>
-                          ) : null}
-                        </View>
-                      </View>
-                    ) : (
-                      <InvoiceModal
-                        visible={showInvoice}
-                        // invoiceData={selectedInvoiceData}
-                        onClose={() => setShowInvoice(false)}
-                      />
-                    )}
-                  </View>
-                </View>
-              </View>
+              <TrackingCard index={index} order={order} />
             ))
           )}
         </ScrollView>
       </View>
-
       {/* Rework Modal */}
       <Modal
         visible={reworkModalVisible}
@@ -943,15 +456,6 @@ const OrderHistory = () => {
           </View>
         </View>
       </Modal>
-
-      {/* Overlay to close dropdown */}
-      {dropdownVisible && (
-        <TouchableOpacity
-          style={styles.dropdownOverlay}
-          onPress={toggleDropdown}
-          activeOpacity={1}
-        />
-      )}
     </View>
   );
 };

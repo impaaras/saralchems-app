@@ -30,6 +30,7 @@ import {extractQuantityPrefix} from '../../utils/function/removeVariantCharacter
 import {useAlert} from '../../context/CustomAlertContext';
 import ImageZoomModal from '../../components/ImageZoom/ImageZoom';
 import ScrollImage from '../../components/ScrollImage/Index';
+import {moderateScale, scale} from '../../utils/Responsive/responsive';
 
 const {width: screenWidth} = Dimensions.get('window');
 
@@ -329,7 +330,7 @@ const ProductDetail = () => {
                 <TouchableOpacity
                   style={styles.plusButton}
                   onPress={() => handleShowVariants(product.variants)}>
-                  <Icon name="add" size={20} color="#FFF" />
+                  <Icon name="add" size={scale(20)} color="#FFF" />
                 </TouchableOpacity>
               )}
             </View>
@@ -342,7 +343,6 @@ const ProductDetail = () => {
                   ? customValue
                   : calculateTotal(activeProduct?.selectedVariant, quantity)}
               </Text>
-              {/* <Text style={styles.totalQtyText}>Total Qty: {customValue}</Text> */}
             </View>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <View style={styles.quantityContainer}>
@@ -360,8 +360,6 @@ const ProductDetail = () => {
                   <Text style={styles.quantityBtnText}>+</Text>
                 </TouchableOpacity>
               </View>
-              <Text>{}</Text>
-
               {categoryName === 'Machines' ||
               !product?.variants?.length ||
               categoryName === 'Textile Printing Machines' ? (

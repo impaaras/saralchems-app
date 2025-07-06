@@ -1,4 +1,5 @@
 import {StyleSheet} from 'react-native';
+import {moderateScale, scale} from '../../screens/Cart/responsive';
 
 const styles = StyleSheet.create({
   headerContainer: {
@@ -17,24 +18,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 100,
     paddingHorizontal: 8,
-    height: 48,
+    height: scale(40),
   },
   menuContainer: {
-    width: 40,
-    height: 40,
+    borderWidth: 1,
+    borderColor: '#CCC',
+    padding: moderateScale(6),
+    borderRadius: 100,
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 100,
-    borderWidth: 0.8,
-    borderColor: '#617D9E',
-
     shadowOffset: {
       width: 0,
       height: 1,
     },
     shadowOpacity: 0.1,
     shadowRadius: 1,
-    // elevation: 2,
   },
   centerContainer: {
     flex: 1,
@@ -42,21 +40,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   title: {
-    fontSize: 17,
+    fontSize: moderateScale(17),
     fontWeight: '500',
     color: '#FFF',
     fontWeight: '500',
-    marginLeft: 10,
+    marginLeft: scale(10),
   },
   searchButton: {
-    width: 40,
-    height: 40,
-
+    borderWidth: 1,
+    borderColor: '#CCC',
+    padding: moderateScale(6),
+    borderRadius: 100,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 0.8,
-    borderColor: '#617D9E',
-    borderRadius: 100,
     marginRight: 10,
     marginLeft: 10,
   },

@@ -12,6 +12,7 @@ import {useDispatch, useSelector} from 'react-redux';
 import {useFocusEffect} from '@react-navigation/native';
 import styles from './Dropdown.styles';
 import {useLoader} from '../../context/LoaderContext';
+import {scale} from '../../utils/Responsive/responsive';
 
 const DropdownMenu = ({currentRouteName, categories}) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -111,7 +112,7 @@ const DropdownMenu = ({currentRouteName, categories}) => {
           {selectedCategory?.name || parentCategoryName || 'All Products'}
         </Text>
         <Animated.View style={animatedStyles}>
-          <Ionicons name="chevron-down" size={24} color="white" />
+          <Ionicons name="chevron-down" size={scale(18)} color="white" />
         </Animated.View>
       </TouchableOpacity>
 

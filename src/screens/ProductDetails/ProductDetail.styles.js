@@ -1,4 +1,10 @@
 import {Dimensions, StyleSheet} from 'react-native';
+import {
+  moderateScale,
+  scale,
+  verticalScale,
+} from '../../utils/Responsive/responsive';
+
 const {width} = Dimensions.get('window');
 
 const styles = StyleSheet.create({
@@ -91,13 +97,13 @@ const styles = StyleSheet.create({
     shadowRadius: 4,
   },
   productName: {
-    fontSize: 18,
+    fontSize: moderateScale(18),
     fontWeight: 'bold',
     color: '#333',
-    marginBottom: 10,
+    marginTop: scale(10),
   },
   detailsRow: {
-    marginBottom: 15,
+    marginVertical: verticalScale(8),
     backgroundColor: '#E5F1FF',
     padding: 10,
     borderRadius: 6,
@@ -106,11 +112,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   detailLabel: {
-    fontSize: 12,
+    fontSize: moderateScale(12),
     color: '#666',
   },
   detailValue: {
-    fontSize: 14,
+    fontSize: moderateScale(12),
     fontWeight: '500',
     color: '#333',
   },
@@ -165,8 +171,7 @@ const styles = StyleSheet.create({
   },
   plusButton: {
     backgroundColor: '#3C5D87',
-    width: 30,
-    // height: 30,
+    width: scale(30),
     borderRadius: 5,
     justifyContent: 'center',
     alignItems: 'center',
@@ -184,7 +189,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   productType: {
-    fontSize: 16,
+    fontSize: scale(14),
     fontWeight: '500',
     marginBottom: 15,
   },
@@ -192,14 +197,14 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   sectionTitle: {
-    fontSize: 16,
+    fontSize: scale(14),
     fontWeight: '600',
     marginBottom: 10,
     color: '#333',
   },
   sectionText: {
-    fontSize: 14,
-    lineHeight: 20,
+    fontSize: scale(12),
+    lineHeight: scale(16),
     color: '#555',
   },
   featureItem: {
@@ -208,13 +213,15 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
   },
   featureText: {
-    fontSize: 14,
-    lineHeight: 20,
+    fontSize: scale(12),
+    lineHeight: scale(16),
     color: '#555',
     marginLeft: 8,
     flex: 1,
   },
   featureHighlight: {
+    fontSize: scale(12),
+    lineHeight: scale(16),
     fontWeight: '600',
     color: '#333',
   },
@@ -223,13 +230,13 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   specLabel: {
-    fontSize: 14,
+    fontSize: scale(12),
     fontWeight: '500',
     color: '#333',
     width: 120,
   },
   specValue: {
-    fontSize: 14,
+    fontSize: scale(12),
     color: '#555',
     flex: 1,
   },
@@ -245,7 +252,7 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   totalQtyText: {
-    fontSize: 16,
+    fontSize: moderateScale(15),
     fontWeight: '600',
   },
   quantityContainer: {
@@ -278,23 +285,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   quantityBtnText: {
-    fontSize: 16,
+    fontSize: moderateScale(16),
     color: '#3C5D87',
   },
   quantityText: {
-    paddingHorizontal: 15,
-    fontSize: 16,
+    paddingHorizontal: scale(12),
+    fontSize: moderateScale(14),
   },
   addToCartButton: {
-    // backgroundColor: '#3C5D87',
-
-    paddingVertical: 8,
-    paddingHorizontal: 10,
+    paddingVertical: scale(5),
+    paddingHorizontal: scale(12),
     alignItems: 'center',
   },
   addToCartText: {
     color: '#FFF',
-    fontSize: 14,
+    fontSize: scale(14),
     fontWeight: '500',
   },
   sectionContainer: {
@@ -339,12 +344,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#3C5D86',
   },
   optionButtonText: {
-    fontSize: 14,
+    fontSize: moderateScale(12),
     color: '#000',
     fontWeight: '500',
   },
   selectedOptionText: {
     color: 'white',
+    fontSize: moderateScale(12),
   },
 
   // New styles for image zoom

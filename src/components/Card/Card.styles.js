@@ -1,4 +1,6 @@
 import {StyleSheet, Dimensions} from 'react-native';
+import {scale} from '../../screens/Cart/responsive';
+import {moderateScale} from '../../utils/Responsive/responsive';
 
 const {width: screenWidth, height: screenHeight} = Dimensions.get('window');
 
@@ -81,30 +83,26 @@ const styles = StyleSheet.create({
   },
 
   variantText: {
-    fontSize: responsiveFontSize(12),
+    fontSize: moderateScale(10),
     color: '#333',
-    // flexShrink: 1, // Allow text to shrink if needed
   },
 
   selectedVariantText: {
-    fontSize: responsiveFontSize(12),
     color: '#FFF',
-    // flexShrink: 1,
+    fontSize: moderateScale(10),
   },
 
   moreButton: {
     backgroundColor: '#3C5D85',
-    borderRadius: wp(1.5),
-    width: getMoreButtonSize(),
+    borderRadius: scale(5),
+    width: scale(27),
     justifyContent: 'center',
     alignItems: 'center',
-
-    // marginLeft: wp(1),
   },
 
   moreButtonText: {
     color: 'white',
-    fontSize: responsiveFontSize(18),
+    fontSize: scale(16),
     fontWeight: 'bold',
   },
 
@@ -140,13 +138,13 @@ const styles = StyleSheet.create({
     },
     shadowOpacity: 0.22,
     shadowRadius: 2.22,
-    // minHeight: hp(3), // Minimum touch target
   },
 
   addButtonText: {
     color: '#3C5D85',
     fontWeight: '600',
-    fontSize: responsiveFontSize(12),
+    fontSize: moderateScale(11),
+    // fontSize: responsiveFontSize(12),
   },
 
   infoContainer: {
@@ -167,31 +165,30 @@ const styles = StyleSheet.create({
   },
 
   name: {
-    fontSize: responsiveFontSize(13),
+    fontSize: moderateScale(12),
     fontWeight: '600',
     marginVertical: hp(0.5),
-    lineHeight: responsiveFontSize(16),
-    flexWrap: 'wrap',
+    // flexWrap: 'wrap',
   },
 
   brandInfo: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     marginTop: hp(0.3),
-    flexWrap: 'wrap', // Allow wrapping on very small screens
   },
 
   brandText: {
-    fontSize: responsiveFontSize(10),
+    width: '60%',
+    fontSize: moderateScale(8),
     color: '#333',
-    flex: 1,
-    marginRight: wp(1),
   },
 
   UnitText: {
-    fontSize: responsiveFontSize(10),
+    width: '30%',
+    // textAlign: 'right',
+    fontSize: moderateScale(8),
     color: '#333',
-    flexShrink: 0, // Prevent shrinking
+    flexShrink: 0,
   },
 });
 

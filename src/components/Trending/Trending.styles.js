@@ -1,4 +1,5 @@
 import {StyleSheet} from 'react-native';
+import {moderateScale, scale} from '../../utils/Responsive/responsive';
 
 const styles = StyleSheet.create({
   container: {
@@ -51,17 +52,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   image: {
-    width: 65,
-    height: 65,
+    width: scale(70),
+    height: scale(70),
     margin: 13,
     borderRadius: 10,
   },
   cardContent: {
     flex: 1,
-    // padding: 12,
   },
   cardTitle: {
-    fontSize: 16,
+    fontSize: moderateScale(14),
     width: '70%',
 
     fontWeight: '600',

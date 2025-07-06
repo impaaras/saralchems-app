@@ -18,6 +18,8 @@ import {useDispatch} from 'react-redux';
 import {registerUser} from '../../redux/slices/authSlice';
 import logo from '../../assets/logo.png';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
+import {scale} from '../Cart/responsive';
+import {moderateScale} from '../../utils/Responsive/responsive';
 
 // Get screen dimensions
 const {width: screenWidth, height: screenHeight} = Dimensions.get('window');
@@ -172,7 +174,8 @@ const RegisterScreen = ({navigation}) => {
       borderWidth: 1,
       borderColor: '#DDD',
       marginBottom: hp(1.9),
-      fontSize: getFontSize(14, 16, 18, 20),
+      // fontSize: getFontSize(10, 12, 14, 16),
+      fontSize: moderateScale(14),
       shadowColor: '#333',
       shadowOffset: {
         width: 0,
@@ -232,13 +235,16 @@ const RegisterScreen = ({navigation}) => {
     },
     signupText: {
       color: '#666',
-      fontSize: getFontSize(14, 16, 18, 20),
+      textAlign: 'center',
+      width: scale(210),
+      fontSize: moderateScale(14),
     },
     signupLink: {
       color: '#2B4C7E',
       fontWeight: '600',
       marginLeft: wp(1.25),
-      fontSize: getFontSize(14, 16, 18, 20),
+      textAlign: 'center',
+      fontSize: moderateScale(14),
     },
     buttonDisabled: {
       opacity: 0.7,
@@ -290,11 +296,11 @@ const RegisterScreen = ({navigation}) => {
     },
     dropdownButtonText: {
       color: '#555',
-      fontSize: getFontSize(14, 16, 18, 20),
+      fontSize: moderateScale(14),
     },
     dropdownArrow: {
       color: '#555',
-      fontSize: getFontSize(14, 16, 18, 20),
+      fontSize: moderateScale(14),
     },
     dropdownList: {
       position: 'absolute',
@@ -313,7 +319,7 @@ const RegisterScreen = ({navigation}) => {
       borderBottomColor: '#f0f0f0',
     },
     dropdownItemText: {
-      fontSize: getFontSize(14, 16, 18, 20),
+      fontSize: moderateScale(14),
       color: '#333',
     },
   });
@@ -678,7 +684,7 @@ const RegisterScreen = ({navigation}) => {
           ]}
         />
 
-        <ScrollView style={{flex: 1, width: '100%'}}>
+        <ScrollView style={{flex: 1, width: '100%', paddingBottom: scale(50)}}>
           <View style={{flex: 1, width: '100%', alignItems: 'center'}}>
             {/* Logo */}
             <View style={responsiveStyles.logoContainer}>
@@ -950,7 +956,7 @@ const RegisterScreen = ({navigation}) => {
                 },
               ]}>
               <Text style={responsiveStyles.signupText}>
-                Already have an account?{' '}
+                Already have an account?
               </Text>
               <TouchableOpacity onPress={handleSignInPress}>
                 <Text style={responsiveStyles.signupLink}>Sign in</Text>

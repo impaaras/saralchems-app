@@ -25,6 +25,8 @@ import InfoIcon from 'react-native-vector-icons/Entypo';
 import ScrollImage from '../../components/ScrollImage/Index';
 import styles from './Tracking.styles';
 import OrderTrackingSteps from './OrderTrackingComponent';
+import {scale} from '../Cart/responsive';
+import TrackingCard from '../../components/TrackingCard/TrackingCard';
 
 const {width} = Dimensions.get('window');
 
@@ -57,8 +59,6 @@ const OrderTracking = ({route}) => {
   const [visible, setVisible] = useState(false);
 
   let {orders: order} = route.params;
-
-  console.log(order, 'data 2');
 
   // Determine the current step based on status
   const getCurrentStep = () => {
@@ -120,182 +120,20 @@ const OrderTracking = ({route}) => {
     <>
       <DashboardHeader />
       <View style={styles.container}>
+        {/* Order Tracking */}
         <View style={[styles.orderCard]}>
-          <View style={[styles.orderHeader]}>
-            <View style={[styles.orderDetails]}>
-              <View>
-                <TouchableOpacity onPress={() => handleTrackingPress(order)}>
-                  <Text style={[styles.orderIdText]}>
-                    Order #{order?._id.slice(-9)}
-                  </Text>
-                </TouchableOpacity>
-                <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                  <View
-                    style={[
-                      styles.statusDot,
-                      {
-                        backgroundColor: getStatusColor(order.status),
-                        width: wp(2.5),
-                        height: wp(2.5),
-                        borderRadius: wp(1.25),
-                        marginRight: wp(2),
-                      },
-                    ]}
-                  />
-                  <Text style={[styles.orderStatus]}>{order.status}</Text>
-                </View>
-              </View>
-              <View>
-                <Text style={[styles.orderDateText]}>
-                  Placed on {formatDate(order.createdAt)}
-                </Text>
-                {order.isPartialOrder && (
-                  <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                    <InfoIcon
-                      name="info-with-circle"
-                      size={isTablet ? 20 : isSmallScreen ? 16 : 18}
-                      color="#101924"
-                    />
-                    <Text
-                      style={{
-                        fontSize: isTablet ? 15 : isSmallScreen ? 11 : 13,
-                        color: 'black',
-                        marginLeft: wp(0.8),
-                      }}>
-                      Partial Order
-                    </Text>
-                  </View>
-                )}
-              </View>
-            </View>
-            <View
-              style={{
-                backgroundColor: '#3C5D87',
-                marginTop: hp(1.2),
-                borderRadius: 10,
-              }}>
-              <View
-                style={{
-                  backgroundColor: '#FFF',
-                  borderBottomLeftRadius: 10,
-                  borderBottomRightRadius: 10,
-                }}>
-                {!expandedOrders.includes(order._id) &&
-                  order.items.length > 0 && (
-                    <View>
-                      <View
-                        style={[
-                          styles.orderItem,
-                          {
-                            marginTop: hp(1.2),
-                            padding: wp(3.8),
-                          },
-                        ]}>
-                        <ScrollImage
-                          product={order.items[0]?.productId}
-                          reffer="cart"
-                        />
-                        <View
-                          style={[
-                            styles.productDetails,
-                            {
-                              marginLeft: wp(4),
-                            },
-                          ]}>
-                          <Text style={[styles.productName]}>
-                            {order.items[0].productId.name}
-                          </Text>
-                          <Text style={[styles.productSize]}>
-                            <Text style={{fontWeight: '700'}}>Variant</Text>:{' '}
-                            {order.items[0].variant}
-                          </Text>
-                          <Text style={[styles.productQuantity]}>
-                            Quantity: {order.items[0].quantity}
-                          </Text>
-                        </View>
-                        {order.items.length > 1 && (
-                          <View>
-                            <LinearGradient
-                              colors={['#38587F', '#101924']}
-                              start={{x: 0, y: 0}}
-                              end={{x: 1, y: 0}}
-                              style={[styles.ratingContainer]}>
-                              <Text style={[styles.ratingText]}>
-                                +{order.items.length - 1}
-                              </Text>
-                            </LinearGradient>
-                          </View>
-                        )}
-                      </View>
-                    </View>
-                  )}
-
-                {expandedOrders.includes(order._id) && (
-                  <View>
-                    {order.items.map((item, itemIndex) => (
-                      <View key={itemIndex} style={[styles.orderItem]}>
-                        <ScrollImage
-                          product={order.items[itemIndex]?.productId}
-                          reffer="cart"
-                        />
-                        <View
-                          style={[
-                            styles.productDetails,
-                            {
-                              marginLeft: wp(4),
-                            },
-                          ]}>
-                          <Text style={[styles.productName]}>
-                            {item.productId.name}
-                          </Text>
-                          <Text style={[styles.productSize]}>
-                            Variant: {item.variant}
-                          </Text>
-                          <Text style={[styles.productQuantity]}>
-                            Quantity: {item.quantity}
-                          </Text>
-                        </View>
-                      </View>
-                    ))}
-                  </View>
-                )}
-              </View>
-              {order.items.length > 1 && (
-                <TouchableOpacity
-                  onPress={() => toggleOrderExpand(order._id)}
-                  style={{
-                    borderBottomLeftRadius: 10,
-                    borderBottomRightRadius: 10,
-                    marginTop: -10,
-                    paddingTop: hp(1.3),
-                    paddingBottom: hp(0.3),
-                  }}>
-                  <Icon
-                    name={
-                      expandedOrders.includes(order._id)
-                        ? 'chevron-up'
-                        : 'chevron-down'
-                    }
-                    style={{alignSelf: 'center'}}
-                    size={isTablet ? 28 : isSmallScreen ? 16 : 18}
-                    color="#fff"
-                  />
-                </TouchableOpacity>
-              )}
-            </View>
-          </View>
+          <TrackingCard order={order} />
         </View>
 
-        <View style={{paddingBottom: hp(2)}}>
+        <View>
           <OrderTrackingSteps
-            // orderStatus={'delivered'}
             orderStatus={order.status}
-            trackingData={sampleTrackingData} // Optional - pass null if no detailed tracking data
+            trackingData={sampleTrackingData}
           />
 
           <View style={styles.supportContainer}>
+            <Text style={styles.supportText}>Need Support?</Text>
             <View style={styles.supportButtons}>
-              <Text style={styles.supportText}>Need Support?</Text>
               <LinearGradient
                 colors={['#38587F', '#101924']} // Left to right gradient colors
                 start={{x: 0, y: 0}}
@@ -303,7 +141,7 @@ const OrderTracking = ({route}) => {
                 style={styles.receiptButton} // Make sure the gradient covers the button
               >
                 <TouchableOpacity style={styles.callButton}>
-                  <Phone size={16} color="#fff" />
+                  <Phone size={scale(22)} color="#fff" />
                   <Text style={styles.buttonText}>Call</Text>
                 </TouchableOpacity>
               </LinearGradient>
@@ -314,7 +152,7 @@ const OrderTracking = ({route}) => {
                 style={styles.receiptButton} // Make sure the gradient covers the button
               >
                 <TouchableOpacity style={styles.whatsappButton}>
-                  <Icon name="whatsapp" size={16} color="#fff" />
+                  <Icon name="whatsapp" size={scale(22)} color="#fff" />
                   <Text style={styles.buttonText}>Whatsapp</Text>
                 </TouchableOpacity>
               </LinearGradient>

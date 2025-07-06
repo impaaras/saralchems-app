@@ -17,6 +17,8 @@ import {useDispatch, useSelector} from 'react-redux';
 import {loginUser} from '../../redux/slices/authSlice';
 import {ROUTES} from '../../constants/routes';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
+import {scale} from '../Cart/responsive';
+import {moderateScale} from '../../utils/Responsive/responsive';
 
 // Get screen dimensions
 const {width: screenWidth, height: screenHeight} = Dimensions.get('window');
@@ -136,7 +138,7 @@ export default function LoginScreen({navigation}) {
       borderWidth: 1,
       borderColor: '#DDD',
       marginBottom: hp(1.9),
-      fontSize: getFontSize(14, 16, 18, 20),
+      fontSize: moderateScale(14, 0.5),
       shadowColor: '#333',
       shadowOffset: {
         width: 0,
@@ -183,26 +185,28 @@ export default function LoginScreen({navigation}) {
     },
     loginButtonText: {
       color: '#fff',
-      fontSize: getFontSize(16, 18, 20, 22),
+      fontSize: moderateScale(18),
       fontWeight: '600',
     },
     signupContainer: {
       flexDirection: 'row',
       justifyContent: 'center',
       alignItems: 'center',
-      paddingBottom: hp(5),
       marginTop: hp(2.5),
       width: '100%',
     },
     signupText: {
+      width: scale(190),
+      textAlign: 'center',
       color: '#666',
-      fontSize: getFontSize(14, 16, 18, 20),
+      fontSize: moderateScale(14),
     },
     signupLink: {
       color: '#2B4C7E',
       fontWeight: '600',
+      textAlign: 'center',
       marginLeft: wp(1.25),
-      fontSize: getFontSize(14, 16, 18, 20),
+      fontSize: moderateScale(14),
     },
     buttonDisabled: {
       opacity: 0.7,
@@ -225,22 +229,22 @@ export default function LoginScreen({navigation}) {
     },
     errorToastText: {
       color: 'white',
-      fontSize: getFontSize(12, 14, 16, 18),
+      fontSize: moderateScale(14),
       textAlign: 'center',
       fontWeight: '600',
     },
     errorText: {
       color: '#ff0000',
-      fontSize: getFontSize(12, 14, 16, 18),
+      fontSize: moderateScale(14),
       marginBottom: hp(2.5),
       textAlign: 'center',
     },
     forgotPassword: {
       color: '#2B4C7E',
       textAlign: 'center',
-      marginBottom: hp(1.9),
-      marginTop: hp(1.7),
-      fontSize: getFontSize(14, 16, 18, 20),
+      // marginBottom: hp(1.9),
+      // marginTop: hp(1.7),
+      fontSize: moderateScale(16),
     },
   });
 
@@ -617,9 +621,7 @@ export default function LoginScreen({navigation}) {
 
             <TouchableOpacity
               onPress={handleForgotPasswordPress}
-              style={{
-                alignSelf: 'center',
-              }}>
+              style={{flex: 1}}>
               <Text style={responsiveStyles.forgotPassword}>
                 Forgot Password?
               </Text>
