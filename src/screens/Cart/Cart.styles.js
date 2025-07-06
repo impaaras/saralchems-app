@@ -1,5 +1,9 @@
 import {StyleSheet} from 'react-native';
-import {scale, verticalScale, moderateScale} from './responsive';
+import {
+  moderateScale,
+  scale,
+  verticalScale,
+} from '../../utils/Responsive/responsive';
 
 const styles = StyleSheet.create({
   container: {
@@ -55,16 +59,7 @@ const styles = StyleSheet.create({
   cartItemsContainer: {
     marginBottom: verticalScale(10),
   },
-  // cartItem: {
-  //   flexDirection: 'row',
-  //   marginTop: verticalScale(10),
-  //   backgroundColor: '#FFF',
-  //   borderRadius: scale(10),
-  //   padding: scale(10),
-  //   borderWidth: 1,
-  //   borderColor: '#CCCCCC',
-  //   marginBottom: verticalScale(0),
-  // },
+
   cartItem: {
     flexDirection: 'row',
     marginTop: verticalScale(10),
@@ -105,22 +100,21 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    // marginBottom: verticalScale(5),
   },
   cartItemName: {
-    fontSize: scale(16),
+    fontSize: scale(13),
     color: '#001',
     fontWeight: '500',
     width: moderateScale(230),
   },
   cartItemSpec: {
-    fontSize: scale(14),
+    fontSize: scale(11),
     color: '#3C5D80',
     fontWeight: '500',
     marginBottom: verticalScale(12),
   },
   cartItemQuality: {
-    fontSize: scale(15),
+    fontSize: scale(11),
     fontWeight: '400',
     color: '#001',
     flex: 1,
@@ -134,13 +128,13 @@ const styles = StyleSheet.create({
     borderRadius: scale(30),
   },
   quantityBtn: {
-    width: scale(40),
+    width: scale(30),
     borderRadius: scale(20),
     justifyContent: 'center',
     alignItems: 'center',
   },
   quantityBtnText: {
-    fontSize: moderateScale(20),
+    fontSize: moderateScale(16),
     color: '#3C5D87',
   },
   quantityInput: {
@@ -149,10 +143,10 @@ const styles = StyleSheet.create({
     borderRightWidth: 0.8,
     borderLeftColor: '#CCC',
     borderLeftWidth: 1,
-    fontSize: moderateScale(15),
+    fontSize: moderateScale(13),
     fontWeight: '600',
     color: '#000',
-    paddingHorizontal: scale(10),
+    paddingHorizontal: scale(8),
     paddingVertical: verticalScale(3),
   },
 

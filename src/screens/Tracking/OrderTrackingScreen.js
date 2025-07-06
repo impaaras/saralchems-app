@@ -25,8 +25,8 @@ import InfoIcon from 'react-native-vector-icons/Entypo';
 import ScrollImage from '../../components/ScrollImage/Index';
 import styles from './Tracking.styles';
 import OrderTrackingSteps from './OrderTrackingComponent';
-import {scale} from '../Cart/responsive';
 import TrackingCard from '../../components/TrackingCard/TrackingCard';
+import {scale} from '../../utils/Responsive/responsive';
 
 const {width} = Dimensions.get('window');
 

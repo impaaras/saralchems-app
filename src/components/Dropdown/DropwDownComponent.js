@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useCallback, useEffect, useState} from 'react';
 import {View, Text, TouchableOpacity, StyleSheet, Animated} from 'react-native';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import {
@@ -15,6 +15,7 @@ import {useLoader} from '../../context/LoaderContext';
 import {scale} from '../../utils/Responsive/responsive';
 
 const DropdownMenu = ({currentRouteName, categories}) => {
+  console.log(categories, 'data');
   const [isOpen, setIsOpen] = useState(false);
   const [rotateAnimation] = useState(new Animated.Value(0));
   const [selectedCategory, setSecSelectedCategory] = useState(null);
@@ -43,7 +44,7 @@ const DropdownMenu = ({currentRouteName, categories}) => {
   });
 
   useFocusEffect(
-    React.useCallback(() => {
+    useCallback(() => {
       setSecSelectedCategory(null);
       setIsOpen(false);
     }, []),
@@ -79,28 +80,9 @@ const DropdownMenu = ({currentRouteName, categories}) => {
   };
 
   const fullCategoryList = [
-    {_id: 'all-products', name: 'All Products'},
+    // {_id: 'all-products', name: 'All Products'},
     ...(categories || []),
   ];
-
-  const fetchAllProducts = async () => {
-    setLoading(true);
-    try {
-      const {data} = await axios.get(`${API_URL}/subcategory/with-products`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      dispatch(setAllProducts(data));
-      setLoading(false);
-    } catch (error) {
-      console.log(
-        'All Products Fetch Error:',
-        error.response?.data?.message || error.message,
-      );
-      setLoading(false);
-    }
-  };
 
   return (
     <View style={styles.container}>
@@ -118,28 +100,30 @@ const DropdownMenu = ({currentRouteName, categories}) => {
 
       {isOpen && (
         <View style={styles.dropdownListContainer}>
-          {fullCategoryList.map((category, index) => (
-            <TouchableOpacity
-              key={category._id || index}
-              style={[
-                styles.dropdownItem,
-                selectedCategory?._id === category._id && styles.activeItem,
-                category._id === 'all-products' &&
-                  !selectedCategory &&
-                  styles.activeItem,
-              ]}
-              onPress={() => handleCategorySelect(category, index)}>
-              <Text
+          {fullCategoryList
+            .filter(category => category.subcategories.length > 0)
+            .map((category, index) => (
+              <TouchableOpacity
+                key={category._id || index}
                 style={[
-                  styles.dropdownItemText,
-                  (selectedCategory?._id === category._id ||
-                    (!selectedCategory && category._id === 'all-products')) &&
-                    styles.activeItemText,
-                ]}>
-                {category.name}
-              </Text>
-            </TouchableOpacity>
-          ))}
+                  styles.dropdownItem,
+                  selectedCategory?._id === category._id && styles.activeItem,
+                  category._id === 'all-products' &&
+                    !selectedCategory &&
+                    styles.activeItem,
+                ]}
+                onPress={() => handleCategorySelect(category, index)}>
+                <Text
+                  style={[
+                    styles.dropdownItemText,
+                    (selectedCategory?._id === category._id ||
+                      (!selectedCategory && category._id === 'all-products')) &&
+                      styles.activeItemText,
+                  ]}>
+                  {category.name}
+                </Text>
+              </TouchableOpacity>
+            ))}
         </View>
       )}
     </View>

@@ -1,8 +1,11 @@
 import React from 'react';
 import {View, Text, StyleSheet, Dimensions} from 'react-native';
 import {Package, Truck, Box, CheckCircle} from 'lucide-react-native';
-import {scale, moderateScale} from '../Cart/responsive';
-import {verticalScale} from '../../utils/Responsive/responsive';
+import {
+  verticalScale,
+  scale,
+  moderateScale,
+} from '../../utils/Responsive/responsive';
 
 const {width: screenWidth, height: screenHeight} = Dimensions.get('window');
 

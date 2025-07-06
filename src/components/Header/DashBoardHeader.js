@@ -45,8 +45,7 @@ import {
 import {API_URL} from '../../utils/ApiService';
 import {previousRouteName} from '../../navigation/navigationService';
 import {fetchUserProfile} from '../../redux/slices/authSlice';
-import {scale} from '../../screens/Cart/responsive';
-import {moderateScale} from '../../utils/Responsive/responsive';
+import {moderateScale, scale} from '../../utils/Responsive/responsive';
 
 const {width} = Dimensions.get('window');
 
@@ -57,23 +56,6 @@ const DashboardHeader = ({name}) => {
   const [openInput, setOpenInput] = useState(false);
   const {results, error} = useSelector(state => state.search);
   const dispatch = useDispatch();
-
-  if (loading) {
-    return (
-      <View style={styles.container}>
-        <Text>Loading...</Text>
-      </View>
-    );
-  }
-
-  if (error) {
-    return (
-      <View style={styles.container}>
-        <Text>Error: {error.message}</Text>
-      </View>
-    );
-  }
-
   // Function to get the current route name
   const getCurrentRouteName = () => {
     const state = navigation.getState();
@@ -180,7 +162,10 @@ const DashboardHeader = ({name}) => {
   };
 
   useEffect(() => {
-    getCategoryData();
+    const route = getCurrentRouteName();
+    if (route === ROUTES.ITEM_SCREEN) {
+      getCategoryData();
+    }
   }, []);
 
   const handleGoBack = () => {
@@ -201,21 +186,6 @@ const DashboardHeader = ({name}) => {
     }
   };
 
-  // const useBackButtonHandler = () => {
-  //   useEffect(() => {
-  //     const onBackPress = () => {
-  //       handleGoBack();
-  //       return true; // Prevent default behavior
-  //     };
-
-  //     BackHandler.addEventListener('hardwareBackPress', onBackPress);
-
-  //     return () => {
-  //       BackHandler.removeEventListener('hardwareBackPress', onBackPress);
-  //     };
-  //   }, []);
-  // };
-
   const inputRef = React.useRef(null);
 
   // Modify the useFocusEffect to use the ref
@@ -223,11 +193,7 @@ const DashboardHeader = ({name}) => {
     useCallback(() => {
       const routeName = getCurrentRouteName();
       setCurrentRouteName(routeName);
-
-      // Focus the input if we're on the search screen
       if (routeName === ROUTES.SEARCH) {
-        // setOpenInput(true);
-        // Small timeout to ensure the input is mounted before focusing
         setTimeout(() => {
           if (inputRef.current) {
             inputRef.current.focus();
@@ -254,7 +220,6 @@ const DashboardHeader = ({name}) => {
               <TouchableOpacity
                 style={styles.menuContainer}
                 onPress={() => navigation.openDrawer()}>
-                {/* <Image source={menuIcon} /> */}
                 <TextIcon size={scale(26)} color="#FFF" />
               </TouchableOpacity>
             ) : (
@@ -300,6 +265,7 @@ const DashboardHeader = ({name}) => {
                       autoFocus={true}
                       style={{
                         paddingVertical: 10,
+                        height: 40,
                         flex: 1,
                       }}
                     />
@@ -320,8 +286,13 @@ const DashboardHeader = ({name}) => {
               {!openInput &&
                 getRouteName() !== 'Search' &&
                 getRouteName() !== ROUTES.ITEM_SCREEN && (
-                  <Text style={styles.title}>Welcome, {user?.name}🤗</Text>
-                  // <Text style={styles.title}>{getRouteName()}</Text>
+                  <Text style={styles.title}>
+                    Welcome,
+                    {user?.name.length > 16
+                      ? ` ${user.name.substring(0, 16)}...`
+                      : ` ${user.name} `}
+                    🤗
+                  </Text>
                 )}
               {!openInput && currentRouteName === ROUTES.ITEM_SCREEN && (
                 <DropdownMenu categories={categories} />

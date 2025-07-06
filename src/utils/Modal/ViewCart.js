@@ -6,8 +6,7 @@ import {ROUTES} from '../../constants/routes';
 import {useDispatch} from 'react-redux';
 import {closeModal} from '../../redux/slices/modalSlice';
 import {useSelector} from 'react-redux';
-import {scale} from '../Responsive/responsive';
-import {moderateScale} from '../../screens/Cart/responsive';
+import {moderateScale, verticalScale, scale} from '../Responsive/responsive';
 
 const ViewCart = () => {
   const navigation = useNavigation();

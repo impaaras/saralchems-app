@@ -26,7 +26,7 @@ import {setSelectedVariant} from '../../redux/slices/newCart';
 import {PackageCheck, RotateCw, X} from 'lucide-react-native';
 import {setVariants} from '../../redux/slices/cartSlice';
 import {toggleShowVariants} from '../../redux/slices/authSlice';
-import {selectVariant} from '../../utils/function/function';
+import {selectVariant, triggerHaptic} from '../../utils/function/function';
 import {extractQuantityPrefix} from '../../utils/function/removeVariantCharacter';
 import {fallbackImg} from '../../utils/images';
 import ScrollImage from '../../components/ScrollImage/Index';
@@ -36,49 +36,6 @@ import {
   scale,
 } from '../../utils/Responsive/responsive';
 
-// Enhanced haptic feedback helper
-const triggerHaptic = (type = 'light') => {
-  if (Platform.OS === 'ios') {
-    const ReactNativeHapticFeedback = require('react-native-haptic-feedback');
-    const options = {
-      enableVibrateFallback: true,
-      ignoreAndroidSystemSettings: false,
-    };
-
-    switch (type) {
-      case 'light':
-        ReactNativeHapticFeedback.trigger('impactLight', options);
-        break;
-      case 'medium':
-        ReactNativeHapticFeedback.trigger('impactMedium', options);
-        break;
-      case 'heavy':
-        ReactNativeHapticFeedback.trigger('impactHeavy', options);
-        break;
-      case 'selection':
-        ReactNativeHapticFeedback.trigger('selection', options);
-        break;
-      default:
-        ReactNativeHapticFeedback.trigger('impactLight', options);
-    }
-  } else {
-    // Android fallback
-    switch (type) {
-      case 'light':
-        Vibration.vibrate(10);
-        break;
-      case 'medium':
-        Vibration.vibrate(20);
-        break;
-      case 'heavy':
-        Vibration.vibrate(50);
-        break;
-      default:
-        Vibration.vibrate(10);
-    }
-  }
-};
-
 // Enhanced Custom dropdown component with animations
 const Dropdown = ({options, selectedValue, onSelect, label}) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -87,7 +44,7 @@ const Dropdown = ({options, selectedValue, onSelect, label}) => {
   const animatedScale = useRef(new Animated.Value(0.95)).current;
 
   const toggleDropdown = () => {
-    triggerHaptic('selection');
+    triggerHaptic('medium');
     setIsOpen(!isOpen);
 
     if (!isOpen) {
@@ -175,7 +132,7 @@ const Dropdown = ({options, selectedValue, onSelect, label}) => {
               key={index}
               style={styles.dropdownOption}
               onPress={() => {
-                triggerHaptic('light');
+                triggerHaptic('medium');
                 onSelect(option);
                 setIsOpen(false);
               }}
@@ -213,14 +170,14 @@ const QuantitySelector = ({quantity, setQuantity, unit, enabled}) => {
   };
 
   const increment = () => {
-    triggerHaptic('light');
+    triggerHaptic('medium');
     animateButton(incrementAnim);
     setQuantity(prev => prev + 1);
   };
 
   const decrement = () => {
     if (quantity > 1) {
-      triggerHaptic('light');
+      triggerHaptic('medium');
       animateButton(decrementAnim);
       setQuantity(prev => prev - 1);
     }
@@ -292,7 +249,6 @@ const OptionButton = ({label, selected, onPress, idx, item}) => {
 
   const handlePress = () => {
     triggerHaptic('selection');
-
     // Button press animation
     Animated.parallel([
       Animated.timing(scaleAnim, {
@@ -379,6 +335,9 @@ const ProductModal = ({product}) => {
   const scaleAnim = useRef(new Animated.Value(0.9)).current;
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const bounceAnim = useRef(new Animated.Value(0)).current;
+  const navigation = useNavigation();
+  const dispatch = useDispatch();
+  const {items, loading, error} = useSelector(state => state.addToCart);
 
   const productData = product;
 
@@ -426,20 +385,16 @@ const ProductModal = ({product}) => {
   }, []);
 
   // Handle screen dimension changes for responsiveness
-  useEffect(() => {
-    const subscription = Dimensions.addEventListener('change', ({window}) => {
-      setDimensions(window);
-    });
-    return () => subscription?.remove();
-  }, []);
+  // useEffect(() => {
+  //   const subscription = Dimensions.addEventListener('change', ({window}) => {
+  //     setDimensions(window);
+  //   });
+  //   return () => subscription?.remove();
+  // }, []);
 
-  const navigation = useNavigation();
-  const dispatch = useDispatch();
-  const {items, loading, error} = useSelector(state => state.addToCart);
-
-  useEffect(() => {
-    dispatch(getCart());
-  }, [dispatch]);
+  // useEffect(() => {
+  //   dispatch(getCart());
+  // }, [dispatch]);
 
   const categoryName = useSelector(state => state.product.categoryName);
   const selectedVariant = useSelector(state => state.product.selectedVariant);
@@ -645,7 +600,9 @@ const ProductModal = ({product}) => {
                 transform: [{scale: bounceAnim}],
                 marginLeft: -23,
               }}>
-              {!product?.image || product?.item?.length === 0 ? (
+              {!product?.image ||
+              product.image.length === 0 ||
+              product?.item?.length === 0 ? (
                 <ScrollImage product={images} />
               ) : (
                 <ScrollImage product={product} />
@@ -653,7 +610,8 @@ const ProductModal = ({product}) => {
             </Animated.View>
             <Animated.View
               style={{
-                marginHorizontal: 10,
+                marginHorizontal: scale(10),
+                marginTop: scale(10),
                 opacity: fadeAnim,
                 transform: [
                   {
@@ -742,6 +700,7 @@ const ProductModal = ({product}) => {
                           <View key={index}>
                             {size === 'loose' ||
                             size === 'losse' ||
+                            size === 'Custom' ||
                             size === 'Custom (Kg)' ||
                             size === 'custom (kg)' ? (
                               <Animated.View

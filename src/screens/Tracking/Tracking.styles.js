@@ -1,6 +1,5 @@
 import {Dimensions, StyleSheet} from 'react-native';
-import {scale} from '../Cart/responsive';
-import {moderateScale} from '../../utils/Responsive/responsive';
+import {moderateScale, scale} from '../../utils/Responsive/responsive';
 const {width: screenWidth, height: screenHeight} = Dimensions.get('window');
 
 // Responsive helper functions

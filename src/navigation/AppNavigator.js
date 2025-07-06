@@ -1,54 +1,3 @@
-// import React, {useEffect, useState} from 'react';
-// import {useDispatch, useSelector} from 'react-redux';
-// import {fetchAuthState} from '../redux/slices/authSlice';
-// import StackNavigation from './StackNavigation';
-// import AuthNavigator from './AuthNavigator';
-// import splashImg from '../assets/animation2.gif';
-// import {Image, View} from 'react-native';
-// import FastImage from 'react-native-fast-image';
-
-// const AppNavigator = () => {
-//   const dispatch = useDispatch();
-//   const isAuthenticated = useSelector(state => state.auth.isAuthenticated);
-//   const [loading, setLoading] = useState(true);
-
-//   useEffect(() => {
-//     const checkAuthState = async () => {
-//       await dispatch(fetchAuthState());
-//       setTimeout(() => {
-//         setLoading(false);
-//       }, 1500);
-//     };
-
-//     checkAuthState();
-//   }, [dispatch]);
-
-//   if (loading) {
-//     return (
-//       <View
-//         style={{
-//           flex: 1,
-//           alignItems: 'center',
-//           justifyContent: 'center',
-//           backgroundColor: '#D0E4FF',
-//         }}>
-//         <FastImage
-//           source={splashImg}
-//           style={{
-//             height: 400,
-//             width: 400,
-//           }}
-//           resizeMode={'contain'}
-//         />
-//       </View>
-//     );
-//   }
-
-//   return <>{isAuthenticated ? <StackNavigation /> : <AuthNavigator />}</>;
-// };
-
-// export default AppNavigator;
-
 import React, {useEffect, useState, useRef} from 'react';
 import {useDispatch, useSelector} from 'react-redux';
 import {fetchAuthState} from '../redux/slices/authSlice';
@@ -129,7 +78,7 @@ const AppNavigator = () => {
       // Hide splash screen after animations
       setTimeout(() => {
         setLoading(false);
-      }, 2800);
+      }, 3000);
     };
 
     checkAuthState();

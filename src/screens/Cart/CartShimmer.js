@@ -7,8 +7,11 @@ import Animated, {
   withTiming,
   Easing,
 } from 'react-native-reanimated';
-import LinearGradient from 'react-native-linear-gradient';
-import {scale, verticalScale, moderateScale} from './responsive';
+import {
+  scale,
+  verticalScale,
+  moderateScale,
+} from '../../utils/Responsive/responsive';
 
 const ShimmerItem = ({width, height, style}) => {
   const translateX = useSharedValue(-width);

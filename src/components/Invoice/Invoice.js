@@ -21,132 +21,13 @@ import ViewShot from 'react-native-view-shot';
 import RNFS from 'react-native-fs';
 import RNHTMLtoPDF from 'react-native-html-to-pdf';
 import {moderateScale} from '../../utils/Responsive/responsive';
+import {toWords} from 'number-to-words';
 
 const {width: screenWidth, height: screenHeight} = Dimensions.get('window');
 
 const InvoiceModal = ({visible, invoiceData, onClose}) => {
   const viewShotRef = useRef();
   const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
-
-  // Using the provided sample data
-  const dummyInvoiceData = {
-    _id: '685702c3c222813447a6a311',
-    userId: {
-      _id: '67bda8384c7cd1ebc0827394',
-      companyName: 'Devops',
-      name: 'Dhruv Bansal',
-      phone: '9953849721',
-      email: 'bansaldhruv2609@gmail.com',
-      companyAddress: 'Chandigarh',
-    },
-    items: [
-      {
-        productId: {
-          _id: '67c0703e1345e617848cc586',
-          name: 'Araldite (Resin + Hardener)',
-          image: [
-            '683876b5e33447f07dbcc8c5',
-            '683876b5e33447f07dbcc8c7',
-            '683876b5e33447f07dbcc8c9',
-          ],
-          id: '67c0703e1345e617848cc586',
-        },
-        variant: 'no variant',
-        quantity: 2,
-        _id: '685702c3c222813447a6a312',
-      },
-    ],
-    originalOrder: '685701db7329c9c27b464eeb',
-    isPartialOrder: false,
-    backorders: [],
-    status: 'Invoice Uploaded',
-    reworkReason: '',
-    originalItems: [],
-    createdAt: '2025-06-21T19:06:43.354Z',
-    updatedAt: '2025-06-21T20:43:02.136Z',
-    __v: 0,
-    invoice: {
-      _id: '68571956f587f474672ddd29',
-      invoiceNumber: 'SC/24-25/002146',
-      date: '2025-03-31T00:00:00.000Z',
-      orderId: '685702c3c222813447a6a311',
-      partyName: 'JUMBO INTERNATIONAL',
-      partyAddress: 'SHED 2 D, PHASE VI, SECTOR 37, Gurugram, Haryana, 122001',
-      gstinBuyer: '06ANLPA5517C1ZH',
-      transport: '-',
-      items: [
-        {
-          description: 'EZYCOAT- 828',
-          hsn: '350699',
-          quantity: 10,
-          unit: 'LTR',
-          unitPrice: 193,
-          discount: 0,
-          amount: 1930,
-          taxRate: '18%',
-          taxAmount: 347.4,
-          igstRate: '18%',
-          igstAmount: 347.4,
-          totalAmount: 2277.4,
-        },
-        {
-          description: 'IMAGE MATE-DZ-343',
-          hsn: '37079090',
-          quantity: 10,
-          unit: 'LTR',
-          unitPrice: 730,
-          discount: 0,
-          amount: 7300,
-          taxRate: '18%',
-          taxAmount: 1314,
-          igstRate: '18%',
-          igstAmount: 1314,
-          totalAmount: 8614,
-        },
-        {
-          description: 'GREY CLOTH\nMono 100X68" 14 No',
-          hsn: '54071029',
-          quantity: 142.5,
-          unit: 'Metre',
-          unitPrice: 51,
-          discount: 0,
-          amount: 7267.5,
-          taxRate: '5%',
-          taxAmount: 363.38,
-          igstRate: '5%',
-          igstAmount: 363.38,
-          totalAmount: 7630.88,
-        },
-        {
-          description: 'CARTAGE 18%',
-          hsn: '9965',
-          quantity: 0,
-          unit: '--',
-          unitPrice: 0,
-          discount: 0,
-          amount: 295,
-          taxRate: '18%',
-          taxAmount: 45,
-          igstRate: '18%',
-          igstAmount: 45,
-          totalAmount: 295,
-        },
-      ],
-      totalQuantity: 162.5,
-      totalAmount: 16792.5,
-      totalTax: 2069.78,
-      grandTotal: 18817,
-      roundedOff: -0.28,
-      finalTotal: 18817,
-      irn: '2b0e165d6d15960760546274f38a25af2cb32912a87e645c76ce59077948d8bf',
-      ackNo: '172517158175532',
-      ackDate: '2025-03-31T00:00:00.000Z',
-      createdAt: '2025-06-21T20:43:02.115Z',
-      updatedAt: '2025-06-21T20:43:02.115Z',
-      __v: 0,
-    },
-    id: '685702c3c222813447a6a311',
-  };
 
   const invoice = invoiceData;
 

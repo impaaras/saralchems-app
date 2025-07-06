@@ -1,5 +1,5 @@
 import {StyleSheet} from 'react-native';
-import {scale} from '../../../screens/Cart/responsive';
+import {scale} from '../../../utils/Responsive/responsive';
 
 const styles = StyleSheet.create({
   container: {

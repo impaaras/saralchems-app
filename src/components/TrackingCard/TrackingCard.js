@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   ScrollView,
   TextInput,
-  Modal,
   Dimensions,
   Animated,
 } from 'react-native';
@@ -25,15 +24,14 @@ import {
 } from '../../utils/Responsive/responsive';
 import styles from './TrackingCard.styles';
 import axios from 'axios';
-
-import {useDispatch, useSelector} from 'react-redux';
-import {useFocusEffect, useNavigation} from '@react-navigation/native';
+import {useNavigation} from '@react-navigation/native';
 import {ROUTES} from '../../constants/routes';
 import {useAlert} from '../../context/CustomAlertContext';
 import {useLoader} from '../../context/LoaderContext';
 import InvoiceModal from '../Invoice/Invoice';
 import {storage} from '../../utils/storage';
 import {API_URL} from '../../utils/ApiService';
+import ReworkModal from '../Rework/ReworkModal';
 
 const TrackingCard = ({index, order}) => {
   const [expandedOrders, setExpandedOrders] = useState([]);
@@ -42,13 +40,8 @@ const TrackingCard = ({index, order}) => {
   const {setLoading} = useLoader();
   const [selectedInvoiceData, setSelectedInvoiceData] = useState(false);
   const [activeTab, setActiveTab] = useState('All Orders');
-  const [orders, setOrders] = useState([]);
   const [dropdownVisible, setDropdownVisible] = useState(false);
   const [dropdownAnimation] = useState(new Animated.Value(0));
-  // const {orderInvoice, loading} = useSelector(
-  //   state => state.invoiceSlice.history,
-  // );
-
   const [error, setError] = useState(null);
   const [reworkModalVisible, setReworkModalVisible] = useState(false);
   const [reworkReason, setReworkReason] = useState('');
@@ -91,30 +84,6 @@ const TrackingCard = ({index, order}) => {
         : [...prev, orderId],
     );
   };
-
-  const fetchOrders = async () => {
-    setLoading(true);
-    setError(null);
-    const token = storage.getString(StorageKeys.AUTH_TOKEN);
-    try {
-      const response = await axios.get(`${API_URL}/order/user-orders`, {
-        headers: {Authorization: `Bearer ${token}`},
-      });
-      setOrders(response.data);
-
-      setLoading(false);
-    } catch (error) {
-      console.log(error, 'error message');
-      setError('Failed to load orders. Please try again.');
-      setLoading(false);
-    }
-  };
-
-  useFocusEffect(
-    useCallback(() => {
-      fetchOrders();
-    }, []),
-  );
 
   const updateOrderStatus = async (orderId, status, reason = null) => {
     setProcessing(true);
@@ -191,20 +160,6 @@ const TrackingCard = ({index, order}) => {
     setReworkModalVisible(true);
   };
 
-  // Submit rework request with reason
-  const submitReworkRequest = () => {
-    if (!reworkReason.trim()) {
-      // Using custom alert for validation error
-      showAlert({
-        title: 'Required',
-        message: 'Please provide a reason for the rework request.',
-        acceptText: 'OK',
-        rejectText: '', // Hide cancel button
-      });
-      return;
-    }
-    updateOrderStatus(selectedOrderId, 'Rework', reworkReason);
-  };
   const handleTrackingPress = order => {
     navigation.navigate(ROUTES.TRACKING, {orders: order});
   };
@@ -300,7 +255,7 @@ const TrackingCard = ({index, order}) => {
                       </Text>
                     </View>
                   </View>
-                  {order.items.length > 1 && (
+                  {order?.items?.length > 1 && (
                     <View>
                       <LinearGradient
                         colors={['#38587F', '#101924']}
@@ -308,7 +263,7 @@ const TrackingCard = ({index, order}) => {
                         end={{x: 1, y: 0}}
                         style={[styles.ratingContainer]}>
                         <Text style={[styles.ratingText]}>
-                          +{order.items.length - 1}
+                          +{order?.items?.length - 1}
                         </Text>
                       </LinearGradient>
                     </View>
@@ -328,16 +283,16 @@ const TrackingCard = ({index, order}) => {
                     <View style={[styles.productDetails]}>
                       <View>
                         <Text style={[styles.productName]}>
-                          {order.items[itemIndex].productId.name}
+                          {order?.items[itemIndex].productId.name}
                         </Text>
                         <Text style={[styles.productSize]}>
                           <Text style={{fontWeight: '600'}}>Variant</Text>:{' '}
-                          {order.items[itemIndex].variant}
+                          {order?.items[itemIndex].variant}
                         </Text>
                       </View>
                       <View>
                         <Text style={[styles.productQuantity]}>
-                          Quantity: {order.items[itemIndex].quantity}
+                          Quantity: {order?.items[itemIndex].quantity}
                         </Text>
                       </View>
                     </View>
@@ -369,75 +324,71 @@ const TrackingCard = ({index, order}) => {
           )}
         </View>
         <View style={{marginTop: hp(1.2)}}>
-          {
-            // order.status === 'Invoice Uploaded' ||
-            order.status === 'Quote Sent' ||
-            order.status === 'Partially Fulfilled' ? (
-              <View
-                style={{
-                  flexDirection: isSmallScreen ? 'column' : 'row',
-                  justifyContent: 'space-around',
-                }}>
-                <LinearGradient
-                  colors={['#101924', '#38587F']}
-                  start={{x: 0, y: 0}}
-                  end={{x: 1, y: 0}}
-                  style={[styles.confirmButton]}>
-                  <TouchableOpacity
-                    style={[styles.quoteButton]}
-                    onPress={() => handleConfirmOrder(order._id)}
-                    disabled={processing}>
-                    <Text
-                      style={[
-                        styles.quoteButtonText,
-                        {
-                          color: '#FFF',
-                        },
-                      ]}>
-                      {processing ? 'Processing...' : 'Confirm'}
-                    </Text>
-                  </TouchableOpacity>
-                </LinearGradient>
-                <LinearGradient
-                  colors={['#FFF', '#FFF']}
-                  start={{x: 0, y: 0}}
-                  end={{x: 1, y: 0}}
-                  style={[
-                    styles.confirmButton,
-                    {
-                      borderColor: '#101924',
-                      borderWidth: 1,
-                    },
-                  ]}>
-                  <TouchableOpacity
-                    style={[styles.quoteButton]}
-                    onPress={() => handleReworkOrder(order._id)}
-                    disabled={processing}>
-                    <Text
-                      style={[
-                        styles.quoteButtonText,
-                        {
-                          color: '#101924',
-                        },
-                      ]}>
-                      {processing ? 'Processing...' : 'Rework'}
-                    </Text>
-                  </TouchableOpacity>
-                </LinearGradient>
-              </View>
-            ) : null
-          }
+          {order.status === 'Quote Sent' ||
+          order.status === 'Partially Fulfilled' ? (
+            <View
+              style={{
+                flexDirection: isSmallScreen ? 'column' : 'row',
+                justifyContent: 'space-around',
+              }}>
+              <LinearGradient
+                colors={['#101924', '#38587F']}
+                start={{x: 0, y: 0}}
+                end={{x: 1, y: 0}}
+                style={[styles.confirmButton]}>
+                <TouchableOpacity
+                  style={[styles.quoteButton]}
+                  onPress={() => handleConfirmOrder(order._id)}
+                  disabled={processing}>
+                  <Text
+                    style={[
+                      styles.quoteButtonText,
+                      {
+                        color: '#FFF',
+                      },
+                    ]}>
+                    {processing ? 'Processing...' : 'Confirm'}
+                  </Text>
+                </TouchableOpacity>
+              </LinearGradient>
+              <LinearGradient
+                colors={['#FFF', '#FFF']}
+                start={{x: 0, y: 0}}
+                end={{x: 1, y: 0}}
+                style={[
+                  styles.confirmButton,
+                  {
+                    borderColor: '#101924',
+                    borderWidth: 1,
+                  },
+                ]}>
+                <TouchableOpacity
+                  style={[styles.quoteButton]}
+                  onPress={() => handleReworkOrder(order._id)}
+                  disabled={processing}>
+                  <Text
+                    style={[
+                      styles.quoteButtonText,
+                      {
+                        color: '#101924',
+                      },
+                    ]}>
+                    {processing ? 'Processing...' : 'Rework'}
+                  </Text>
+                </TouchableOpacity>
+              </LinearGradient>
+            </View>
+          ) : null}
         </View>
         <View style={{flex: 1}}>
           {!showInvoice ? (
             <View style={{flex: 1}}>
               <View style={{marginTop: hp(1.2)}}>
-                {order.status === 'Invoice Uploaded' ? (
+                {order.status === 'Invoice Uploaded' && (
                   <View
                     style={{
                       flexDirection: isSmallScreen ? 'column' : 'row',
                       justifyContent: 'space-around',
-                      //   gap: isSmallScreen ? hp(1) : 0,
                     }}>
                     <LinearGradient
                       colors={['#101924', '#38587F']}
@@ -490,7 +441,7 @@ const TrackingCard = ({index, order}) => {
                       </TouchableOpacity>
                     </LinearGradient>
                   </View>
-                ) : null}
+                )}
               </View>
             </View>
           ) : (
@@ -502,122 +453,16 @@ const TrackingCard = ({index, order}) => {
           )}
         </View>
       </View>
-      <Modal
+      <ReworkModal
         visible={reworkModalVisible}
-        transparent={true}
-        animationType="slide"
-        onRequestClose={() => {
+        onClose={() => {
           setReworkModalVisible(false);
-          setReworkReason('');
-        }}>
-        <View style={[styles.modalContainer, {padding: wp(5)}]}>
-          <View
-            style={[
-              styles.modalContent,
-              {
-                padding: wp(5),
-                width: isTablet ? '80%' : '100%',
-                maxWidth: isTablet ? 500 : 400,
-              },
-            ]}>
-            <Text
-              style={[
-                styles.modalTitle,
-                {
-                  fontSize: isTablet ? 20 : 18,
-                  marginBottom: hp(1.2),
-                },
-              ]}>
-              Request Rework
-            </Text>
-            <Text
-              style={[
-                styles.modalSubtitle,
-                {
-                  fontSize: isTablet ? 16 : 14,
-                  marginBottom: hp(1.8),
-                },
-              ]}>
-              Please provide a reason for your rework request:
-            </Text>
-            <TextInput
-              style={[
-                styles.reasonInput,
-                {
-                  padding: wp(2.5),
-                  marginBottom: hp(2.4),
-                  height: hp(12),
-                  fontSize: isTablet ? 16 : 14,
-                },
-              ]}
-              placeholder="Enter reason for rework"
-              multiline={true}
-              numberOfLines={4}
-              value={reworkReason}
-              onChangeText={setReworkReason}
-            />
-            <View style={styles.modalButtons}>
-              <TouchableOpacity
-                style={[
-                  styles.modalButton,
-                  styles.cancelButton,
-                  {
-                    padding: hp(1.4),
-                    marginHorizontal: wp(1.25),
-                    width: isSmallScreen ? '100%' : '45%',
-                  },
-                ]}
-                onPress={() => {
-                  setReworkModalVisible(false);
-                  setReworkReason('');
-                }}>
-                <Text
-                  style={[
-                    styles.cancelButtonText,
-                    {
-                      fontSize: isTablet ? 16 : 14,
-                    },
-                  ]}>
-                  Cancel
-                </Text>
-              </TouchableOpacity>
-
-              <LinearGradient
-                colors={['#101924', '#38587F']}
-                start={{x: 0, y: 0}}
-                end={{x: 1, y: 0}}
-                style={[
-                  styles.confirmButton,
-                  {
-                    width: isSmallScreen ? '50%' : '45%',
-                  },
-                ]}>
-                <TouchableOpacity
-                  style={[
-                    styles.modalButton,
-                    styles.submitButton,
-                    {
-                      padding: hp(1.4),
-                      marginHorizontal: wp(1.25),
-                    },
-                  ]}
-                  onPress={submitReworkRequest}
-                  disabled={processing}>
-                  <Text
-                    style={[
-                      styles.submitButtonText,
-                      {
-                        fontSize: isTablet ? 16 : 14,
-                      },
-                    ]}>
-                    {processing ? 'Submitting...' : 'Submit'}
-                  </Text>
-                </TouchableOpacity>
-              </LinearGradient>
-            </View>
-          </View>
-        </View>
-      </Modal>
+          setSelectedOrderId(null);
+        }}
+        selectedOrderId={selectedOrderId}
+        updateOrderStatus={updateOrderStatus}
+        processing={processing}
+      />
     </View>
   );
 };

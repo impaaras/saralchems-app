@@ -341,6 +341,7 @@ const styles = StyleSheet.create({
     borderColor: '#D0E4FF',
   },
   selectedOption: {
+    flex: 1,
     backgroundColor: '#3C5D86',
   },
   optionButtonText: {
@@ -351,8 +352,9 @@ const styles = StyleSheet.create({
   selectedOptionText: {
     color: 'white',
     fontSize: moderateScale(12),
+    paddingHorizontal: 6,
+    fontWeight: '500',
   },
-
   // New styles for image zoom
   modalContainer: {
     flex: 1,

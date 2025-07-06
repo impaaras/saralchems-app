@@ -30,32 +30,29 @@ const ProductsScreen = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
 
-  useFocusEffect(
-    useCallback(() => {
-      const fetchData = async () => {
-        setLoading(true);
-        setIsInitialLoad(true);
-        try {
-          await dispatch(searchProducts('')).unwrap();
-        } catch (err) {
-          console.error(err);
-        } finally {
-          setLoading(false);
-          setIsInitialLoad(false);
-        }
-      };
-
-      fetchData();
-    }, [dispatch, setLoading]),
-  );
-
-  // When full product list is updated, reset visible products
   useEffect(() => {
-    if (allProducts.length > 0) {
-      setVisibleProducts(allProducts.slice(0, PAGE_SIZE));
-      setCurrentPage(1);
-    }
-  }, [allProducts]);
+    const fetchData = async () => {
+      setLoading(true);
+      setIsInitialLoad(true);
+      try {
+        await dispatch(searchProducts('')).unwrap();
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+        setIsInitialLoad(false);
+      }
+    };
+
+    fetchData();
+  }, [dispatch, setLoading]),
+    // When full product list is updated, reset visible products
+    useEffect(() => {
+      if (allProducts.length > 0) {
+        setVisibleProducts(allProducts.slice(0, PAGE_SIZE));
+        setCurrentPage(1);
+      }
+    }, [allProducts]);
 
   const handleAddPress = product => {
     dispatch(addItem(product));

@@ -9,6 +9,7 @@ import {
   onNavigationReady,
   onStateChange,
 } from './navigationService';
+import DashboardHeader from '../components/Header/DashBoardHeader';
 
 const App = () => {
   return (

@@ -5,17 +5,10 @@ import {
   View,
   SafeAreaView,
   TouchableOpacity,
-  Image,
   ScrollView,
-  ActivityIndicator,
-  Alert,
   Animated,
   Easing,
-  Platform,
-  Vibration,
-  TextInput,
 } from 'react-native';
-import Icon from 'react-native-vector-icons/MaterialIcons';
 import {useNavigation} from '@react-navigation/native';
 import {ROUTES} from '../../constants/routes';
 import LinearGradient from 'react-native-linear-gradient';
@@ -26,335 +19,19 @@ import {
   removeFromCart,
   updateCartItem,
 } from '../../redux/slices/addToCartSlice';
-import {fallbackImg} from '../../utils/images';
 import styles from './Cart.styles';
 import {StorageKeys, storage} from '../../utils/storage';
 import EmptyCartScreen from './EmptyCart';
-import Loader from '../../utils/Loader';
-import {setActiveProduct} from '../../redux/slices/newCart';
-import {openModal} from '../../redux/slices/modalSlice';
-import {addItem} from '../../redux/slices/cartSlice';
-
 import {useAlert} from '../../context/CustomAlertContext';
 import {useLoader} from '../../context/LoaderContext';
-import ScrollImage from '../../components/ScrollImage/Index';
 import CartShimmer from './CartShimmer';
-import {Trash2} from 'lucide-react-native';
-import {moderateScale, scale, verticalScale} from './responsive';
-
-// Enhanced TouchableOpacity with animations and haptic feedback
-const AnimatedTouchable = ({
-  children,
-  onPress,
-  style,
-  hapticType = 'light',
-  ...props
-}) => {
-  const scaleAnim = useRef(new Animated.Value(1)).current;
-  const opacityAnim = useRef(new Animated.Value(1)).current;
-
-  const triggerHaptic = type => {
-    if (Platform.OS === 'ios') {
-      // iOS Haptic Feedback
-      const ReactNativeHapticFeedback = require('react-native-haptic-feedback');
-      const options = {
-        enableVibrateFallback: true,
-        ignoreAndroidSystemSettings: false,
-      };
-
-      switch (type) {
-        case 'light':
-          ReactNativeHapticFeedback?.trigger('impactLight', options);
-          break;
-        case 'medium':
-          ReactNativeHapticFeedback?.trigger('impactMedium', options);
-          break;
-        case 'heavy':
-          ReactNativeHapticFeedback?.trigger('impactHeavy', options);
-          break;
-        default:
-          ReactNativeHapticFeedback?.trigger('selection', options);
-      }
-    } else {
-      // Android Vibration fallback
-      switch (type) {
-        case 'light':
-          Vibration.vibrate(10);
-          break;
-        case 'medium':
-          Vibration.vibrate(20);
-          break;
-        case 'heavy':
-          Vibration.vibrate(50);
-          break;
-        default:
-          Vibration.vibrate(5);
-      }
-    }
-  };
-
-  const handlePressIn = () => {
-    triggerHaptic(hapticType);
-
-    Animated.parallel([
-      Animated.spring(scaleAnim, {
-        toValue: 0.95,
-        useNativeDriver: true,
-        tension: 100,
-        friction: 8,
-      }),
-      Animated.timing(opacityAnim, {
-        toValue: 0.8,
-        duration: 100,
-        easing: Easing.out(Easing.quad),
-        useNativeDriver: true,
-      }),
-    ]).start();
-  };
-
-  const handlePressOut = () => {
-    Animated.parallel([
-      Animated.spring(scaleAnim, {
-        toValue: 1,
-        useNativeDriver: true,
-        tension: 100,
-        friction: 8,
-      }),
-      Animated.timing(opacityAnim, {
-        toValue: 1,
-        duration: 150,
-        easing: Easing.out(Easing.quad),
-        useNativeDriver: true,
-      }),
-    ]).start();
-  };
-
-  return (
-    <TouchableOpacity
-      activeOpacity={1}
-      onPressIn={handlePressIn}
-      onPressOut={handlePressOut}
-      onPress={onPress}
-      {...props}>
-      <Animated.View
-        style={[
-          style,
-          {
-            transform: [{scale: scaleAnim}],
-            opacity: opacityAnim,
-          },
-        ]}>
-        {children}
-      </Animated.View>
-    </TouchableOpacity>
-  );
-};
-
-const CartItem = ({product, onRemove, onDecrement, onIncrement}) => {
-  let [variantId, setVariantId] = useState(null);
-  const navigation = useNavigation();
-  const [qty, setQty] = useState(product.quantity);
-
-  const dispatch = useDispatch();
-
-  useEffect(() => {
-    setQty(product.quantity);
-  }, [product.quantity]);
-
-  // Animation values
-  const slideAnim = useRef(new Animated.Value(0)).current;
-  const fadeAnim = useRef(new Animated.Value(0)).current;
-  const scaleAnim = useRef(new Animated.Value(0.8)).current;
-
-  useEffect(() => {
-    // Staggered entrance animation
-    Animated.sequence([
-      Animated.delay(Math.random() * 200), // Random delay for staggered effect
-      Animated.parallel([
-        Animated.spring(slideAnim, {
-          toValue: 1,
-          useNativeDriver: true,
-          tension: 60,
-          friction: 8,
-        }),
-        Animated.timing(fadeAnim, {
-          toValue: 1,
-          duration: 600,
-          easing: Easing.out(Easing.cubic),
-          useNativeDriver: true,
-        }),
-        Animated.spring(scaleAnim, {
-          toValue: 1,
-          useNativeDriver: true,
-          tension: 50,
-          friction: 8,
-          delay: 100,
-        }),
-      ]),
-    ]).start();
-  }, []);
-
-  const calculateTotal = (variant, quantity) => {
-    const match = variant.match(/(\d+(\.\d+)?)\s*(kg|gm|ltr|ml)/i);
-    if (!match) return `${quantity}`; // Fallback if no match
-
-    const value = parseFloat(match[1]);
-    const unit = match[3].toLowerCase();
-    const total = value * quantity;
-
-    if (unit === 'gm' && total >= 1000) {
-      return `${total / 1000}kg`;
-    }
-
-    return `${parseFloat(total.toFixed(1))}${unit}`;
-  };
-
-  const removeTrailingDigits = variant => {
-    const match = variant?.match(/^\d+(\.\d+)?\s*(kg|gm|ml|ltr|ml)/i);
-    return match ? match[0].replace(/\s+/, '') : '';
-  };
-
-  const activeProduct = useSelector(state => state.newCart.activeProduct);
-
-  const openAddModal = (product, index, currentIndex) => {
-    console.log(product);
-    if (
-      activeProduct?.selectedVariant === null ||
-      activeProduct?._id !== currentIndex
-    ) {
-      dispatch(setActiveProduct(product));
-    }
-    setVariantId(index);
-    const newProduct = {
-      ...product,
-      parentId: index,
-      variants: product.variants || [],
-    };
-
-    dispatch(addItem(newProduct));
-    dispatch(
-      openModal({
-        modalType: 'PRODUCT_MODAL',
-        callbackId: '123',
-        product: newProduct,
-      }),
-    );
-  };
-
-  const updateQuantity = newQty => {
-    const numericQty = parseInt(newQty, 10);
-    if (!isNaN(numericQty) && numericQty > 0) {
-      const difference = numericQty - product.quantity;
-
-      if (difference === 0) return; // nothing to update
-
-      setQty(numericQty);
-
-      dispatch(
-        updateCartItem({
-          productId: product.productId._id,
-          variant: product.variant,
-          quantity: difference, // ✅ Send the difference!
-        }),
-      )
-        .unwrap()
-        .then(() => dispatch(getCart()))
-        .catch(err => {
-          console.error('Update failed:', err);
-        });
-    }
-  };
-
-  const animatedRemove = () => {
-    Animated.parallel([]).start(() => {
-      onRemove();
-    });
-  };
-
-  return (
-    <Animated.View
-      style={[
-        styles.cartItem,
-        {
-          opacity: fadeAnim,
-          transform: [
-            {
-              translateX: slideAnim.interpolate({
-                inputRange: [0, 1],
-                outputRange: [50, 0],
-              }),
-            },
-            {scale: scaleAnim},
-          ],
-        },
-      ]}>
-      {product && <ScrollImage product={product} reffer="cart" />}
-      <View style={styles.cartItemDetails}>
-        <View style={styles.cartItemHeader}>
-          <AnimatedTouchable
-            // onPress={() => openAddModal(product, 0, product?._id)}
-            hapticType="light">
-            <Text style={styles.cartItemName}>{product?.productId?.name}</Text>
-          </AnimatedTouchable>
-          <AnimatedTouchable onPress={animatedRemove} hapticType="medium">
-            <Animated.View>
-              <Trash2 name="delete" size={scale(20)} color="#001" />
-              {/* <Icon name="delete" size={22} color="#666" /> */}
-            </Animated.View>
-          </AnimatedTouchable>
-        </View>
-        {product.variant !== 'no variant' && (
-          <Text style={styles.cartItemSpec}>
-            {removeTrailingDigits(product.variant) ||
-              product.variant ||
-              'Custom variant'}
-          </Text>
-        )}
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-          }}>
-          <Text style={styles.cartItemQuality}>
-            <Text style={{fontWeight: '500', fontSize: scale(15)}}>
-              Total Qty:{' '}
-            </Text>
-            {product.variant === 'no variant'
-              ? product.quantity
-              : calculateTotal(product.variant, product.quantity)}
-          </Text>
-          <View style={styles.cartItemQuantity}>
-            <AnimatedTouchable
-              style={[styles.quantityBtn]}
-              onPress={onDecrement}
-              hapticType="light">
-              <Text style={styles.quantityBtnText}>−</Text>
-            </AnimatedTouchable>
-            <TextInput
-              value={String(qty)}
-              onChangeText={text => {
-                const numeric = text.replace(/[^0-9]/g, '');
-                setQty(numeric); // Immediate update for UX
-              }}
-              onEndEditing={() => updateQuantity(qty)}
-              keyboardType="numeric"
-              style={styles.quantityInput}
-              textAlign="center"
-            />
-
-            <AnimatedTouchable
-              style={styles.quantityBtn}
-              onPress={onIncrement}
-              hapticType="light">
-              <Text style={styles.quantityBtnText}>+</Text>
-            </AnimatedTouchable>
-          </View>
-        </View>
-      </View>
-    </Animated.View>
-  );
-};
+import CartItem from './CartItem';
+import AnimatedTouchable from './AnimateTouchable';
+import {
+  scale,
+  moderateScale,
+  verticalScale,
+} from '../../utils/Responsive/responsive';
 
 const Cart = () => {
   const navigation = useNavigation();
@@ -364,9 +41,9 @@ const Cart = () => {
   const isProcessing = useRef(false);
   const {setLoading} = useLoader();
   const [alertVisible, setAlertVisible] = useState(true);
-
-  // New state for initial loading
+  const selectedProductItem = useSelector(state => state.cart.selectedProduct);
   const [initialLoading, setInitialLoading] = useState(true);
+  const {showAlert} = useAlert();
 
   // Animation values
   const containerFadeAnim = useRef(new Animated.Value(0)).current;
@@ -374,9 +51,7 @@ const Cart = () => {
   const buttonFadeAnim = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    // Screen entrance animation
     if (!initialLoading) {
-      // Only animate after initial load is complete
       Animated.parallel([
         Animated.timing(containerFadeAnim, {
           toValue: 1,
@@ -403,18 +78,7 @@ const Cart = () => {
         ]),
       ]).start();
     }
-  }, [items, initialLoading]); // Add initialLoading to dependencies
-
-  useEffect(() => {
-    const unsubscribe = navigation.addListener('focus', () => {
-      isScreenFocused.current = true;
-      fetchCartData();
-    });
-
-    return unsubscribe;
-  }, [navigation]);
-
-  const {showAlert} = useAlert();
+  }, [items, initialLoading]);
 
   const fetchCartData = useCallback(async () => {
     setInitialLoading(true); // Set initialLoading to true before fetching
@@ -423,21 +87,22 @@ const Cart = () => {
     } catch (err) {
       showAlert({
         title: 'Error',
-        message: 'Failed to load cart',
-        rejectText: 'Cancel',
-      });
-      // The `error` from useSelector might not be immediately available
-      // if the `unwrap` call catches the error.
-      // Consider using the `err` object directly or re-dispatching an error action.
-      showAlert({
-        title: 'Error',
-        message: err.message, // Use err.message here
+        message: err.message,
         acceptText: 'OK',
       });
     } finally {
-      setInitialLoading(false); // Set initialLoading to false after fetch attempt
+      setInitialLoading(false);
     }
-  }, [dispatch, showAlert]); // Add showAlert to dependencies
+  }, [dispatch, showAlert]);
+
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('focus', () => {
+      isScreenFocused.current = true;
+      fetchCartData();
+    });
+
+    return unsubscribe;
+  }, []);
 
   const handleCartOperation = async (
     operation,
@@ -502,22 +167,11 @@ const Cart = () => {
         rejectText: 'Cancel',
       });
     },
-    [dispatch, fetchCartData, showAlert], // Add showAlert to dependencies
+    [dispatch, fetchCartData, showAlert],
   );
-
-  useEffect(() => {
-    const unsubscribe = navigation.addListener('blur', () => {
-      isScreenFocused.current = false;
-    });
-
-    return unsubscribe;
-  }, [navigation]);
-
-  const selectedProductItem = useSelector(state => state.cart.selectedProduct);
 
   const requestForQuote = async quoteData => {
     const token = storage.getString(StorageKeys.AUTH_TOKEN);
-
     showAlert({
       title: 'Are you sure?',
       message: 'Do you want to send this quote?',

@@ -1,4 +1,10 @@
-import React, {useEffect, useState, useRef} from 'react';
+import React, {
+  useEffect,
+  useState,
+  useRef,
+  useLayoutEffect,
+  useCallback,
+} from 'react';
 import {
   View,
   StyleSheet,
@@ -29,11 +35,9 @@ const hapticOptions = {
 const HomeScreen = () => {
   const [categories, setCategories] = useState([]);
   const [subCategories, setSubCategories] = useState({});
-  const [isDataReady, setIsDataReady] = useState(false); // New state to track if all data is ready
   const {setLoading} = useLoader();
   const [error, setError] = useState(null);
   const token = useSelector(state => state.auth.token);
-
   // Animation values
   const headerAnim = useRef(new Animated.Value(0)).current;
   const categoriesListAnim = useRef(new Animated.Value(0)).current;
@@ -42,7 +46,6 @@ const HomeScreen = () => {
   const getCategoryData = async () => {
     setLoading(true);
     setError(null);
-    setIsDataReady(false); // Reset data ready state
 
     try {
       const response = await axios.get(`${API_URL}/category`, {
@@ -73,28 +76,23 @@ const HomeScreen = () => {
           processedCategories.push(category);
         }
       }
-
       // Set all data at once after processing is complete
       setCategories(processedCategories);
       setSubCategories(subCategoriesMap);
-
       // Prepare animated values for sections
       sectionAnims.length = 0;
       for (let i = 0; i < processedCategories.length; i++) {
         sectionAnims.push(new Animated.Value(0));
       }
-
       // Mark data as ready and start animations
-      setIsDataReady(true);
       setLoading(false);
 
       // Start animations after data is ready
       setTimeout(() => {
         startAnimations(processedCategories);
-      }, 100); // Small delay to ensure state updates are complete
+      }, 100);
     } catch (error) {
       setLoading(false);
-      setIsDataReady(false);
       if (
         error.response &&
         (error.response.status === 401 || error.response.status === 403)
@@ -155,23 +153,6 @@ const HomeScreen = () => {
     );
   }
 
-  // Show loading state until all data is ready
-  // if (isDataReady) {
-  //   return (
-  //     <SafeAreaView style={styles.container}>
-  //       <DashboardHeader />
-  //       <TrendingProducts categories={categories} />
-  //       {/* You can add a skeleton loader here if needed */}
-  //       <View style={styles.loadingOverlay}>
-  //         <View style={styles.loadingContainer}>
-  //           <ActivityIndicator size="large" color="#101924" />
-  //           <Text style={styles.loadingText}>Loading...</Text>
-  //         </View>
-  //       </View>
-  //     </SafeAreaView>
-  //   );
-  // }
-
   return (
     <SafeAreaView style={styles.container}>
       <Animated.View
@@ -191,41 +172,42 @@ const HomeScreen = () => {
         <DashboardHeader />
         <TrendingProducts categories={categories} />
       </Animated.View>
-
-      <Animated.ScrollView
+      <Animated.FlatList
+        data={categories}
+        keyExtractor={item => item._id}
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollHomescreen}
         decelerationRate="fast"
-        scrollEventThrottle={16}>
-        {/* "Shop By Category" section */}
-        <Animated.View
-          style={[
-            styles.sectionContainer,
-            {
-              opacity: categoriesListAnim,
-              transform: [
+        scrollEventThrottle={16}
+        ListHeaderComponent={
+          <>
+            <Animated.View
+              style={[
+                styles.sectionContainer,
                 {
-                  scale: categoriesListAnim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [0.95, 1],
-                  }),
+                  opacity: categoriesListAnim,
+                  transform: [
+                    {
+                      scale: categoriesListAnim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [0.95, 1],
+                      }),
+                    },
+                    {
+                      translateY: categoriesListAnim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [20, 0],
+                      }),
+                    },
+                  ],
                 },
-                {
-                  translateY: categoriesListAnim.interpolate({
-                    inputRange: [0, 1],
-                    outputRange: [20, 0],
-                  }),
-                },
-              ],
-            },
-          ]}>
-          <ProductList title="Shop By Category" products={categories} />
-        </Animated.View>
-
-        {/* Individual category lists - all render together */}
-        {categories.map((category, index) => (
+              ]}>
+              <ProductList title="Shop By Category" products={categories} />
+            </Animated.View>
+          </>
+        }
+        renderItem={({item, index}) => (
           <Animated.View
-            key={category._id}
             style={{
               opacity: sectionAnims[index],
               transform: [
@@ -243,13 +225,13 @@ const HomeScreen = () => {
                 HapticFeedback.trigger('impactLight', hapticOptions);
               }}>
               <ProductList
-                title={`${category.name}`}
-                products={subCategories[category._id] || []}
+                title={item.name}
+                products={subCategories[item._id] || []}
               />
             </TouchableOpacity>
           </Animated.View>
-        ))}
-      </Animated.ScrollView>
+        )}
+      />
     </SafeAreaView>
   );
 };

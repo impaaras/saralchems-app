@@ -1,18 +1,7 @@
 import {StyleSheet, Dimensions} from 'react-native';
-import {scale} from '../../screens/Cart/responsive';
-import {moderateScale} from '../../utils/Responsive/responsive';
+import {hp, moderateScale, scale, wp} from '../../utils/Responsive/responsive';
 
 const {width: screenWidth, height: screenHeight} = Dimensions.get('window');
-
-// Helper functions for responsive design
-const wp = percentage => {
-  return (percentage * screenWidth) / 100;
-};
-
-const hp = percentage => {
-  return (percentage * screenHeight) / 100;
-};
-
 // Responsive font size
 const responsiveFontSize = size => {
   const scale = screenWidth / 420; // Base width (iPhone X)
@@ -34,12 +23,6 @@ const getImageHeight = () => {
   if (screenWidth < 400) return hp(13); // Medium phones
   if (screenWidth < 500) return hp(14); // Large phones
   return hp(15); // Tablets
-};
-
-// Get more button size
-const getMoreButtonSize = () => {
-  if (screenWidth < 350) return wp(6); // Small phones
-  return wp(6.5); // Other devices
 };
 
 const styles = StyleSheet.create({
@@ -68,7 +51,6 @@ const styles = StyleSheet.create({
     borderRadius: wp(1),
     paddingVertical: hp(0.3),
     paddingHorizontal: wp(2),
-    // maxWidth: wp(20), // Prevent variants from being too wide
   },
 
   selectedVariantItem: {
@@ -79,15 +61,18 @@ const styles = StyleSheet.create({
     borderRadius: wp(1),
     paddingVertical: hp(0.3),
     paddingHorizontal: wp(2),
-    maxWidth: wp(20),
   },
 
   variantText: {
     fontSize: moderateScale(10),
     color: '#333',
+    textAlign: 'center',
+    minWidth: wp(8),
   },
 
   selectedVariantText: {
+    textAlign: 'center',
+    minWidth: wp(8),
     color: '#FFF',
     fontSize: moderateScale(10),
   },

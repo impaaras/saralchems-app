@@ -18,8 +18,7 @@ import {useDispatch} from 'react-redux';
 import {registerUser} from '../../redux/slices/authSlice';
 import logo from '../../assets/logo.png';
 import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
-import {scale} from '../Cart/responsive';
-import {moderateScale} from '../../utils/Responsive/responsive';
+import {moderateScale, scale} from '../../utils/Responsive/responsive';
 
 // Get screen dimensions
 const {width: screenWidth, height: screenHeight} = Dimensions.get('window');

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   StyleSheet,
   Text,
@@ -20,14 +20,15 @@ import {
   verticalScale,
   moderateScale,
 } from '../utils/Responsive/responsive';
+import {triggerHaptic} from '../utils/function/function';
 
 const windowWidth = Dimensions.get('window').width;
 
 const CustomTabBar = ({state, descriptors, navigation, translateY}) => {
-  const [index, setIndex] = React.useState(state.index);
+  const [index, setIndex] = useState(state.index);
   const {items} = useSelector(state => state.addToCart);
 
-  React.useEffect(() => {
+  useEffect(() => {
     setIndex(state.index);
   }, [state.index]);
 
@@ -138,12 +139,12 @@ const CustomTabBar = ({state, descriptors, navigation, translateY}) => {
         <TabButton
           iconComponent={
             <PackageCheck
-              color={index === 4 ? '#FFF' : '#5A5A5A'}
+              color={index === 3 ? '#FFF' : '#5A5A5A'}
               size={scale(20)}
             />
           }
           label="Order History"
-          isActive={index === 4}
+          isActive={index === 3}
           onPress={() => handleNavigateScreen(3)}
         />
       </View>

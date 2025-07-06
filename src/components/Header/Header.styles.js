@@ -1,5 +1,9 @@
 import {StyleSheet} from 'react-native';
-import {moderateScale, scale} from '../../screens/Cart/responsive';
+import {
+  moderateScale,
+  scale,
+  verticalScale,
+} from '../../utils/Responsive/responsive';
 
 const styles = StyleSheet.create({
   headerContainer: {
@@ -40,7 +44,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   title: {
-    fontSize: moderateScale(17),
+    fontSize: moderateScale(16),
     fontWeight: '500',
     color: '#FFF',
     fontWeight: '500',

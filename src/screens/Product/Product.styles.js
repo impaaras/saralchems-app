@@ -1,5 +1,5 @@
 import {StyleSheet} from 'react-native';
-import {scale} from '../Cart/responsive';
+import {scale} from '../../utils/Responsive/responsive';
 
 const styles = StyleSheet.create({
   container: {
@@ -9,9 +9,7 @@ const styles = StyleSheet.create({
   flatListContainer: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-
     justifyContent: 'space-around',
-    // paddingBottom: 20,
   },
   loadingText: {
     textAlign: 'center',

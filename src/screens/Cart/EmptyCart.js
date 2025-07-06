@@ -12,12 +12,6 @@ import {
 } from 'react-native-svg';
 
 const EmptyCartScreen = ({navigation}) => {
-  const handleStartShopping = () => {
-    // Navigate to products or home screen
-    // navigation.navigate('Products');
-    console.log('Start shopping pressed');
-  };
-
   return (
     <View style={styles.container}>
       <View style={styles.content}>

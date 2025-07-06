@@ -106,7 +106,7 @@ const BottomNavigator = () => {
     <Tab.Navigator
       tabBar={props => <CustomTabBar {...props} translateY={tabBarOffset} />}
       screenOptions={{headerShown: false}}>
-      <Tab.Screen name="Home">
+      <Tab.Screen name={ROUTES.HOME}>
         {props => wrapScreen(HomeScreen)(props)}
       </Tab.Screen>
       <Tab.Screen name={ROUTES.PRODUCT_SCREEN}>
@@ -115,11 +115,11 @@ const BottomNavigator = () => {
       <Tab.Screen name={ROUTES.CART}>
         {props => wrapScreen(Cart)(props)}
       </Tab.Screen>
-      <Tab.Screen name={ROUTES.TRACKING}>
-        {props => wrapScreen(OrderTrackingScreen)(props)}
-      </Tab.Screen>
       <Tab.Screen name={ROUTES.HISTORY}>
         {props => wrapScreen(OrderHistory)(props)}
+      </Tab.Screen>
+      <Tab.Screen name={ROUTES.TRACKING}>
+        {props => wrapScreen(OrderTrackingScreen)(props)}
       </Tab.Screen>
       <Tab.Screen name={ROUTES.PROFILE}>
         {props => wrapScreen(Profile)(props)}

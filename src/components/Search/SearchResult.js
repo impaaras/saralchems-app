@@ -54,6 +54,7 @@
 //       setCurrentPage(1);
 //     }
 //   }, [allProducts]);
+//   const showNoResults = allProducts.length === 0 && !loading;
 
 //   const handleAddPress = product => {
 //     dispatch(addItem(product));
@@ -89,7 +90,7 @@
 //     }
 //   };
 
-//   const showNoResults = searchText && allProducts.length === 0 && !loading;
+//   // This is the key logic for showing "Product not found"
 //   const showInitialState = !searchText && allProducts.length === 0;
 
 //   const renderProductItem = ({item, index}) => (
@@ -100,18 +101,6 @@
 //       idx={index}
 //     />
 //   );
-
-//   // Show loading indicator during search
-//   if (loading && searchText) {
-//     return (
-//       <View style={styles.searchResultsContainer}>
-//         <View style={styles.emptyStateContainer}>
-//           <ActivityIndicator size="large" color="#3C5D87" />
-//           <Text style={styles.loadingText}>Searching...</Text>
-//         </View>
-//       </View>
-//     );
-//   }
 
 //   return (
 //     <View style={styles.searchResultsContainer}>
@@ -124,12 +113,10 @@
 //               : error.message || 'Something went wrong'}
 //           </Text>
 //         </View>
-//       ) : showNoResults ? (
+//       ) : showNoResults ? ( // This condition triggers the "Product not found" message
 //         <View style={styles.emptyStateContainer}>
-//           <Icon name="search-off" size={48} color="#CCCCCC" />
-//           <Text style={styles.noResultsText}>
-//             Product not found for "{searchText}"
-//           </Text>
+//           <Icon name="search-off" size={48} color="#001" />
+//           <Text style={styles.noResultsText}>Product not found</Text>
 //         </View>
 //       ) : (
 //         <FlatList
@@ -203,7 +190,7 @@
 //     borderTopRightRadius: 10,
 //   },
 //   emptyStateContainer: {
-//     flex: 1,
+//     // flex: 1,
 //     justifyContent: 'center',
 //     alignItems: 'center',
 //     padding: 20,
@@ -211,7 +198,7 @@
 //   noResultsText: {
 //     textAlign: 'center',
 //     fontSize: 18,
-//     color: '#555555',
+//     color: '#001',
 //     marginTop: 15,
 //     fontWeight: '500',
 //   },
@@ -272,7 +259,7 @@
 
 // export default SearchResults;
 
-import React, {useState, useEffect, useMemo} from 'react';
+import React, {useState, useEffect, useMemo, useCallback} from 'react';
 import {
   View,
   Text,
@@ -301,6 +288,9 @@ const SearchResults = ({searchText}) => {
   const navigation = useNavigation();
   const {setLoading} = useLoader();
 
+  // Local state for typing indicator
+  const [isTyping, setIsTyping] = useState(false);
+
   // Handle both API response formats
   const allProducts = useMemo(() => {
     // If results is directly an array (search results)
@@ -318,6 +308,25 @@ const SearchResults = ({searchText}) => {
   const [visibleProducts, setVisibleProducts] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
 
+  // Debounce search with typing indicator
+  useEffect(() => {
+    if (!searchText) {
+      setIsTyping(false);
+      return;
+    }
+
+    setIsTyping(true);
+
+    const timeoutId = setTimeout(() => {
+      setIsTyping(false);
+      dispatch(searchProducts(searchText));
+    }, 100); // 300ms debounce
+
+    return () => {
+      clearTimeout(timeoutId);
+    };
+  }, [searchText, dispatch]);
+
   // Update visible products when search results change
   useEffect(() => {
     if (allProducts.length > 0) {
@@ -328,29 +337,36 @@ const SearchResults = ({searchText}) => {
       setCurrentPage(1);
     }
   }, [allProducts]);
+
   const showNoResults = allProducts.length === 0 && !loading;
 
-  const handleAddPress = product => {
-    dispatch(addItem(product));
-  };
+  const handleAddPress = useCallback(
+    product => {
+      dispatch(addItem(product));
+    },
+    [dispatch],
+  );
 
-  const handleHistoryItemPress = async query => {
-    setLoading(true);
-    try {
-      await dispatch(searchProducts(query)).unwrap();
-    } catch (error) {
-      console.error('Search failed:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const handleHistoryItemPress = useCallback(
+    async query => {
+      setLoading(true);
+      try {
+        await dispatch(searchProducts(query)).unwrap();
+      } catch (error) {
+        console.error('Search failed:', error);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [dispatch, setLoading],
+  );
 
-  const handleClearHistory = () => {
+  const handleClearHistory = useCallback(() => {
     dispatch(clearHistory());
-  };
+  }, [dispatch]);
 
   // Load more function
-  const handleLoadMore = () => {
+  const handleLoadMore = useCallback(() => {
     if (visibleProducts.length >= allProducts.length) {
       return; // Already showing all products
     }
@@ -362,18 +378,32 @@ const SearchResults = ({searchText}) => {
       setVisibleProducts(nextData);
       setCurrentPage(nextPage);
     }
-  };
+  }, [visibleProducts.length, allProducts.length, currentPage, allProducts]);
 
   // This is the key logic for showing "Product not found"
   const showInitialState = !searchText && allProducts.length === 0;
 
-  const renderProductItem = ({item, index}) => (
-    <ProductCard
-      key={item._id}
-      item={item}
-      onAddPress={handleAddPress}
-      idx={index}
-    />
+  const renderProductItem = useCallback(
+    ({item, index}) => (
+      <ProductCard
+        key={item._id}
+        item={item}
+        onAddPress={handleAddPress}
+        idx={index}
+      />
+    ),
+    [handleAddPress],
+  );
+
+  const keyExtractor = useCallback(item => item._id, []);
+
+  // Render shimmer cards while typing
+  const renderShimmerGrid = () => (
+    <View style={styles.shimmerContainer}>
+      {Array.from({length: 9}).map((_, index) => (
+        <ShimmerCard key={`shimmer-typing-${index}`} />
+      ))}
+    </View>
   );
 
   return (
@@ -387,52 +417,38 @@ const SearchResults = ({searchText}) => {
               : error.message || 'Something went wrong'}
           </Text>
         </View>
-      ) : showNoResults ? ( // This condition triggers the "Product not found" message
+      ) : isTyping ? (
+        // Show shimmer cards while typing
+        renderShimmerGrid()
+      ) : showNoResults ? (
         <View style={styles.emptyStateContainer}>
           <Icon name="search-off" size={48} color="#001" />
           <Text style={styles.noResultsText}>Product not found</Text>
         </View>
       ) : (
         <FlatList
-          ListHeaderComponent={
-            () => <></>
-            // history.length > 0 && showInitialState ? (
-            //   <View style={styles.historySection}>
-            //     <View style={styles.historyHeader}>
-            //       <Text style={styles.historyTitle}>Recent Searches</Text>
-            //       <TouchableOpacity onPress={handleClearHistory}>
-            //         <Text style={styles.clearHistoryText}>Clear</Text>
-            //       </TouchableOpacity>
-            //     </View>
-            //     {history.map((item, index) => (
-            //       <TouchableOpacity
-            //         key={index}
-            //         style={styles.historyItem}
-            //         onPress={() => handleHistoryItemPress(item)}>
-            //         <Icon name="history" size={20} color="#3C5D87" />
-            //         <Text style={styles.historyText}>{item}</Text>
-            //       </TouchableOpacity>
-            //     ))}
-            //   </View>
-            // ) : null
-          }
+          ListHeaderComponent={() => <></>}
           contentContainerStyle={styles.flatListContainer}
           data={visibleProducts}
           renderItem={renderProductItem}
-          keyExtractor={item => item._id}
+          keyExtractor={keyExtractor}
           numColumns={3}
           onEndReached={handleLoadMore}
           onEndReachedThreshold={0.5}
+          removeClippedSubviews={true}
+          maxToRenderPerBatch={15}
+          windowSize={10}
+          initialNumToRender={15}
+          getItemLayout={(data, index) => ({
+            length: 200, // Approximate height of each item
+            offset: 200 * Math.floor(index / 3),
+            index,
+          })}
           ListFooterComponent={() =>
             visibleProducts.length < allProducts.length ? (
-              <View
-                style={{
-                  flexDirection: 'row',
-                  flexWrap: 'wrap',
-                  justifyContent: 'center',
-                }}>
+              <View style={styles.loadMoreContainer}>
                 {Array.from({length: 3}).map((_, index) => (
-                  <ShimmerCard key={`shimmer-${index}`} />
+                  <ShimmerCard key={`shimmer-load-more-${index}`} />
                 ))}
               </View>
             ) : null
@@ -468,6 +484,20 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
+  },
+  shimmerContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    backgroundColor: '#FFF',
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 10,
+    padding: 10,
+  },
+  loadMoreContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
   },
   noResultsText: {
     textAlign: 'center',

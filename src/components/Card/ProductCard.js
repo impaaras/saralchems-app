@@ -9,12 +9,7 @@ import {
 import React, {useEffect, useRef, useState} from 'react';
 import {toggleShowVariants} from '../../redux/slices/authSlice';
 import {useDispatch, useSelector} from 'react-redux';
-import {
-  openScreen,
-  setVariants,
-  addItem,
-  // closeModal,
-} from '../../redux/slices/cartSlice'; // Import the action
+import {openScreen, setVariants, addItem} from '../../redux/slices/cartSlice'; // Import the action
 import {useNavigation} from '@react-navigation/native';
 import {ROUTES} from '../../constants/routes';
 import {ProductModal} from '../../screens';
@@ -44,7 +39,7 @@ const ProductCard = ({item, onAddPress, idx, ParentCategoryId}) => {
       parentId,
     }));
     dispatch(setVariants(updatedVariants));
-    dispatch(toggleShowVariants());
+    // dispatch(toggleShowVariants());
     dispatch(
       openModal({
         modalType: 'VARIANT_MODAL',
