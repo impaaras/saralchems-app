@@ -40,7 +40,6 @@ const CustomTabBar = ({state, descriptors, navigation, translateY}) => {
       ROUTES.CART,
       ROUTES.HISTORY,
     ];
-
     navigation.navigate(screens[index]);
   };
 

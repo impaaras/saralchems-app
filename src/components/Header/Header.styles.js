@@ -7,13 +7,10 @@ import {
 
 const styles = StyleSheet.create({
   headerContainer: {
-    // paddingHorizontal: 8,
-    // zIndex: 0,
     paddingVertical: 16,
     paddingBottom: 100,
     borderBottomEndRadius: 40,
     borderBottomLeftRadius: 40,
-
     backgroundColor: '#3C5D87',
   },
 
@@ -26,7 +23,7 @@ const styles = StyleSheet.create({
   },
   menuContainer: {
     borderWidth: 1,
-    borderColor: '#CCC',
+    borderColor: '#FCFCFC33',
     padding: moderateScale(6),
     borderRadius: 100,
     justifyContent: 'center',
@@ -52,7 +49,7 @@ const styles = StyleSheet.create({
   },
   searchButton: {
     borderWidth: 1,
-    borderColor: '#CCC',
+    borderColor: '#FCFCFC33',
     padding: moderateScale(6),
     borderRadius: 100,
     justifyContent: 'center',

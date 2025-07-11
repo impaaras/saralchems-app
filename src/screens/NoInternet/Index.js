@@ -8,6 +8,7 @@ import {
   StatusBar,
 } from 'react-native';
 import noInternetImage from '../../assets/nointernet.png';
+import {scale} from '../../utils/Responsive/responsive';
 
 const NoInternetScreen = ({onRetry}) => {
   return (
@@ -38,9 +39,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   image: {
-    height: 180,
-    width: 180,
-    marginBottom: 30,
+    height: scale(300),
+    width: scale(300),
   },
   title: {
     fontSize: 20,

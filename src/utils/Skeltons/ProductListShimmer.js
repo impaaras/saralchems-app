@@ -23,9 +23,9 @@ const getCardWidth = () => {
 
 // Get image height based on screen size
 const getImageHeight = () => {
-  if (screenWidth < 350) return hp(12);
-  if (screenWidth < 400) return hp(13);
-  if (screenWidth < 500) return hp(14);
+  if (screenWidth < 350) return hp(10);
+  if (screenWidth < 400) return hp(12);
+  if (screenWidth < 500) return hp(12);
   return hp(15);
 };
 
@@ -62,7 +62,11 @@ const ProductListShimmer = () => {
     <View style={shimmerStyles.card}>
       {/* Image Container */}
       <View style={shimmerStyles.imageContainer}>
-        <Animated.View style={[shimmerStyles.shimmerImage, {opacity}]} />
+        <View style={shimmerStyles.imageContainer}>
+          <Animated.View style={[shimmerStyles.shimmerImage, {opacity}]} />
+        </View>
+        {/* Product Title */}
+        <Animated.View style={[shimmerStyles.shimmerTitle, {opacity}]} />
       </View>
     </View>
   );
@@ -90,6 +94,12 @@ const shimmerStyles = StyleSheet.create({
     height: '100%',
     borderRadius: wp(2),
     backgroundColor: '#E1E9EE',
+  },
+  shimmerTitle: {
+    height: hp(1),
+    backgroundColor: '#E1E9EE',
+    borderRadius: wp(1),
+    marginTop: hp(1),
   },
 
   shimmerAddButton: {

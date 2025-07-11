@@ -4,7 +4,6 @@ import {
   Text,
   Image,
   TouchableOpacity,
-  ScrollView,
   TextInput,
   Dimensions,
   Animated,
@@ -63,6 +62,8 @@ const TrackingCard = ({index, order}) => {
     switch (status) {
       case 'Delivered':
         return '#4CAF50';
+      case 'Invoice Uploaded':
+        return '#1B3C53';
       case 'Quote Sent':
         return '#FF9800';
       case 'Confirmed':
@@ -73,6 +74,8 @@ const TrackingCard = ({index, order}) => {
         return '#2196F3';
       case 'Rework':
         return '#F44336';
+      case 'Dispatched':
+        return '#A7C1A8';
       default:
         return '#757575';
     }
@@ -95,6 +98,8 @@ const TrackingCard = ({index, order}) => {
       if (reason) {
         payload.reason = reason;
       }
+
+      console.log(payload);
 
       const response = await axios.patch(
         `${API_URL}/order/user-status/${orderId}`,
@@ -185,7 +190,15 @@ const TrackingCard = ({index, order}) => {
                   },
                 ]}
               />
-              <Text style={[styles.orderStatus, {flex: 1}]}>
+              <Text
+                style={[
+                  styles.orderStatus,
+                  {
+                    flex: 1,
+                    color: getStatusColor(order.status),
+                    fontWeight: '500',
+                  },
+                ]}>
                 {order.status}
               </Text>
             </View>
@@ -236,7 +249,7 @@ const TrackingCard = ({index, order}) => {
               <View>
                 <View style={[styles.orderItem]}>
                   <ScrollImage
-                    product={order.items[0]?.productId}
+                    image={order.items[0]?.productId.image}
                     reffer="cart"
                   />
                   <View style={[styles.productDetails]}>
@@ -277,7 +290,7 @@ const TrackingCard = ({index, order}) => {
                 {order.items.map((item, itemIndex) => (
                   <View key={itemIndex} style={[styles.orderItem]}>
                     <ScrollImage
-                      product={order.items[itemIndex]?.productId}
+                      image={order.items[itemIndex]?.productId.image}
                       reffer="cart"
                     />
                     <View style={[styles.productDetails]}>

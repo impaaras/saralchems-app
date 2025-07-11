@@ -1,4 +1,10 @@
-import React, {useCallback, useEffect, useRef, useState} from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from 'react';
 import {
   StyleSheet,
   Text,
@@ -9,29 +15,29 @@ import {
   Animated,
   Easing,
 } from 'react-native';
-import {useNavigation} from '@react-navigation/native';
+import {useFocusEffect, useNavigation} from '@react-navigation/native';
 import {ROUTES} from '../../constants/routes';
 import LinearGradient from 'react-native-linear-gradient';
 import DashboardHeader from '../../components/Header/DashBoardHeader';
 import {useDispatch, useSelector} from 'react-redux';
-import {
-  getCart,
-  removeFromCart,
-  updateCartItem,
-} from '../../redux/slices/addToCartSlice';
 import styles from './Cart.styles';
 import {StorageKeys, storage} from '../../utils/storage';
 import EmptyCartScreen from './EmptyCart';
 import {useAlert} from '../../context/CustomAlertContext';
 import {useLoader} from '../../context/LoaderContext';
 import CartShimmer from './CartShimmer';
-import CartItem from './CartItem';
+import CartItem, {CartItemImage, ProductName} from './CartItem';
 import AnimatedTouchable from './AnimateTouchable';
 import {
   scale,
   moderateScale,
   verticalScale,
 } from '../../utils/Responsive/responsive';
+import {
+  getCart,
+  removeFromCart,
+  updateCartItem,
+} from '../../redux/slices/addToCartSlice';
 
 const Cart = () => {
   const navigation = useNavigation();
@@ -81,7 +87,8 @@ const Cart = () => {
   }, [items, initialLoading]);
 
   const fetchCartData = useCallback(async () => {
-    setInitialLoading(true); // Set initialLoading to true before fetching
+    setLoading(true);
+    setInitialLoading(true);
     try {
       await dispatch(getCart()).unwrap();
     } catch (err) {
@@ -92,82 +99,14 @@ const Cart = () => {
       });
     } finally {
       setInitialLoading(false);
+      setLoading(false);
     }
   }, [dispatch, showAlert]);
 
-  useEffect(() => {
-    const unsubscribe = navigation.addListener('focus', () => {
-      isScreenFocused.current = true;
+  useFocusEffect(
+    useCallback(() => {
       fetchCartData();
-    });
-
-    return unsubscribe;
-  }, []);
-
-  const handleCartOperation = async (
-    operation,
-    productId,
-    variant,
-    quantityChange,
-  ) => {
-    if (isProcessing.current) return;
-    isProcessing.current = true;
-    try {
-      await dispatch(
-        updateCartItem({
-          productId,
-          variant,
-          quantity: quantityChange,
-        }),
-      ).unwrap();
-      await dispatch(getCart());
-    } catch (err) {
-      showAlert({
-        title: 'Error',
-        message: err.message, // Use err.message here
-        acceptText: 'OK',
-      });
-    } finally {
-      isProcessing.current = false;
-    }
-  };
-
-  const handleDecrement = (productId, variant, currentQuantity) => {
-    if (currentQuantity > 1) {
-      handleCartOperation(updateCartItem, productId, variant, -1);
-    } else {
-      handleRemoveItem(productId, variant);
-    }
-  };
-
-  const handleIncrement = (productId, variant) => {
-    handleCartOperation(updateCartItem, productId, variant, 1);
-  };
-
-  const handleRemoveItem = useCallback(
-    (productId, variant) => {
-      showAlert({
-        title: 'Remove Item',
-        message: 'Are you sure you want to remove this item from your cart?',
-        onConfirm: async () => {
-          try {
-            await dispatch(removeFromCart({productId, variant})).unwrap();
-            if (isScreenFocused.current) {
-              await fetchCartData();
-            }
-          } catch (err) {
-            showAlert({
-              title: 'Error',
-              message: err.message || 'Failed to remove item',
-              acceptText: 'OK',
-            });
-          }
-        },
-        acceptText: 'Remove',
-        rejectText: 'Cancel',
-      });
-    },
-    [dispatch, fetchCartData, showAlert],
+    }, []),
   );
 
   const requestForQuote = async quoteData => {
@@ -208,7 +147,7 @@ const Cart = () => {
             acceptText: 'OK',
           });
         } finally {
-          setLoading(false); // Ensure loading is turned off even on error
+          setLoading(false);
         }
       },
       acceptText: 'Yes',
@@ -237,29 +176,18 @@ const Cart = () => {
             {items && items?.length > 0 ? (
               items?.map((item, index) => (
                 <CartItem
-                  key={`${index}`}
-                  product={{
-                    ...item,
-                    id: item.productId._id,
-                    name: item.productId.name,
-                    variants: item.productId?.variants || item.variants || [],
-                    image: Array.isArray(item?.productId?.image)
-                      ? item?.productId?.image
-                      : [item?.productId?.image || null],
-                  }}
-                  onRemove={() =>
-                    handleRemoveItem(item.productId._id, item.variant)
+                  key={item._id}
+                  id={item.productId._id}
+                  name={item.productId.name}
+                  image={
+                    Array.isArray(item.productId.image)
+                      ? item.productId.image
+                      : [item.productId.image || null]
                   }
-                  onDecrement={() =>
-                    handleDecrement(
-                      item.productId._id,
-                      item.variant,
-                      item.quantity,
-                    )
-                  }
-                  onIncrement={() =>
-                    handleIncrement(item.productId._id, item.variant)
-                  }
+                  variant={item.variant}
+                  quantity={item.quantity}
+                  originalProduct={item.productId} // only if required
+                  fetchCartData={fetchCartData}
                 />
               ))
             ) : (

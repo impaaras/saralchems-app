@@ -79,7 +79,7 @@ const styles = StyleSheet.create({
       : isSmallScreen
       ? moderateScale(10)
       : moderateScale(12),
-    color: '#001',
+    color: '#555555',
     fontWeight: '500',
   },
   orderValueText: {

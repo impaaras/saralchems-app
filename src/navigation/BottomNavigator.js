@@ -67,13 +67,13 @@ const BottomNavigator = () => {
     },
   );
 
-  useEffect(() => {
-    return () => {
-      if (scrollTimeout.current) {
-        clearTimeout(scrollTimeout.current);
-      }
-    };
-  }, []);
+  // useEffect(() => {
+  //   return () => {
+  //     if (scrollTimeout.current) {
+  //       clearTimeout(scrollTimeout.current);
+  //     }
+  //   };
+  // }, []);
 
   const wrapScreen = ScreenComponent => {
     return props => {
@@ -81,6 +81,7 @@ const BottomNavigator = () => {
       if (
         routeName === ROUTES.SEARCH ||
         routeName === 'products' ||
+        routeName === ROUTES.HISTORY ||
         routeName === ROUTES.CART ||
         routeName === 'Home'
       ) {

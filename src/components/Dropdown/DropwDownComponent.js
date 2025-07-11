@@ -15,7 +15,6 @@ import {useLoader} from '../../context/LoaderContext';
 import {scale} from '../../utils/Responsive/responsive';
 
 const DropdownMenu = ({currentRouteName, categories}) => {
-  console.log(categories, 'data');
   const [isOpen, setIsOpen] = useState(false);
   const [rotateAnimation] = useState(new Animated.Value(0));
   const [selectedCategory, setSecSelectedCategory] = useState(null);

@@ -13,11 +13,13 @@ import {openModal} from '../../redux/slices/modalSlice';
 import Icon from 'react-native-vector-icons/Entypo';
 import {scale} from '../../utils/Responsive/responsive';
 
-const Index = ({product, reffer}) => {
+const Index = React.memo(({image, reffer}) => {
   const dispatch = useDispatch();
   const flatListRef = useRef(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [imageLoadError, setImageLoadError] = useState(false);
   const handleImageZoom = (imageList, currentIndex) => {
+    console.log('click');
     dispatch(
       openModal({
         modalType: 'ImageZoomModal',
@@ -31,10 +33,10 @@ const Index = ({product, reffer}) => {
   };
 
   const renderDots = () => {
-    if (product?.image?.length <= 1) return null;
+    if (image?.length <= 1) return null;
     return (
-      <View style={styles.dotsContainer}>
-        {product?.image?.map((_, index) => (
+      <View>
+        {image?.map((_, index) => (
           <TouchableOpacity
             key={index}
             style={[
@@ -70,14 +72,11 @@ const Index = ({product, reffer}) => {
   ];
 
   const ImageWithPlaceholder = ({uri, customStyle, resizeMode}) => {
-    const [imageLoadError, setImageLoadError] = useState(false);
-
     const handleLoadError = () => {
       setImageLoadError(true);
     };
 
     if (imageLoadError || !uri) {
-      // Show placeholder if error or URI is invalid/empty
       return (
         <View style={[customStyle, styles.container]}>
           <Icon name="images" color="#AAA" size={scale(24)} />
@@ -100,8 +99,8 @@ const Index = ({product, reffer}) => {
     if (reffer === 'cart') {
       return (
         <TouchableOpacity
-          onPress={() => handleImageZoom(product?.image, index)}
-          disabled={!item}
+          onPress={() => handleImageZoom(image, index)}
+          disabled={!item || imageLoadError}
           activeOpacity={0.9}>
           <ImageWithPlaceholder
             uri={imageUrl}
@@ -113,7 +112,8 @@ const Index = ({product, reffer}) => {
     } else {
       return (
         <TouchableOpacity
-          onPress={() => handleImageZoom(product?.image, index)}
+          onPress={() => handleImageZoom(image, index)}
+          disabled={!item || imageLoadError}
           activeOpacity={0.9}>
           <View style={styles.imageSlideContainer}>
             <ImageWithPlaceholder
@@ -160,13 +160,13 @@ const Index = ({product, reffer}) => {
 
   return (
     <>
-      {!product?.image || product?.item?.length === 0 ? (
+      {!image ? (
         <View style={styles.imageContainer}>
           <FlatList
             ref={flatListRef}
             data={reffer === 'cart' ? [images[0]] : images}
             renderItem={renderImageItemWithDummyData}
-            keyExtractor={(product, index) => index.toString()}
+            keyExtractor={(image, index) => index.toString()}
             horizontal
             pagingEnabled
             showsHorizontalScrollIndicator={false}
@@ -182,7 +182,7 @@ const Index = ({product, reffer}) => {
         <View style={styles.imageContainer}>
           <FlatList
             ref={flatListRef}
-            data={reffer === 'cart' ? [product?.image?.[0]] : product?.image}
+            data={reffer === 'cart' ? [image?.[0]] : image}
             renderItem={renderImageItem}
             keyExtractor={(premium, index) => index.toString()}
             horizontal
@@ -199,7 +199,7 @@ const Index = ({product, reffer}) => {
       )}
     </>
   );
-};
+});
 
 export default Index;
 

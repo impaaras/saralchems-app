@@ -31,6 +31,7 @@ import {useAlert} from '../../context/CustomAlertContext';
 import ImageZoomModal from '../../components/ImageZoom/ImageZoom';
 import ScrollImage from '../../components/ScrollImage/Index';
 import {moderateScale, scale} from '../../utils/Responsive/responsive';
+import {BlurView} from '@react-native-community/blur';
 
 const {width: screenWidth} = Dimensions.get('window');
 
@@ -248,9 +249,9 @@ const ProductDetail = () => {
         style={styles.productContent}
         showsVerticalScrollIndicator={false}>
         {!product?.image || product?.item?.length === 0 ? (
-          <ScrollImage product={images} />
+          <ScrollImage image={images} />
         ) : (
-          <ScrollImage product={product} />
+          <ScrollImage image={product?.image} />
         )}
 
         {/* Product Info */}
@@ -409,88 +410,87 @@ const ProductDetail = () => {
             </View>
           </View>
 
-          {/* Product Type */}
-          <Text style={styles.productType}>NYLON (12 No. 54" (NAM))</Text>
+          <View>
+            <Text style={styles.productType}>NYLON (12 No. 54" (NAM))</Text>
+            <ExpandableSection title="Product Description:">
+              <Text style={styles.sectionText}>
+                Our Nylon (12 No. 54" (NAM)) is a high-quality, durable
+                synthetic fabric designed for multiple industrial and commercial
+                applications. Made from premium-grade nylon fibers, this fabric
+                offers excellent strength and abrasion resistance to wear and
+                tear.
+              </Text>
+            </ExpandableSection>
+            <ExpandableSection title="Key Features:">
+              <View style={styles.featureItem}>
+                <Icon name="circle" size={14} color="#5A5A5A" />
+                <Text style={styles.featureText}>
+                  <Text style={styles.featureHighlight}>Durable & Strong:</Text>{' '}
+                  High tensile strength ensures longevity and reliability.
+                </Text>
+              </View>
+              <View style={styles.featureItem}>
+                <Icon name="circle" size={14} color="#5A5A5A" />
+                <Text style={styles.featureText}>
+                  <Text style={styles.featureHighlight}>
+                    Lightweight & Flexible:
+                  </Text>{' '}
+                  Easy to handle and adaptable to various applications.
+                </Text>
+              </View>
+              <View style={styles.featureItem}>
+                <Icon name="circle" size={14} color="#5A5A5A" />
+                <Text style={styles.featureText}>
+                  <Text style={styles.featureHighlight}>
+                    Weather & Moisture Resistant:
+                  </Text>{' '}
+                  Performs well in outdoor and humid conditions.
+                </Text>
+              </View>
+              <View style={styles.featureItem}>
+                <Icon name="circle" size={14} color="#5A5A5A" />
+                <Text style={styles.featureText}>
+                  <Text style={styles.featureHighlight}>Versatile Use:</Text>{' '}
+                  Suitable for netting, filtration, protective covers, and
+                  industrial purposes.
+                </Text>
+              </View>
+              <View style={styles.featureItem}>
+                <Icon name="circle" size={14} color="#5A5A5A" />
+                <Text style={styles.featureText}>
+                  <Text style={styles.featureHighlight}>Standard Width:</Text>{' '}
+                  54-inch width provides ample coverage for different projects.
+                </Text>
+              </View>
+            </ExpandableSection>
 
-          {/* Product Description */}
-          <ExpandableSection title="Product Description:">
-            <Text style={styles.sectionText}>
-              Our Nylon (12 No. 54" (NAM)) is a high-quality, durable synthetic
-              fabric designed for multiple industrial and commercial
-              applications. Made from premium-grade nylon fibers, this fabric
-              offers excellent strength and abrasion resistance to wear and
-              tear.
-            </Text>
-          </ExpandableSection>
-          <ExpandableSection title="Key Features:">
-            <View style={styles.featureItem}>
-              <Icon name="circle" size={14} color="#5A5A5A" />
-              <Text style={styles.featureText}>
-                <Text style={styles.featureHighlight}>Durable & Strong:</Text>{' '}
-                High tensile strength ensures longevity and reliability.
-              </Text>
-            </View>
-            <View style={styles.featureItem}>
-              <Icon name="circle" size={14} color="#5A5A5A" />
-              <Text style={styles.featureText}>
-                <Text style={styles.featureHighlight}>
-                  Lightweight & Flexible:
-                </Text>{' '}
-                Easy to handle and adaptable to various applications.
-              </Text>
-            </View>
-            <View style={styles.featureItem}>
-              <Icon name="circle" size={14} color="#5A5A5A" />
-              <Text style={styles.featureText}>
-                <Text style={styles.featureHighlight}>
-                  Weather & Moisture Resistant:
-                </Text>{' '}
-                Performs well in outdoor and humid conditions.
-              </Text>
-            </View>
-            <View style={styles.featureItem}>
-              <Icon name="circle" size={14} color="#5A5A5A" />
-              <Text style={styles.featureText}>
-                <Text style={styles.featureHighlight}>Versatile Use:</Text>{' '}
-                Suitable for netting, filtration, protective covers, and
-                industrial purposes.
-              </Text>
-            </View>
-            <View style={styles.featureItem}>
-              <Icon name="circle" size={14} color="#5A5A5A" />
-              <Text style={styles.featureText}>
-                <Text style={styles.featureHighlight}>Standard Width:</Text>{' '}
-                54-inch width provides ample coverage for different projects.
-              </Text>
-            </View>
-          </ExpandableSection>
-
-          <ExpandableSection title="Specifications:">
-            <View style={styles.specItem}>
-              <Text style={styles.specLabel}>Material:</Text>
-              <Text style={styles.specValue}>100% Nylon</Text>
-            </View>
-            <View style={styles.specItem}>
-              <Text style={styles.specLabel}>Mesh/Thread Size:</Text>
-              <Text style={styles.specValue}>12 No. (NAM)</Text>
-            </View>
-            <View style={styles.specItem}>
-              <Text style={styles.specLabel}>Width:</Text>
-              <Text style={styles.specValue}>54 inches</Text>
-            </View>
-            <View style={styles.specItem}>
-              <Text style={styles.specLabel}>Color Options:</Text>
-              <Text style={styles.specValue}>
-                Available in various colors upon request
-              </Text>
-            </View>
-            <View style={styles.specItem}>
-              <Text style={styles.specLabel}>Customization:</Text>
-              <Text style={styles.specValue}>
-                Can be tailored to specific requirements
-              </Text>
-            </View>
-          </ExpandableSection>
+            <ExpandableSection title="Specifications:">
+              <View style={styles.specItem}>
+                <Text style={styles.specLabel}>Material:</Text>
+                <Text style={styles.specValue}>100% Nylon</Text>
+              </View>
+              <View style={styles.specItem}>
+                <Text style={styles.specLabel}>Mesh/Thread Size:</Text>
+                <Text style={styles.specValue}>12 No. (NAM)</Text>
+              </View>
+              <View style={styles.specItem}>
+                <Text style={styles.specLabel}>Width:</Text>
+                <Text style={styles.specValue}>54 inches</Text>
+              </View>
+              <View style={styles.specItem}>
+                <Text style={styles.specLabel}>Color Options:</Text>
+                <Text style={styles.specValue}>
+                  Available in various colors upon request
+                </Text>
+              </View>
+              <View style={styles.specItem}>
+                <Text style={styles.specLabel}>Customization:</Text>
+                <Text style={styles.specValue}>
+                  Can be tailored to specific requirements
+                </Text>
+              </View>
+            </ExpandableSection>
+          </View>
         </View>
       </ScrollView>
     </SafeAreaView>

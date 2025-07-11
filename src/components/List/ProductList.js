@@ -298,7 +298,7 @@ const ProductList = ({title, products, onViewAll, idx}) => {
           );
         })}
 
-        {title === 'Shop By Category' && (
+        {/* {title === 'Shop By Category' && (
           <Animated.View
             style={{
               opacity: allProductsFadeAnim,
@@ -323,7 +323,7 @@ const ProductList = ({title, products, onViewAll, idx}) => {
               </CustomText>
             </TouchableOpacity>
           </Animated.View>
-        )}
+        )} */}
       </ScrollView>
     </View>
   );

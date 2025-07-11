@@ -16,7 +16,7 @@ import {
   Easing,
   ActivityIndicator,
 } from 'react-native';
-import {useSelector} from 'react-redux';
+import {useDispatch, useSelector} from 'react-redux';
 import axios from 'axios';
 import HapticFeedback from 'react-native-haptic-feedback';
 
@@ -26,6 +26,7 @@ import DashboardHeader from '../../components/Header/DashBoardHeader';
 import {API_URL} from '../../utils/ApiService';
 import styles from './Homescreen.styles';
 import {useLoader} from '../../context/LoaderContext';
+import {fetchCategories} from '../../redux/slices/categoriesSlice';
 
 const hapticOptions = {
   enableVibrateFallback: true,
@@ -42,11 +43,11 @@ const HomeScreen = () => {
   const headerAnim = useRef(new Animated.Value(0)).current;
   const categoriesListAnim = useRef(new Animated.Value(0)).current;
   const sectionAnims = useRef([]).current;
+  const dispatch = useDispatch();
 
   const getCategoryData = async () => {
     setLoading(true);
     setError(null);
-
     try {
       const response = await axios.get(`${API_URL}/category`, {
         headers: {
@@ -54,9 +55,7 @@ const HomeScreen = () => {
           Authorization: `Bearer ${token}`,
         },
       });
-
       const categoriesData = response.data;
-
       // Wait for all subcategory processing to complete
       const subCategoriesMap = {};
       const processedCategories = [];
@@ -71,7 +70,6 @@ const HomeScreen = () => {
             parentCategoryName: category.name,
             subCategories: category.subcategories,
           }));
-
           subCategoriesMap[category._id] = subcats;
           processedCategories.push(category);
         }
@@ -107,6 +105,51 @@ const HomeScreen = () => {
       }
     }
   };
+  // const getCategoryData = async () => {
+  //   setLoading(true);
+  //   setError(null);
+  //   try {
+  //     const categoriesData = await dispatch(fetchCategories()).unwrap();
+
+  //     const subCategoriesMap = {};
+  //     const processedCategories = [];
+
+  //     for (const category of categoriesData) {
+  //       if (category.subcategories && category.subcategories.length > 0) {
+  //         const subcats = category.subcategories.map(subcat => ({
+  //           ...subcat,
+  //           parentCategoryId: category._id,
+  //           parentCategoryName: category.name,
+  //           subCategories: category.subcategories,
+  //         }));
+  //         subCategoriesMap[category._id] = subcats;
+  //         processedCategories.push(category);
+  //       }
+  //     }
+
+  //     setCategories(processedCategories);
+  //     setSubCategories(subCategoriesMap);
+
+  //     sectionAnims.length = 0;
+  //     for (let i = 0; i < processedCategories.length; i++) {
+  //       sectionAnims.push(new Animated.Value(0));
+  //     }
+
+  //     setLoading(false);
+
+  //     setTimeout(() => {
+  //       startAnimations(processedCategories);
+  //     }, 100);
+  //   } catch (error) {
+  //     setLoading(false);
+  //     if (error.tokenExpired) {
+  //       setError('Session expired. Please login again.');
+  //     } else {
+  //       setError('Failed to load categories');
+  //       console.log('Category Fetch Error:', error?.message || error);
+  //     }
+  //   }
+  // };
 
   const startAnimations = categoriesData => {
     // Staggered animations for a luxurious feel

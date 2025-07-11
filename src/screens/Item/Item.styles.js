@@ -29,28 +29,24 @@ const getImageSize = () => {
 
 const styles = StyleSheet.create({
   screen: {
-    // backgroundColor: '#F2F7FE',
     flex: 1,
   },
   scrollWrapper: {
     marginTop: hp(-10), // Responsive negative margin
     marginLeft: wp(2.5),
+    marginRight: wp(2.5),
+    borderRadius: wp(3),
+    overflow: 'hidden', // ⬅️ This clips the children to the border radius
   },
   container: {
     backgroundColor: '#E5F1FF',
-    // backgroundColor: 'red',
     flexDirection: 'row',
-    borderRadius: wp(4),
-    // paddingHorizontal: wp(2.5),
-
-    // minHeight: hp(15), // Minimum height for touch targets
+    borderRadius: wp(3),
   },
   itemContainer: {
     marginLeft: wp(3),
     marginTop: wp(3),
-    // marginBottom: scale(10),
     marginRight: wp(3),
-    // alignItems: 'center',
     minWidth: wp(20), // Minimum width to prevent squishing
   },
   selectedItem: {

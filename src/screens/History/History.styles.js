@@ -64,6 +64,7 @@ const styles = StyleSheet.create({
     marginTop: hp(-4),
     borderRadius: wp(3),
     backgroundColor: '#FFF',
+    marginBottom: wp(57),
   },
   pageTitle: {
     fontSize: isTablet ? 18 : 16,
@@ -366,11 +367,9 @@ const styles = StyleSheet.create({
     fontSize: isTablet ? 16 : 14,
   },
   emptyContainer: {
-    // flexGrow: 1,
     justifyContent: 'center',
     alignItems: 'center',
     padding: 24,
-    // backgroundColor: '#F5F7FA',
   },
   emptyImage: {
     width: 200,

@@ -603,9 +603,9 @@ const ProductModal = ({product}) => {
               {!product?.image ||
               product.image.length === 0 ||
               product?.item?.length === 0 ? (
-                <ScrollImage product={images} />
+                <ScrollImage image={images} />
               ) : (
-                <ScrollImage product={product} />
+                <ScrollImage image={product?.image} />
               )}
             </Animated.View>
             <Animated.View

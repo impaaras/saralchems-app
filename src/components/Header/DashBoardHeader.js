@@ -67,11 +67,9 @@ const DashboardHeader = ({name}) => {
 
   const menuRoutes = [
     ROUTES.HOME,
-    'products',
-    'Cart',
+    ROUTES.PRODUCT_SCREEN,
     ROUTES.CART,
     ROUTES.HISTORY,
-    ROUTES.TRACKING,
   ];
   // Update the route name dynamically when screen changes
   useFocusEffect(
@@ -220,15 +218,16 @@ const DashboardHeader = ({name}) => {
               <TouchableOpacity
                 style={styles.menuContainer}
                 onPress={() => navigation.openDrawer()}>
-                <TextIcon size={scale(26)} color="#FFF" />
+                <TextIcon size={scale(25)} color="#FFF" />
               </TouchableOpacity>
             ) : (
               <TouchableOpacity
                 onPress={handleGoBack}
                 style={{
                   borderWidth: 1,
-                  borderColor: '#CCC',
-                  padding: moderateScale(6),
+                  marginLeft: scale(3),
+                  borderColor: '#FCFCFC33',
+                  padding: moderateScale(5),
                   borderRadius: 100,
                 }}>
                 <ChevronLeft color="#FFF" size={scale(26)} />
@@ -287,11 +286,7 @@ const DashboardHeader = ({name}) => {
                 getRouteName() !== 'Search' &&
                 getRouteName() !== ROUTES.ITEM_SCREEN && (
                   <Text style={styles.title}>
-                    Welcome,
-                    {user?.name.length > 16
-                      ? ` ${user.name.substring(0, 16)}...`
-                      : ` ${user.name} `}
-                    🤗
+                    Welcome, {user?.name ? `${user.name.split(' ')[0]}` : ''} 🤗
                   </Text>
                 )}
               {!openInput && currentRouteName === ROUTES.ITEM_SCREEN && (
@@ -317,9 +312,9 @@ const DashboardHeader = ({name}) => {
               <TouchableOpacity
                 style={styles.profileContainer}
                 onPress={() => navigation.navigate(ROUTES.PROFILE)}>
-                <View style={styles.badge}>
+                {/* <View style={styles.badge}>
                   <Text style={styles.badgeText}>5</Text>
-                </View>
+                </View> */}
                 <Icon3 name="user" size={scale(22)} color="#5A5A5A" />
               </TouchableOpacity>
             </View>
