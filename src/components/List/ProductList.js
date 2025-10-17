@@ -1,5 +1,5 @@
 import {useNavigation} from '@react-navigation/native';
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useEffect, useRef, useState, useMemo, useCallback} from 'react';
 import {
   View,
   Text,
@@ -28,70 +28,66 @@ const hapticOptions = {
   ignoreAndroidSystemSettings: false,
 };
 
-const ProductList = ({title, products, onViewAll, idx}) => {
+const ProductList = ({title, products}) => {
   const navigation = useNavigation();
   const dispatch = useDispatch();
+
+  // Memoize filtered products to prevent unnecessary recalculations
+  const filteredProducts = useMemo(() => {
+    if (!products || products.length === 0) return [];
+
+    return title === 'Shop By Category'
+      ? products.filter(product => product?.subcategories?.length > 0)
+      : products;
+  }, [products, title]);
 
   const animationScalesRef = useRef([]);
   const fadeAnimsRef = useRef([]);
   const allProductsScaleAnim = useRef(new Animated.Value(1)).current;
   const allProductsFadeAnim = useRef(new Animated.Value(0)).current;
 
-  const [animationsReady, setAnimationsReady] = useState(false);
-  const [productsReady, setProductsReady] = useState(false); // New state to ensure products are fully loaded
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [animationsInitialized, setAnimationsInitialized] = useState(false);
 
+  // Initialize animations when products change
   useEffect(() => {
-    // Reset state
-    setAnimationsReady(false);
-    setProductsReady(false);
-
-    // Wait for products to be properly set
-    if (!products || products.length === 0) {
-      setProductsReady(true); // If no products, mark as ready
-      setAnimationsReady(true);
+    if (filteredProducts.length === 0) {
+      setAnimationsInitialized(true);
       return;
     }
 
-    // Filter products first (same logic as render)
-    const filteredProducts =
-      title === 'Shop By Category'
-        ? products?.filter(product => product?.subcategories?.length > 0)
-        : products;
-
-    // If no filtered products, mark as ready
-    if (!filteredProducts || filteredProducts.length === 0) {
-      setProductsReady(true);
-      setAnimationsReady(true);
-      return;
-    }
-
-    // Reset animated values
+    // Reset animation arrays
     animationScalesRef.current = [];
     fadeAnimsRef.current = [];
 
-    // Create Animated.Value for each filtered product
+    // Create new animated values for each product
     filteredProducts.forEach(() => {
       animationScalesRef.current.push(new Animated.Value(1));
       fadeAnimsRef.current.push(new Animated.Value(0));
     });
 
-    // Mark products as ready
-    setProductsReady(true);
+    setAnimationsInitialized(true);
+  }, [filteredProducts]);
 
-    // Small delay to ensure state is updated
-    setTimeout(() => {
-      startAnimations(filteredProducts);
-    }, 50);
-  }, [products, title]);
+  // Start animations when animations are initialized
+  useEffect(() => {
+    if (animationsInitialized && filteredProducts.length > 0 && !isAnimating) {
+      startAnimations();
+    }
+  }, [animationsInitialized, filteredProducts.length, isAnimating]);
 
-  const startAnimations = filteredProducts => {
+  const startAnimations = useCallback(() => {
+    if (isAnimating || filteredProducts.length === 0) return;
+
+    setIsAnimating(true);
+
     // Prepare animations for all product cards
     const productAnimations = filteredProducts.map((_, index) =>
       Animated.parallel([
         Animated.timing(fadeAnimsRef.current[index], {
           toValue: 1,
-          duration: 500,
-          delay: index * 80,
+          duration: 400,
+          delay: index * 50,
           easing: Easing.out(Easing.ease),
           useNativeDriver: true,
         }),
@@ -110,8 +106,8 @@ const ProductList = ({title, products, onViewAll, idx}) => {
         Animated.parallel([
           Animated.timing(allProductsFadeAnim, {
             toValue: 1,
-            duration: 500,
-            delay: filteredProducts.length * 80,
+            duration: 400,
+            delay: filteredProducts.length * 50,
             easing: Easing.out(Easing.ease),
             useNativeDriver: true,
           }),
@@ -127,13 +123,19 @@ const ProductList = ({title, products, onViewAll, idx}) => {
 
     // Start all animations together
     if (productAnimations.length > 0) {
-      Animated.stagger(50, productAnimations).start(() => {
-        setAnimationsReady(true);
+      Animated.stagger(30, productAnimations).start(() => {
+        setIsAnimating(false);
       });
     } else {
-      setAnimationsReady(true);
+      setIsAnimating(false);
     }
-  };
+  }, [
+    filteredProducts,
+    title,
+    isAnimating,
+    allProductsFadeAnim,
+    allProductsScaleAnim,
+  ]);
 
   const getAnimatedValues = (index, isAllProducts = false) => {
     if (isAllProducts) {
@@ -142,13 +144,22 @@ const ProductList = ({title, products, onViewAll, idx}) => {
         fade: allProductsFadeAnim,
       };
     }
+
+    if (animationScalesRef.current[index] && fadeAnimsRef.current[index]) {
+      return {
+        scale: animationScalesRef.current[index],
+        fade: fadeAnimsRef.current[index],
+      };
+    }
+
+    // Fallback values
     return {
-      scale: animationScalesRef.current[index],
-      fade: fadeAnimsRef.current[index],
+      scale: new Animated.Value(1),
+      fade: new Animated.Value(1),
     };
   };
 
-  const handlePressIn = index => {
+  const handlePressIn = useCallback(index => {
     const {scale} = getAnimatedValues(index);
     if (scale) {
       HapticFeedback.trigger('impactLight', hapticOptions);
@@ -159,9 +170,9 @@ const ProductList = ({title, products, onViewAll, idx}) => {
         useNativeDriver: true,
       }).start();
     }
-  };
+  }, []);
 
-  const handlePressOut = index => {
+  const handlePressOut = useCallback(index => {
     const {scale} = getAnimatedValues(index);
     if (scale) {
       Animated.spring(scale, {
@@ -171,9 +182,9 @@ const ProductList = ({title, products, onViewAll, idx}) => {
         useNativeDriver: true,
       }).start();
     }
-  };
+  }, []);
 
-  const handleAllProductsPressIn = () => {
+  const handleAllProductsPressIn = useCallback(() => {
     const {scale} = getAnimatedValues(0, true);
     if (scale) {
       HapticFeedback.trigger('impactLight', hapticOptions);
@@ -184,9 +195,9 @@ const ProductList = ({title, products, onViewAll, idx}) => {
         useNativeDriver: true,
       }).start();
     }
-  };
+  }, []);
 
-  const handleAllProductsPressOut = () => {
+  const handleAllProductsPressOut = useCallback(() => {
     const {scale} = getAnimatedValues(0, true);
     if (scale) {
       Animated.spring(scale, {
@@ -196,57 +207,54 @@ const ProductList = ({title, products, onViewAll, idx}) => {
         useNativeDriver: true,
       }).start();
     }
-  };
+  }, []);
 
-  const handleProductItem = (item, index) => {
-    dispatch(setCategoryName(item.name));
+  const handleProductItem = useCallback(
+    (item, index) => {
+      dispatch(setCategoryName(item.name));
+      console.log(item, 'data new ');
+      if (item.subcategories) {
+        dispatch(setParentCategoryName(item.name));
+        navigation.navigate(ROUTES.ITEM_SCREEN, {
+          subcategories: item.subcategories,
+          categoryId: item._id,
+          parentCategoryName: item.parentCategoryName,
+          subcategoryId: item.subcategories[0]?._id,
+          selectedItem: item.subcategories[0]?.name,
+        });
+      } else {
+        dispatch(setParentCategoryName(item.parentCategoryName));
+        navigation.navigate(ROUTES.ITEM_SCREEN, {
+          subcategories: item.subCategories,
+          categoryId: item.parentCategoryId,
+          parentCategoryName: item.parentCategoryName,
+          subcategoryId: item._id,
+          selectedItem: item.subCategories[index]?.name,
+        });
+      }
+    },
+    [dispatch, navigation],
+  );
 
-    if (item.subcategories) {
-      dispatch(setParentCategoryName(item.name));
-      navigation.navigate(ROUTES.ITEM_SCREEN, {
-        subcategories: item.subcategories,
-        categoryId: item._id,
-        parentCategoryName: item.parentCategoryName,
-        subcategoryId: item.subcategories[0]?._id,
-        selectedItem: item.subcategories[0]?.name,
-      });
-    } else {
-      dispatch(setParentCategoryName(item.parentCategoryName));
-      navigation.navigate(ROUTES.ITEM_SCREEN, {
-        subcategories: item.subCategories,
-        categoryId: item.parentCategoryId,
-        parentCategoryName: item.parentCategoryName,
-        subcategoryId: item._id,
-        selectedItem: item.subCategories[index]?.name,
-      });
-    }
-  };
-
-  const handleViewAllProducts = () => {
+  const handleViewAllProducts = useCallback(() => {
     HapticFeedback.trigger('impactLight', hapticOptions);
     navigation.navigate('products');
-  };
+  }, [navigation]);
 
-  // Filter products before rendering
-  const filteredProducts =
-    title === 'Shop By Category'
-      ? products?.filter(product => product?.subcategories?.length > 0)
-      : products;
-
-  // Don't render if products aren't ready or if no products exist
-  if (!productsReady || !filteredProducts || filteredProducts.length === 0) {
-    return null;
-  }
-
-  // Show basic structure while animations are preparing
-  if (!animationsReady) {
+  // Show shimmer while animations are not initialized
+  if (!animationsInitialized) {
     return (
       <View style={styles.shimmerContainer}>
         {[1, 2, 3, 4, 5].map((_, index) => (
-          <ProductListShimmer key={index} />
+          <ProductListShimmer key={`shimmer-${index}`} />
         ))}
       </View>
     );
+  }
+
+  // Don't render if no products exist after filtering
+  if (filteredProducts.length === 0) {
+    return null;
   }
 
   return (
@@ -263,11 +271,9 @@ const ProductList = ({title, products, onViewAll, idx}) => {
         scrollEventThrottle={16}>
         {filteredProducts.map((product, index) => {
           const {scale, fade} = getAnimatedValues(index);
-          if (!scale || !fade) return null;
-
           return (
             <Animated.View
-              key={`product-${index}`}
+              key={`${product._id}-${index}`} // Use product ID + index for unique key
               style={{
                 opacity: fade,
                 transform: [{scale: scale}],
@@ -297,33 +303,6 @@ const ProductList = ({title, products, onViewAll, idx}) => {
             </Animated.View>
           );
         })}
-
-        {/* {title === 'Shop By Category' && (
-          <Animated.View
-            style={{
-              opacity: allProductsFadeAnim,
-              transform: [{scale: allProductsScaleAnim}],
-            }}>
-            <TouchableOpacity
-              activeOpacity={1}
-              style={styles.productCard}
-              onPressIn={handleAllProductsPressIn}
-              onPressOut={handleAllProductsPressOut}
-              onPress={handleViewAllProducts}>
-              <Image
-                source={{uri: fallbackImg()}}
-                style={styles.productImage}
-              />
-              <CustomText
-                style={[
-                  styles.productName,
-                  {fontWeight: '700', color: '#5A5A5A'},
-                ]}>
-                All Products
-              </CustomText>
-            </TouchableOpacity>
-          </Animated.View>
-        )} */}
       </ScrollView>
     </View>
   );

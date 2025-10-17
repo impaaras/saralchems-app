@@ -91,67 +91,20 @@ const GlobalAlert = ({
     onReject?.() || onClose?.();
   };
 
+  // const handleAccept = () => {
+  //   HapticFeedback.trigger('impactMedium');
+  //   onAccept?.() || onClose?.();
+  // };
   const handleAccept = () => {
     HapticFeedback.trigger('impactMedium');
-    onAccept?.() || onClose?.();
+    if (onAccept) {
+      onAccept();
+    }
+    onClose?.();
   };
 
   return (
     <>
-      {/* {isVisible && (
-        <TouchableWithoutFeedback onPress={handleClose}>
-          <Animated.View style={[styles.overlay, {opacity: fadeAnim}]}>
-            <TouchableWithoutFeedback onPress={e => e.stopPropagation()}>
-              <Animated.View
-                style={[
-                  styles.modalContainer,
-                  {
-                    transform: [
-                      {scale: scaleAnim},
-                      {translateY: translateYAnim},
-                    ],
-                    opacity: fadeAnim,
-                  },
-                ]}>
-                <TouchableOpacity
-                  style={styles.closeButton}
-                  onPress={handleClose}
-                  hitSlop={{top: 10, right: 10, bottom: 10, left: 10}}>
-                  <Ionicons
-                    name="close"
-                    size={moderateScale(20)}
-                    color="#000"
-                  />
-                </TouchableOpacity>
-
-                <View style={styles.contentContainer}>
-                  <Text style={styles.title}>{title}</Text>
-                  <Text style={styles.message}>{message}</Text>
-
-                  <View style={styles.buttonContainer}>
-                    <TouchableOpacity
-                      style={styles.rejectButton}
-                      onPress={handleReject}>
-                      <Text style={styles.rejectButtonText}>{rejectText}</Text>
-                    </TouchableOpacity>
-                    <LinearGradient
-                      colors={['#38587F', '#101924']}
-                      start={{x: 0, y: 0}}
-                      style={styles.acceptButton}
-                      end={{x: 1, y: 0}}>
-                      <TouchableOpacity onPress={handleAccept}>
-                        <Text style={styles.acceptButtonText}>
-                          {acceptText}
-                        </Text>
-                      </TouchableOpacity>
-                    </LinearGradient>
-                  </View>
-                </View>
-              </Animated.View>
-            </TouchableWithoutFeedback>
-          </Animated.View>
-        </TouchableWithoutFeedback>
-      )} */}
       {isVisible && (
         <TouchableWithoutFeedback onPress={handleClose}>
           <Animated.View style={[styles.overlay, {opacity: fadeAnim}]}>

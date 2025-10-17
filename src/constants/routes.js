@@ -22,6 +22,7 @@ export const ROUTES = {
   CART: 'Cart',
   TRACKING: 'Tracking',
   HISTORY: 'History',
+  LEDGER: 'Account Ledger',
   RESET_PASSWORD: 'Reset password',
   SEARCH: 'Search',
   RESET_HANDLE: 'Reset handle',

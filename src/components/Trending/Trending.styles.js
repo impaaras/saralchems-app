@@ -6,9 +6,9 @@ const styles = StyleSheet.create({
     paddingTop: 14,
     paddingBottom: 4,
     marginTop: -100,
-    marginLeft: -8,
-    zIndex: 1,
+    marginLeft: -5,
   },
+
   header: {
     paddingHorizontal: 16,
     paddingBottom: 12,
@@ -19,12 +19,16 @@ const styles = StyleSheet.create({
     color: 'white',
   },
   scrollContent: {
+    // paddingHorizontal: 12,
+    // paddingBottom: 5,
+    // marginLeft: scale(5),
     paddingHorizontal: 12,
-    paddingBottom: 5,
+    paddingVertical: 8,
+    alignItems: 'center',
   },
+
   card: {
     marginHorizontal: 6,
-
     backgroundColor: '#E5F1FF',
     borderRadius: 12,
     overflow: 'hidden',
@@ -63,7 +67,6 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: moderateScale(14),
     width: '70%',
-
     fontWeight: '600',
     color: '#333',
   },

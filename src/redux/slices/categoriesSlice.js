@@ -1,60 +1,30 @@
-// const response = await axios.get(`${API_URL}/category`, {
-//     headers: {
-//       'Content-Type': 'application/json',
-//       Authorization: `Bearer ${token}`,
-//     },
-//   });
-
 import {createSlice, createAsyncThunk} from '@reduxjs/toolkit';
-import axios from 'axios'; // Make sure to import axios
 import {StorageKeys, storage} from '../../utils/storage';
-import {API_URL} from '../../utils/ApiService';
+import api from '../api';
 
-// Define an initial state
-const BASE_URL = API_URL;
-const api = axios.create({
-  baseURL: BASE_URL,
-});
-
-// Add a response interceptor to handle expired tokens
-api.interceptors.response.use(
-  response => response,
-  error => {
-    if (error.response && error.response.status === 401) {
-      storage.clearAll();
-      return Promise.reject({tokenExpired: true});
-    }
-    return Promise.reject(error);
-  },
-);
-
-const initialState = {
-  categories: [],
-  loading: false,
-  error: null,
-};
-
+// Async thunk to fetch categories
 export const fetchCategories = createAsyncThunk(
   'category/fetchCategories',
-  async (_, {getState, rejectWithValue}) => {
+  async (_, {rejectWithValue}) => {
     try {
-      const token = storage.getString(StorageKeys.AUTH_TOKEN);
-      console.log(token);
-      const response = await api.get(`${BASE_URL}/category`, {
-        headers: {Authorization: `Bearer ${token}`},
-      });
-      console.log(response.data);
+      // You don’t need to manually set headers here; interceptor handles it
+      const response = await api.get('/category');
       return response.data;
     } catch (error) {
-      console.log(error);
-      return rejectWithValue(error.response);
+      console.log('Fetch Categories Error:', error);
+      return rejectWithValue(error?.response?.data || 'Something went wrong');
     }
   },
 );
 
+// Slice definition
 const categoriesSlice = createSlice({
   name: 'category',
-  initialState,
+  initialState: {
+    loading: false,
+    error: null,
+    categories: [],
+  },
   reducers: {},
   extraReducers: builder => {
     builder
@@ -72,4 +42,5 @@ const categoriesSlice = createSlice({
       });
   },
 });
+
 export default categoriesSlice.reducer;

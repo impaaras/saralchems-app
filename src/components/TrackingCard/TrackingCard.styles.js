@@ -8,6 +8,7 @@ import {
   verticalScale,
   moderateScale,
 } from '../../utils/Responsive/responsive';
+import Colors from '../../assets/color';
 
 const styles = StyleSheet.create({
   ordersContainer: {
@@ -19,6 +20,32 @@ const styles = StyleSheet.create({
     minHeight: hp(50),
     borderBottomLeftRadius: wp(3),
     borderBottomRightRadius: wp(3),
+  },
+  confirmWithLinear: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderRadius: wp(25),
+  },
+  buttonText: {
+    color: '#FFF',
+    fontWeight: '500',
+    paddingVertical: moderateScale(6),
+    paddingHorizontal: moderateScale(10),
+    textAlign: 'center',
+    fontSize: moderateScale(8),
+  },
+  confirmButton: {
+    flex: 1,
+    borderRadius: wp(25),
+  },
+  repeatOrder: {
+    position: 'absolute',
+    right: wp(2),
+    bottom: hp(1),
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   orderCard: {
     borderWidth: 1,
@@ -42,14 +69,13 @@ const styles = StyleSheet.create({
     elevation: 4,
   },
   orderHeader: {
-    paddingHorizontal: wp(2.5),
     paddingBottom: hp(1.2),
   },
   statusDot: {
-    width: scale(6),
-    height: scale(6),
+    width: scale(8),
+    height: scale(8),
     borderRadius: wp(1.25),
-    marginRight: wp(2),
+    marginRight: wp(0),
   },
   orderStatus: {
     fontSize: isTablet
@@ -57,10 +83,11 @@ const styles = StyleSheet.create({
       : isSmallScreen
       ? moderateScale(9)
       : moderateScale(11),
-    color: '#757575',
+    color: Colors.TEXT_WHITE,
   },
   orderDetails: {
-    marginTop: scale(4),
+    padding: scale(8),
+    borderRadius: scale(10),
     flexDirection: 'row',
     justifyContent: 'space-between',
   },
@@ -71,7 +98,7 @@ const styles = StyleSheet.create({
       ? moderateScale(10)
       : moderateScale(13),
     fontWeight: '600',
-    color: '#212121',
+    // color: Colors.TEXT_WHITE,
   },
   orderDateText: {
     fontSize: isTablet
@@ -79,7 +106,7 @@ const styles = StyleSheet.create({
       : isSmallScreen
       ? moderateScale(10)
       : moderateScale(12),
-    color: '#555555',
+    color: Colors.TEXT_WHITE,
     fontWeight: '500',
   },
   orderValueText: {
@@ -123,6 +150,7 @@ const styles = StyleSheet.create({
     flex: 1,
     marginLeft: wp(4),
     justifyContent: 'space-around',
+    position: 'relative',
   },
   productName: {
     fontSize: isTablet
@@ -131,15 +159,16 @@ const styles = StyleSheet.create({
       ? moderateScale(11)
       : moderateScale(13),
     fontWeight: '500',
-    color: '#212121',
+    color: '#000000',
   },
   productSize: {
+    fontWeight: '500',
     fontSize: isTablet
       ? moderateScale(12)
       : isSmallScreen
       ? moderateScale(9)
       : moderateScale(11),
-    color: '#757575',
+    color: '#3C5D87',
     marginTop: hp(0.5),
   },
   productQuantity: {
@@ -148,8 +177,7 @@ const styles = StyleSheet.create({
       : isSmallScreen
       ? moderateScale(9)
       : moderateScale(11),
-    color: '#757575',
-    marginTop: hp(0.5),
+    color: '#555555',
   },
   productPrice: {
     fontSize: isTablet ? 17 : isSmallScreen ? 13 : 15,

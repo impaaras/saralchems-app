@@ -8,7 +8,7 @@ import ProductsScreen from '../screens/Product/ProductsScreen';
 import OrderHistory from '../screens/History/OrderHistory';
 import OrderTrackingScreen from '../screens/Tracking/OrderTrackingScreen';
 import ProductDetail from '../screens/ProductDetails/ProductDetail';
-import {Cart, ItemScreen, Profile, Search} from '../screens';
+import {Cart, ItemScreen, Profile, Search, AccountLedger} from '../screens';
 
 const Tab = createBottomTabNavigator();
 
@@ -67,14 +67,6 @@ const BottomNavigator = () => {
     },
   );
 
-  // useEffect(() => {
-  //   return () => {
-  //     if (scrollTimeout.current) {
-  //       clearTimeout(scrollTimeout.current);
-  //     }
-  //   };
-  // }, []);
-
   const wrapScreen = ScreenComponent => {
     return props => {
       const routeName = props.route.name;
@@ -121,6 +113,9 @@ const BottomNavigator = () => {
       </Tab.Screen>
       <Tab.Screen name={ROUTES.TRACKING}>
         {props => wrapScreen(OrderTrackingScreen)(props)}
+      </Tab.Screen>
+      <Tab.Screen name={ROUTES.LEDGER}>
+        {props => wrapScreen(AccountLedger)(props)}
       </Tab.Screen>
       <Tab.Screen name={ROUTES.PROFILE}>
         {props => wrapScreen(Profile)(props)}

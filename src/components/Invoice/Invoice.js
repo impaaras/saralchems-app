@@ -32,7 +32,7 @@ const InvoiceModal = ({visible, invoiceData, onClose}) => {
   const invoice = invoiceData;
 
   const formatCurrency = amount => {
-    return `₹${amount.toLocaleString('en-IN', {
+    return `₹${amount?.toLocaleString('en-IN', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     })}`;
@@ -44,7 +44,7 @@ const InvoiceModal = ({visible, invoiceData, onClose}) => {
   };
 
   const formatCurrencyWithoutSymbol = amount => {
-    return amount.toLocaleString('en-IN', {
+    return amount?.toLocaleString('en-IN', {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     });
@@ -734,7 +734,7 @@ const InvoiceModal = ({visible, invoiceData, onClose}) => {
     setIsGeneratingPDF(true);
     try {
       const htmlContent = generateHTMLForPDF();
-      const fileName = `Invoice_${invoice.invoiceNumber.replace(
+      const fileName = `Invoice_${invoice?.invoiceNumber.replace(
         /\//g,
         '_',
       )}.pdf`;
@@ -765,8 +765,8 @@ const InvoiceModal = ({visible, invoiceData, onClose}) => {
               try {
                 await Share.share({
                   url: `file://${pdf.filePath}`,
-                  title: `Invoice ${invoice.invoiceNumber}`,
-                  message: `Invoice ${invoice.invoiceNumber} from Saral Chemicals`,
+                  title: `Invoice ${invoice?.invoiceNumber}`,
+                  message: `Invoice ${invoice?.invoiceNumber} from Saral Chemicals`,
                 });
               } catch (error) {
                 console.error('Error sharing PDF:', error);
@@ -786,7 +786,10 @@ const InvoiceModal = ({visible, invoiceData, onClose}) => {
   const downloadInvoice = async () => {
     try {
       const uri = await viewShotRef.current.capture();
-      const fileName = `Invoice_${invoice.invoiceNumber.replace('/', '_')}.jpg`;
+      const fileName = `Invoice_${invoice?.invoiceNumber.replace(
+        '/',
+        '_',
+      )}.jpg`;
       const destPath = `${RNFS.DownloadDirectoryPath}/${fileName}`;
 
       await RNFS.copyFile(uri, destPath);
@@ -807,8 +810,8 @@ const InvoiceModal = ({visible, invoiceData, onClose}) => {
       const uri = await viewShotRef.current.capture();
       await Share.share({
         url: uri,
-        title: `Invoice ${invoice.invoiceNumber}`,
-        message: `Invoice ${invoice.invoiceNumber} from Saral Chemicals`,
+        title: `Invoice ${invoice?.invoiceNumber}`,
+        message: `Invoice ${invoice?.invoiceNumber} from Saral Chemicals`,
       });
     } catch (error) {
       console.error('Error sharing invoice:', error);
@@ -1163,7 +1166,7 @@ const InvoiceModal = ({visible, invoiceData, onClose}) => {
                   </View>
 
                   {/* Tax row for 18% */}
-                  {Object.entries(invoice.taxBreakdown).map(
+                  {Object.entries(invoice?.taxBreakdown).map(
                     ([rate, tax], index) => (
                       <View
                         key={index}

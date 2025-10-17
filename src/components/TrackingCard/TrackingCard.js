@@ -1,4 +1,4 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useCallback, useState} from 'react';
 import {
   View,
   Text,
@@ -7,8 +7,9 @@ import {
   TextInput,
   Dimensions,
   Animated,
+  TouchableWithoutFeedback,
 } from 'react-native';
-import {InfoIcon} from 'lucide-react-native';
+import {InfoIcon, Receipt} from 'lucide-react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import ScrollImage from '../ScrollImage/Index';
 import Icon from 'react-native-vector-icons/Entypo';
@@ -20,6 +21,7 @@ import {
   isSmallScreen,
   formatDate,
   moderateScale,
+  verticalScale,
 } from '../../utils/Responsive/responsive';
 import styles from './TrackingCard.styles';
 import axios from 'axios';
@@ -28,11 +30,18 @@ import {ROUTES} from '../../constants/routes';
 import {useAlert} from '../../context/CustomAlertContext';
 import {useLoader} from '../../context/LoaderContext';
 import InvoiceModal from '../Invoice/Invoice';
-import {storage} from '../../utils/storage';
+
+import {storage, StorageKeys} from '../../utils/storage';
 import {API_URL} from '../../utils/ApiService';
 import ReworkModal from '../Rework/ReworkModal';
+import ConfirmComponent from './ConfirmComponent';
+import Colors from '../../assets/color';
+import ReceiptIcon from '../../assets/icons/svg/bill.svg';
+import BottomModal from './BottomModal';
+import {addToCart} from '../../redux/slices/addToCartSlice';
+import {useDispatch} from 'react-redux';
 
-const TrackingCard = ({index, order}) => {
+const TrackingCard = ({index, order, fetchOrders}) => {
   const [expandedOrders, setExpandedOrders] = useState([]);
   const [showInvoice, setShowInvoice] = useState(false);
   const [processing, setProcessing] = useState(false);
@@ -48,38 +57,38 @@ const TrackingCard = ({index, order}) => {
   const navigation = useNavigation();
   const {showAlert} = useAlert();
   const [invoiceData, setInvoiceData] = useState(null);
+  const [bottomModalVisible, setBottomModalVisible] = useState(false);
 
   const handleInvoiceConfirmOrder = orderInvoice => {
+    setShowInvoice(true);
     setInvoiceData(orderInvoice);
-    setShowInvoice(true);
   };
 
-  const handleInvoiceReworkOrder = orderId => {
-    setShowInvoice(true);
+  const dispatch = useDispatch();
+
+  const onEditOrderClick = () => {
+    setBottomModalVisible(true);
   };
 
-  const getStatusColor = status => {
+  const getStatusStyles = status => {
     switch (status) {
-      case 'Delivered':
-        return '#4CAF50';
-      case 'Invoice Uploaded':
-        return '#1B3C53';
-      case 'Quote Sent':
-        return '#FF9800';
       case 'Confirmed':
-        return '#2196F3';
-      case 'Processing':
-        return '#FF9800';
+        return {backgroundColor: '#193A64', color: '#FFFFFF'}; // Dark blue bg, white text
+      case 'Quote Sent':
+        return {backgroundColor: '#D9E9FF', color: '#4B6489'}; // Light blue bg, muted blue text
+      case 'Invoice Uploaded':
+        return {backgroundColor: '#E2E2E2', color: '#000000'}; // Light grey bg, black text
+      case 'Delivered':
+        return {backgroundColor: '#009F08', color: '#FFFFFF'}; // Green bg, white text
       case 'Shipped':
-        return '#2196F3';
-      case 'Rework':
-        return '#F44336';
-      case 'Dispatched':
-        return '#A7C1A8';
+        return {backgroundColor: '#3D5E84', color: '#FFFFFF'}; // Muted blue bg, white text
+      case 'Completed':
+        return {backgroundColor: '#11335A', color: '#FFFFFF'}; // Deep navy bg, white text
       default:
-        return '#757575';
+        return {backgroundColor: '#722323', color: '#FFFFFF'}; // Default deep red, white text
     }
   };
+
   const toggleOrderExpand = orderId => {
     setExpandedOrders(prev =>
       prev.includes(orderId)
@@ -92,15 +101,14 @@ const TrackingCard = ({index, order}) => {
     setProcessing(true);
     const token = storage.getString(StorageKeys.AUTH_TOKEN);
 
+    console.log('confirmed why');
+
     try {
       setLoading(true);
       const payload = {status};
       if (reason) {
         payload.reason = reason;
       }
-
-      console.log(payload);
-
       const response = await axios.patch(
         `${API_URL}/order/user-status/${orderId}`,
         payload,
@@ -147,36 +155,117 @@ const TrackingCard = ({index, order}) => {
     }
   };
 
-  // Handle confirm button press
-  const handleConfirmOrder = orderId => {
-    // Using custom alert instead of Alert.alert
+  const handleConfirmOrder = () => {
     showAlert({
       title: 'Confirm Order',
       message: 'Are you sure you want to confirm this order?',
-      onConfirm: () => updateOrderStatus(orderId, 'Confirmed'),
+      onAccept: async () => {
+        await updateOrderStatus(order?._id, 'Confirmed');
+      },
       acceptText: 'Confirm',
       rejectText: 'Cancel',
     });
   };
 
   // Handle rework button press
-  const handleReworkOrder = orderId => {
-    setSelectedOrderId(orderId);
-    setReworkModalVisible(true);
+  const handleReworkOrder = () => {
+    console.log('Rework order clicked', order);
+    setSelectedOrderId(order._id);
+    setReworkModalVisible(!reworkModalVisible);
   };
 
   const handleTrackingPress = order => {
     navigation.navigate(ROUTES.TRACKING, {orders: order});
   };
 
+  // Handle adding single item to cart
+  const handleAddToCart = async (productId, variant, quantity) => {
+    console.log('12', productId, variant, quantity);
+    try {
+      await dispatch(addToCart({productId, variant, quantity})).unwrap();
+    } catch (err) {
+      console.log('Error adding item to cart:', err.message);
+      throw err;
+    }
+  };
+
+  const handleRepeatOrder = async order => {
+    if (!order || order.length === 0) {
+      showAlert({
+        title: 'No Previous Order',
+        message: 'No previous order found to repeat.',
+        acceptText: 'OK',
+      });
+      return;
+    }
+
+    showAlert({
+      title: 'Repeat Last Order',
+      message: `Do you want to add all ${order.length} items from your last order to cart?`,
+      onConfirm: async () => {
+        setLoading(true);
+        try {
+          const addToCartPromises = order.map(item =>
+            handleAddToCart(item.productId._id, item.variant, item.quantity),
+          );
+
+          await Promise.all(addToCartPromises);
+
+          // dispatch(
+          //   openModal({
+          //     modalType: 'ViewCart',
+          //     callbackId: '123',
+          //   }),
+          // );
+
+          showAlert({
+            title: 'Success',
+            message: 'All items have been added to cart!',
+            acceptText: 'OK',
+            onConfirm: () => {
+              navigation.navigate(ROUTES.CART);
+            },
+          });
+        } catch (error) {
+          showAlert({
+            title: 'Error',
+            message:
+              error.message || 'Failed to repeat order. Please try again.',
+            acceptText: 'OK',
+          });
+        } finally {
+          setLoading(false);
+        }
+      },
+      acceptText: 'Yes, Add to Cart',
+      rejectText: 'Cancel',
+    });
+  };
+
   return (
     <View key={index} style={[styles.orderCard]}>
+      <BottomModal
+        visible={bottomModalVisible}
+        onClose={() => {
+          console.log('Modal closing');
+          setBottomModalVisible(false);
+        }}
+      />
       <View style={[styles.orderHeader]}>
-        <View style={[styles.orderDetails]}>
+        <TouchableOpacity
+          onPress={() => handleTrackingPress(order)}
+          style={[
+            styles.orderDetails,
+            {backgroundColor: getStatusStyles(order.status).backgroundColor},
+          ]}>
           <View>
-            <TouchableOpacity onPress={() => handleTrackingPress(order)}>
-              <Text style={[styles.orderIdText]}>
-                Order #{order?._id.slice(-9)}
+            <TouchableOpacity>
+              <Text
+                style={[
+                  styles.orderIdText,
+                  {color: getStatusStyles(order.status).color},
+                ]}>
+                Order #{order?.orderId}
               </Text>
             </TouchableOpacity>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
@@ -184,9 +273,9 @@ const TrackingCard = ({index, order}) => {
                 style={[
                   styles.statusDot,
                   {
-                    backgroundColor: getStatusColor(order.status),
+                    backgroundColor: getStatusStyles(order.status).color,
                     borderRadius: wp(1.25),
-                    marginRight: wp(2),
+                    marginRight: wp(1),
                   },
                 ]}
               />
@@ -195,49 +284,138 @@ const TrackingCard = ({index, order}) => {
                   styles.orderStatus,
                   {
                     flex: 1,
-                    color: getStatusColor(order.status),
+                    color: getStatusStyles(order.status).color,
                     fontWeight: '500',
                   },
                 ]}>
-                {order.status}
+                {order.status === 'Warehouse Processing' ||
+                order.status === 'Admin Stock Review' ||
+                order.status === 'Approval Pending' ||
+                order.status === 'Awaiting Invoice' ||
+                order.status === 'Invoice Verification'
+                  ? 'In processing'
+                  : order.status}
               </Text>
             </View>
           </View>
 
-          <View>
-            <Text style={[styles.orderDateText]}>
-              Placed on {formatDate(order.createdAt)}
-            </Text>
-            {order.isPartialOrder && (
-              <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                <InfoIcon
-                  name="info-with-circle"
-                  size={
-                    isTablet ? scale(20) : isSmallScreen ? scale(16) : scale(18)
-                  }
-                  color="#101924"
-                />
-                <Text
-                  style={{
-                    fontSize: isTablet
-                      ? moderateScale(15)
-                      : isSmallScreen
-                      ? moderateScale(10)
-                      : moderateScale(12),
-                    color: 'black',
-                    flex: 1,
-                    marginLeft: wp(0.8),
-                  }}>
-                  Partial Order
-                </Text>
-              </View>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+            }}>
+            {(order.status === 'Invoice Uploaded' ||
+              order.status === 'Confirmed' ||
+              order.status === 'Packing' ||
+              order.status === 'Dispatched' ||
+              order.status === 'Delivered') && (
+              <TouchableOpacity
+                onPress={() => handleInvoiceConfirmOrder(order?.invoice)}
+                style={{
+                  backgroundColor: '#FFF',
+                  borderRadius: 50,
+                  marginRight: 5,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  paddingVertical: 7,
+                  paddingHorizontal: 8,
+                }}>
+                <ReceiptIcon width={18} height={18} style={{color: '#FFF'}} />
+              </TouchableOpacity>
             )}
+            <View style={{alignItems: 'flex-end'}}>
+              <Text
+                style={[
+                  styles.orderDateText,
+                  {
+                    color: getStatusStyles(order.status).color,
+                  },
+                ]}>
+                {formatDate(order.createdAt)}
+              </Text>
+              {order.isPartialOrder && order?.originalOrder === null && (
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    flex: 1,
+                  }}>
+                  <InfoIcon
+                    name="info-with-circle"
+                    size={
+                      isTablet
+                        ? scale(20)
+                        : isSmallScreen
+                        ? scale(16)
+                        : scale(18)
+                    }
+                    color={getStatusStyles(order.status).color}
+                  />
+                  <Text
+                    style={{
+                      fontSize: isTablet
+                        ? moderateScale(15)
+                        : isSmallScreen
+                        ? moderateScale(10)
+                        : moderateScale(12),
+                      color: getStatusStyles(order.status).color,
+                      marginLeft: wp(0.8),
+                    }}>
+                    Partial Order
+                  </Text>
+                </View>
+              )}
+              {!order.isPartialOrder && order?.originalOrder && (
+                <View
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    flex: 1,
+                  }}>
+                  <InfoIcon
+                    name="info-with-circle"
+                    size={
+                      isTablet
+                        ? scale(20)
+                        : isSmallScreen
+                        ? scale(16)
+                        : scale(18)
+                    }
+                    color={getStatusStyles(order.status).color}
+                  />
+                  <Text
+                    style={{
+                      fontSize: isTablet
+                        ? moderateScale(15)
+                        : isSmallScreen
+                        ? moderateScale(10)
+                        : moderateScale(12),
+                      color: getStatusStyles(order.status).color,
+                      marginLeft: wp(0.8),
+                    }}>
+                    Back order
+                  </Text>
+                </View>
+              )}
+            </View>
           </View>
-        </View>
+        </TouchableOpacity>
+
+        {(order.status === 'Invoice Uploaded' ||
+          order.status === 'Partially Fulfilled') && (
+          <ConfirmComponent
+            handleReworkOrder={handleReworkOrder}
+            handleConfirmOrder={handleConfirmOrder}
+            handleInvoiceConfirmOrder={() =>
+              handleInvoiceConfirmOrder(order?.invoice)
+            }
+          />
+        )}
         <View
           style={{
             backgroundColor: '#3C5D87',
             borderRadius: 10,
+            marginHorizontal: scale(12),
           }}>
           <View
             style={{
@@ -262,21 +440,61 @@ const TrackingCard = ({index, order}) => {
                         {order.items[0].variant}
                       </Text>
                     </View>
-                    <View>
+                    <View
+                      style={{
+                        flexDirection: 'row',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        marginTop: moderateScale(6),
+                      }}>
                       <Text style={[styles.productQuantity]}>
                         Quantity: {order.items[0].quantity}
                       </Text>
+                      {/* <View>
+                        <TouchableOpacity
+                          style={{
+                            borderWidth: 1,
+                            borderColor: Colors.PRIMARY_DARK,
+                            paddingVertical: moderateScale(4),
+                            paddingHorizontal: moderateScale(8),
+                            borderRadius: 50,
+                          }}
+                          onPress={() => onEditOrderClick()}>
+                          <Text style={{textAlign: 'center'}}>Edit Order</Text>
+                        </TouchableOpacity>
+                      </View> */}
                     </View>
                   </View>
+                  {order?.status === 'Delivered' && (
+                    <View style={styles.repeatOrder}>
+                      <TouchableWithoutFeedback
+                        onPress={() => handleRepeatOrder(order.items)}>
+                        <View style={styles.confirmButton}>
+                          <LinearGradient
+                            colors={[
+                              '#2D4565',
+                              '#2D4565',
+                              '#1B2B48',
+                              '#1B2B48',
+                            ]}
+                            start={{x: 0, y: 0}}
+                            end={{x: 0, y: 1}}
+                            style={styles.confirmWithLinear}>
+                            <Text style={styles.buttonText}>Repeat Order</Text>
+                          </LinearGradient>
+                        </View>
+                      </TouchableWithoutFeedback>
+                    </View>
+                  )}
                   {order?.items?.length > 1 && (
-                    <View>
+                    <View style={{position: 'absolute', right: 10, top: 10}}>
                       <LinearGradient
                         colors={['#38587F', '#101924']}
                         start={{x: 0, y: 0}}
                         end={{x: 1, y: 0}}
                         style={[styles.ratingContainer]}>
                         <Text style={[styles.ratingText]}>
-                          +{order?.items?.length - 1}
+                          {order?.items?.length - 1}+
                         </Text>
                       </LinearGradient>
                     </View>
@@ -315,28 +533,30 @@ const TrackingCard = ({index, order}) => {
             )}
           </View>
           {order.items.length > 1 && (
-            <TouchableOpacity
-              onPress={() => toggleOrderExpand(order._id)}
-              style={{
-                borderBottomLeftRadius: 10,
-                borderBottomRightRadius: 10,
-                marginTop: -10,
-                paddingTop: hp(0.9),
-              }}>
-              <Icon
-                name={
-                  expandedOrders.includes(order._id)
-                    ? 'chevron-up'
-                    : 'chevron-down'
-                }
-                style={{alignSelf: 'center'}}
-                size={isTablet ? 28 : isSmallScreen ? 20 : 24}
-                color="#fff"
-              />
-            </TouchableOpacity>
+            <TouchableWithoutFeedback
+              onPress={() => toggleOrderExpand(order._id)}>
+              <View
+                style={{
+                  borderBottomLeftRadius: 10,
+                  borderBottomRightRadius: 10,
+                  marginTop: -10,
+                  paddingTop: hp(0.9),
+                }}>
+                <Icon
+                  name={
+                    expandedOrders.includes(order._id)
+                      ? 'chevron-up'
+                      : 'chevron-down'
+                  }
+                  style={{alignSelf: 'center'}}
+                  size={isTablet ? 28 : isSmallScreen ? 20 : 24}
+                  color="#fff"
+                />
+              </View>
+            </TouchableWithoutFeedback>
           )}
         </View>
-        <View style={{marginTop: hp(1.2)}}>
+        {/* <View style={{marginTop: hp(1.2)}}>
           {order.status === 'Quote Sent' ||
           order.status === 'Partially Fulfilled' ? (
             <View
@@ -345,9 +565,9 @@ const TrackingCard = ({index, order}) => {
                 justifyContent: 'space-around',
               }}>
               <LinearGradient
-                colors={['#101924', '#38587F']}
-                start={{x: 0, y: 0}}
-                end={{x: 1, y: 0}}
+                colors={['#2D4565', '#2D4565', '#1B2B48', '#1B2B48']}
+                start={{x: 0, y: 0}} // Top
+                end={{x: 0, y: 1}} // Bottom
                 style={[styles.confirmButton]}>
                 <TouchableOpacity
                   style={[styles.quoteButton]}
@@ -392,21 +612,22 @@ const TrackingCard = ({index, order}) => {
               </LinearGradient>
             </View>
           ) : null}
-        </View>
+        </View> */}
         <View style={{flex: 1}}>
           {!showInvoice ? (
             <View style={{flex: 1}}>
-              <View style={{marginTop: hp(1.2)}}>
-                {order.status === 'Invoice Uploaded' && (
+              {/* <View style={{marginTop: hp(1.2)}}>
+                {(order.status !== 'Quote Sent' ||
+                  order.status !== 'Rework') && (
                   <View
                     style={{
                       flexDirection: isSmallScreen ? 'column' : 'row',
                       justifyContent: 'space-around',
                     }}>
                     <LinearGradient
-                      colors={['#101924', '#38587F']}
-                      start={{x: 0, y: 0}}
-                      end={{x: 1, y: 0}}
+                      colors={['#2D4565', '#2D4565', '#1B2B48', '#1B2B48']}
+                      start={{x: 0, y: 0}} // Top
+                      end={{x: 0, y: 1}} // Bottom
                       style={[styles.confirmButton]}>
                       <TouchableOpacity
                         style={[styles.quoteButton]}
@@ -455,7 +676,7 @@ const TrackingCard = ({index, order}) => {
                     </LinearGradient>
                   </View>
                 )}
-              </View>
+              </View> */}
             </View>
           ) : (
             <InvoiceModal
@@ -466,10 +687,11 @@ const TrackingCard = ({index, order}) => {
           )}
         </View>
       </View>
+
       <ReworkModal
         visible={reworkModalVisible}
         onClose={() => {
-          setReworkModalVisible(false);
+          setReworkModalVisible(!reworkModalVisible);
           setSelectedOrderId(null);
         }}
         selectedOrderId={selectedOrderId}

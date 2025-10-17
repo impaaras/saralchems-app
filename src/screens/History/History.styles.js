@@ -23,6 +23,7 @@ const isSmallScreen = screenWidth < 380;
 const styles = StyleSheet.create({
   filterTabsContainer: {
     paddingHorizontal: wp(2),
+    marginTop: scale(15),
   },
 
   tabScrollContainer: {

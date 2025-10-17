@@ -1,7 +1,5 @@
-// src/redux/slices/authSlice.js
 import {createSlice, createAsyncThunk} from '@reduxjs/toolkit';
 import axios from 'axios';
-// import storage from '../../utils/storage';
 import {
   storage,
   StorageKeys,
@@ -9,45 +7,43 @@ import {
   getItem,
   setBoolItem,
 } from '../../utils/storage';
-import {store} from '../store';
-import {API_URL} from '../../utils/ApiService';
+import {API_URL} from '../../utils/ApiService'; // Assuming this exports BASE_URL or similar
+import api from '../api';
 
-const BASE_URL = API_URL;
-const api = axios.create({
-  baseURL: BASE_URL,
-});
+// export const loginUser = createAsyncThunk(
+//   'auth/login',
+//   async ({email, password}, {rejectWithValue}) => {
+//     try {
+//       const response = await api.post('/auth/login', {email, password});
+//       const {user, token} = response.data;
 
-// Add a response interceptor to handle expired tokens
-axios.interceptors.response.use(
-  response => response,
-  error => {
-    if (error?.response?.status === 401 || error?.response?.status === 403) {
-      storage.clearAll(); // Clear MMKV or whatever you're using
-      store.dispatch(logout());
+//       setItem(StorageKeys.AUTH_TOKEN, token);
+//       setItem(StorageKeys.USER_DATA, user);
+//       setBoolItem(StorageKeys.IS_AUTHENTICATED, true);
 
-      return Promise.reject({tokenExpired: true});
-    }
-    return Promise.reject(error);
-  },
-);
+//       return {user, token};
+//     } catch (error) {
+//       return rejectWithValue(error.response?.data || 'Login failed');
+//     }
+//   },
+// );
 
 export const loginUser = createAsyncThunk(
   'auth/login',
   async ({email, password}, {rejectWithValue}) => {
     try {
-      const response = await axios.post(`${BASE_URL}/auth/login`, {
-        email,
-        password,
-      });
+      const response = await api.post('/auth/login', {email, password});
+      const {user, accessToken, refreshToken} = response.data;
 
-      const {user, token} = response.data;
-      // Store token and user data in MMKV
-      setItem(StorageKeys.AUTH_TOKEN, token);
+      // Save tokens & user data
+      setItem(StorageKeys.AUTH_TOKEN, accessToken); // Access token
+      setItem(StorageKeys.REFRESH_TOKEN, refreshToken); // Refresh token
       setItem(StorageKeys.USER_DATA, user);
       setBoolItem(StorageKeys.IS_AUTHENTICATED, true);
-      return {user, token};
+
+      return {user, accessToken, refreshToken};
     } catch (error) {
-      return rejectWithValue('helo', error.response.data);
+      return rejectWithValue(error.response?.data || 'Login failed');
     }
   },
 );
@@ -68,7 +64,7 @@ export const registerUser = createAsyncThunk(
     {rejectWithValue},
   ) => {
     try {
-      const response = await axios.post(`${BASE_URL}/auth/signup`, {
+      const response = await api.post('/auth/signup', {
         personName,
         companyName,
         businessType,
@@ -80,7 +76,7 @@ export const registerUser = createAsyncThunk(
       });
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(error.response?.data || 'Registration failed');
     }
   },
 );
@@ -89,36 +85,28 @@ export const requestOTP = createAsyncThunk(
   'auth/requestOTP',
   async ({email}, {rejectWithValue}) => {
     try {
-      const response = await axios.post(`${BASE_URL}/auth/request-otp`, {
-        email,
-      });
+      const response = await api.post('/auth/request-otp', {email});
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(error.response?.data || 'Failed to send OTP');
     }
   },
 );
 
-// **Verify OTP**
 export const verifyOTP = createAsyncThunk(
   'auth/verifyOTP',
   async ({email, otp}, {rejectWithValue}) => {
     try {
-      const response = await axios.post(`${BASE_URL}/auth/verify-otp`, {
-        email,
-        otp,
-      });
+      const response = await api.post('/auth/verify-otp', {email, otp});
       const {user, token} = response.data;
 
-      // Store token and user data in MMKV after OTP verification
       setItem(StorageKeys.AUTH_TOKEN, token);
       setItem(StorageKeys.USER_DATA, user);
       setBoolItem(StorageKeys.IS_AUTHENTICATED, true);
 
       return {user, token};
-      // return response.data;
     } catch (error) {
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(error.response?.data || 'Invalid OTP');
     }
   },
 );
@@ -130,20 +118,11 @@ export const fetchAuthState = createAsyncThunk(
     const userData = storage.getString(StorageKeys.USER_DATA);
     const isAuthenticated = storage.getBoolean(StorageKeys.IS_AUTHENTICATED);
 
-    // If we have a token, verify it's not expired
     if (token) {
       try {
-        // Make a simple request to verify token
-        await api.get(`${BASE_URL}/auth/me`, {
-          headers: {Authorization: `Bearer ${token}`},
-        });
+        await api.get('/auth/me');
       } catch (error) {
-        // If token expired, logout
-
-        if (
-          (error.response && error.response.status === 401) ||
-          error.response.status === 403
-        ) {
+        if (error.response?.status === 401 || error.response?.status === 403) {
           dispatch(logout());
           return {
             token: null,
@@ -166,13 +145,10 @@ export const fetchUserProfile = createAsyncThunk(
   'auth/fetchUserProfile',
   async ({token}, {rejectWithValue}) => {
     try {
-      const response = await axios.get(`${BASE_URL}/user/profile`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+      const response = await axios.get(`${API_URL}/user/profile`, {
+        headers: {Authorization: `Bearer ${token}`},
       });
-
-      return response.data; // Return the user profile data
+      return response.data;
     } catch (error) {
       return rejectWithValue(
         error.response?.data || 'Failed to fetch user profile',
@@ -181,54 +157,55 @@ export const fetchUserProfile = createAsyncThunk(
   },
 );
 
-// Request Password Reset
 export const requestPasswordReset = createAsyncThunk(
   'auth/requestPasswordReset',
   async ({email}, {rejectWithValue}) => {
     try {
-      const response = await axios.post(`${BASE_URL}/auth/forgot-password`, {
+      const response = await api.post(`${API_URL}/auth/forgot-password`, {
         email,
       });
-
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(
+        error.response?.data || 'Failed to send password reset OTP',
+      );
     }
   },
 );
-// Reset Password
+
 export const resetPassword = createAsyncThunk(
   'auth/resetPassword',
   async ({email, otp, newPassword}, {rejectWithValue}) => {
     try {
-      const response = await axios.post(`${BASE_URL}/auth/reset-password`, {
+      const response = await api.post('/auth/reset-password', {
         email,
         otp,
         newPassword,
       });
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(
+        error.response?.data || 'Failed to reset password',
+      );
     }
   },
 );
 
+// Auth Slice
+
 const authSlice = createSlice({
   name: 'auth',
   initialState: {
-    // user: null,
     loading: false,
     error: null,
-    user: getItem(StorageKeys.USER_DATA), // Load user from storage
-    token: getItem(StorageKeys.AUTH_TOKEN), // Load token from storage
+    user: getItem(StorageKeys.USER_DATA),
+    token: getItem(StorageKeys.AUTH_TOKEN),
     isAuthenticated: getItem(StorageKeys.IS_AUTHENTICATED) === 'true',
-    loading: false,
-    error: null,
     otpSent: false,
     otpVerified: false,
     passwordResetRequested: false,
     passwordResetSuccess: false,
-    showVariants: false, // Moved from useState
+    showVariants: false,
     showSearchVariants: false,
   },
   reducers: {
@@ -249,7 +226,6 @@ const authSlice = createSlice({
   },
   extraReducers: builder => {
     builder
-      // Login cases
       .addCase(loginUser.pending, state => {
         state.loading = true;
         state.error = null;
@@ -262,9 +238,9 @@ const authSlice = createSlice({
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload?.message || 'Login failed';
+        state.error = action.payload || 'Login failed';
       })
-      // Register cases
+
       .addCase(registerUser.pending, state => {
         state.loading = true;
         state.error = null;
@@ -277,9 +253,9 @@ const authSlice = createSlice({
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload?.message || 'Registration failed';
+        state.error = action.payload || 'Registration failed';
       })
-      // Request OTP cases
+
       .addCase(requestOTP.pending, state => {
         state.loading = true;
         state.error = null;
@@ -290,9 +266,9 @@ const authSlice = createSlice({
       })
       .addCase(requestOTP.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload?.message || 'Failed to send OTP';
+        state.error = action.payload || 'Failed to send OTP';
       })
-      // Verify OTP cases
+
       .addCase(verifyOTP.pending, state => {
         state.loading = true;
         state.error = null;
@@ -304,15 +280,29 @@ const authSlice = createSlice({
       })
       .addCase(verifyOTP.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload?.message || 'Invalid OTP';
+        state.error = action.payload || 'Invalid OTP';
       })
+
       .addCase(fetchAuthState.fulfilled, (state, action) => {
         state.user = action.payload.user;
         state.token = action.payload.token;
         state.isAuthenticated = action.payload.isAuthenticated;
         state.loading = false;
       })
-      // Reset password
+
+      .addCase(fetchUserProfile.pending, state => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchUserProfile.fulfilled, (state, action) => {
+        state.loading = false;
+        state.user = action.payload;
+      })
+      .addCase(fetchUserProfile.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || 'Failed to fetch user profile';
+      })
+
       .addCase(requestPasswordReset.pending, state => {
         state.loading = true;
         state.error = null;
@@ -323,9 +313,9 @@ const authSlice = createSlice({
       })
       .addCase(requestPasswordReset.rejected, (state, action) => {
         state.loading = false;
-        state.error =
-          action.payload?.message || 'Failed to send password reset OTP';
+        state.error = action.payload;
       })
+
       .addCase(resetPassword.pending, state => {
         state.loading = true;
         state.error = null;
@@ -336,24 +326,12 @@ const authSlice = createSlice({
       })
       .addCase(resetPassword.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload?.message || 'Failed to reset password';
-      })
-      .addCase(fetchUserProfile.pending, state => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(fetchUserProfile.fulfilled, (state, action) => {
-        state.loading = false;
-        state.user = action.payload; // Set the user data
-        state.error = null;
-      })
-      .addCase(fetchUserProfile.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload || 'Failed to fetch user profile'; // Set the error message
+        state.error = action.payload || 'Failed to reset password';
       });
   },
 });
 
-export const {toggleShowVariants, toggleShowSearchVariants} = authSlice.actions;
-export const {logout} = authSlice.actions;
+export const {logout, toggleShowVariants, toggleShowSearchVariants} =
+  authSlice.actions;
+
 export default authSlice.reducer;

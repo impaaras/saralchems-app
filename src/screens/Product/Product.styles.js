@@ -24,7 +24,8 @@ const styles = StyleSheet.create({
   },
   productContainer: {
     zIndex: 9999,
-    marginBottom: 200,
+    // marginBottom: scale(200),
+    paddingBottom: scale(220),
     backgroundColor: '#FFF',
     borderTopLeftRadius: 15,
     borderTopRightRadius: 15,

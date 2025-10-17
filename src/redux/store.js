@@ -12,12 +12,14 @@ import searchHistoryReducer from './slices/searchHistory';
 import newCart from './slices/newCart';
 import invoice from './slices/orderHistory';
 import categoryReducer from './slices/categoriesSlice';
+import homeReducer from './slices/homeSlice';
 
 export const store = configureStore({
   reducer: {
     auth: authReducer,
     drawer: drawerReducer,
     cart: cartReducer,
+    home: homeReducer,
     categories: categoryReducer,
     search: searchReducer,
     sort: sortSlice,

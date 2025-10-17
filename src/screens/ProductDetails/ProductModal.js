@@ -7,12 +7,8 @@ import {
   ScrollView,
   TextInput,
   Dimensions,
-  Image,
-  Platform,
-  FlatList,
   Animated,
   Easing,
-  Vibration,
 } from 'react-native';
 import React, {useState, useEffect, useRef} from 'react';
 import LinearGradient from 'react-native-linear-gradient';
@@ -21,7 +17,6 @@ import {ROUTES} from '../../constants/routes';
 import {useDispatch, useSelector} from 'react-redux';
 import {addToCart, getCart} from '../../redux/slices/addToCartSlice';
 import {closeModal, openModal} from '../../redux/slices/modalSlice';
-import Icon from 'react-native-vector-icons/Fontisto';
 import {setSelectedVariant} from '../../redux/slices/newCart';
 import {PackageCheck, RotateCw, X} from 'lucide-react-native';
 import {setVariants} from '../../redux/slices/cartSlice';
@@ -35,6 +30,7 @@ import {
   verticalScale,
   scale,
 } from '../../utils/Responsive/responsive';
+import Toast from 'react-native-toast-message';
 
 // Enhanced Custom dropdown component with animations
 const Dropdown = ({options, selectedValue, onSelect, label}) => {
@@ -406,6 +402,11 @@ const ProductModal = ({product}) => {
   };
 
   const handleAddToCart = (productId, variant, quantity, itemId) => {
+    if (!variant) {
+      Toast.show({type: 'error', text1: 'Variant is required'});
+      return;
+    }
+
     triggerHaptic('medium');
     const last8 = variant.slice(-8);
     const last8OfItemId = itemId.slice(-8);
@@ -447,6 +448,11 @@ const ProductModal = ({product}) => {
   };
 
   const handleAddToCartMachineProduct = (productId, quantity) => {
+    if (!variant) {
+      Toast.show({type: 'error', text1: 'Variant is required'});
+      return;
+    }
+
     triggerHaptic('medium');
     let variant = 'no variant';
     dispatch(addToCart({productId, variant, quantity}))
@@ -624,7 +630,7 @@ const ProductModal = ({product}) => {
               }}>
               <Text style={styles.title}>{selectedProductItem.name}</Text>
             </Animated.View>
-
+            <Toast position="top" />
             <Animated.View
               style={{
                 backgroundColor: '#E5F1FF',
@@ -657,9 +663,10 @@ const ProductModal = ({product}) => {
                     alignItems: 'center',
                   }}>
                   <Text style={styles.infoLabel}>Category :</Text>
-                  <Text style={{fontSize: moderateScale(12), flex: 1}}>
-                    {product?.categorySubcategoryPairs[0]?.categoryId.name}
-                  </Text>
+                  {/* <Text style={{fontSize: moderateScale(12), flex: 1}}>
+                    {product &&
+                      product?.categorySubcategoryPairs[0]?.categoryId.name}
+                  </Text> */}
                 </View>
                 <View
                   style={{
@@ -881,7 +888,7 @@ const ProductModal = ({product}) => {
                   style={styles.receiptButton}>
                   <TouchableOpacity
                     style={styles.addToCartButton}
-                    disabled={activeProduct?.selectedVariant === null}
+                    // disabled={activeProduct?.selectedVariant === null}
                     onPress={() =>
                       handleAddToCart(
                         selectedProductItem._id,

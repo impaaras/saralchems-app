@@ -32,6 +32,7 @@ import ImageZoomModal from '../../components/ImageZoom/ImageZoom';
 import ScrollImage from '../../components/ScrollImage/Index';
 import {moderateScale, scale} from '../../utils/Responsive/responsive';
 import {BlurView} from '@react-native-community/blur';
+import Toast from 'react-native-toast-message';
 
 const {width: screenWidth} = Dimensions.get('window');
 
@@ -120,6 +121,11 @@ const ProductDetail = () => {
   const {items, loading, error} = useSelector(state => state.addToCart);
 
   useEffect(() => {
+    setQuantity(1);
+    setCustomValue('');
+  }, [product?._id]); // Reset when product ID changes
+
+  useEffect(() => {
     dispatch(getCart());
   }, [dispatch]);
 
@@ -127,6 +133,10 @@ const ProductDetail = () => {
 
   const {showAlert} = useAlert();
   const handleAddToCart = (productId, variant, quantity) => {
+    if (!variant) {
+      Toast.show({type: 'info', text1: 'Variant is required'});
+      return;
+    }
     let newVariant;
     if (customValue && customValue.trim() !== '') {
       newVariant = customValue.trim();
@@ -245,6 +255,10 @@ const ProductDetail = () => {
   return (
     <SafeAreaView style={styles.container}>
       <DashboardHeader name={product?.name} />
+
+      <View style={{flex: 1, zIndex: 9}}>
+        <Toast position="bottom" />
+      </View>
       <ScrollView
         style={styles.productContent}
         showsVerticalScrollIndicator={false}>
@@ -390,10 +404,10 @@ const ProductDetail = () => {
                   style={{borderRadius: 100}}>
                   <TouchableOpacity
                     style={styles.addToCartButton}
-                    disabled={
-                      customValue === '' &&
-                      activeProduct?.selectedVariant === null
-                    }
+                    // disabled={
+                    //   customValue === '' &&
+                    //   activeProduct?.selectedVariant === null
+                    // }
                     onPress={() =>
                       handleAddToCart(
                         product._id,
@@ -411,7 +425,7 @@ const ProductDetail = () => {
           </View>
 
           <View>
-            <Text style={styles.productType}>NYLON (12 No. 54" (NAM))</Text>
+            <Text style={styles.productType}>{product?.name}</Text>
             <ExpandableSection title="Product Description:">
               <Text style={styles.sectionText}>
                 Our Nylon (12 No. 54" (NAM)) is a high-quality, durable

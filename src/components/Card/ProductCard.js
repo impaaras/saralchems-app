@@ -150,6 +150,7 @@ const ProductCard = ({item, onAddPress, idx, ParentCategoryId}) => {
             />
           </TouchableOpacity>
         )}
+
         <TouchableOpacity
           style={styles.addButton}
           onPress={() => openAddModal(item, idx, item?._id)}>

@@ -4,5 +4,5 @@ const images = [
 
 export const fallbackImg = () => {
   const idx = Math.floor(Math.random() * images.length);
-  return images[0];
+  return images[idx];
 };

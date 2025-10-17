@@ -7,6 +7,7 @@ import {LoaderProvider, useLoader} from './context/LoaderContext';
 import {AlertProvider} from './context/CustomAlertContext';
 import GlobalAlert from './utils/Modal/GlobalAlert';
 import NoInternetScreen from './screens/NoInternet/Index';
+import {RequestProvider} from './context/RequestContext';
 
 const AppContent = () => {
   const {loading} = useLoader();
@@ -42,7 +43,9 @@ const App = () => {
   return (
     <LoaderProvider>
       <AlertProvider>
-        <AppContent />
+        <RequestProvider>
+          <AppContent />
+        </RequestProvider>
       </AlertProvider>
     </LoaderProvider>
   );

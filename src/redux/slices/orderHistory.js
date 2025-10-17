@@ -1,48 +1,31 @@
 import {createSlice, createAsyncThunk} from '@reduxjs/toolkit';
-import axios from 'axios'; // Make sure to import axios
-import {storage} from '../../utils/storage';
-import {API_URL} from '../../utils/ApiService';
+import {storage, StorageKeys} from '../../utils/storage';
+import api from '../api'; // ✅ Use the shared axios instance
 
-// Define an initial state
-const BASE_URL = API_URL;
-const api = axios.create({
-  baseURL: BASE_URL,
-});
-
-// Add a response interceptor to handle expired tokens
-api.interceptors.response.use(
-  response => response,
-  error => {
-    if (error.response && error.response.status === 401) {
-      storage.clearAll();
-      return Promise.reject({tokenExpired: true});
-    }
-    return Promise.reject(error);
-  },
-);
-
+// Initial state
 const initialState = {
   history: [],
   loading: false,
   error: null,
 };
 
+// Async thunk to fetch invoice
 export const fetchInvoice = createAsyncThunk(
   'cart/fetchInvoice',
-  async ({id}, {getState, rejectWithValue}) => {
+  async ({id}, {rejectWithValue}) => {
     try {
-      const token = storage.getString(StorageKeys.AUTH_TOKEN);
-      const response = await api.get(`${BASE_URL}/order/invoice/${id}`, {
-        headers: {Authorization: `Bearer ${token}`},
-      });
+      const response = await api.get(`/order/invoice/${id}`);
       return response.data;
     } catch (error) {
-      return rejectWithValue(error.response.data);
+      console.log('Invoice fetch error:', error);
+      return rejectWithValue(
+        error?.response?.data || 'Unable to fetch invoice.',
+      );
     }
   },
 );
 
-// Create the slice
+// Create slice
 const orderHistorySlice = createSlice({
   name: 'history',
   initialState,
@@ -59,13 +42,9 @@ const orderHistorySlice = createSlice({
       })
       .addCase(fetchInvoice.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message;
+        state.error = action.payload || 'Something went wrong';
       });
   },
 });
 
-// Export the async thunk
-// export {fetchInvoice};
-
-// Export the reducer
 export default orderHistorySlice.reducer;

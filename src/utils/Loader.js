@@ -1,8 +1,11 @@
 import React, {useEffect, useRef} from 'react';
-import {View, Animated, StyleSheet, Easing, Text} from 'react-native';
-import {moderateScale} from './Responsive/responsive';
+import {View, Animated, StyleSheet, Text, Dimensions} from 'react-native';
+import Colors from '../assets/color';
+import LoaderIcon from '../assets/icons/svg/loader.svg';
 
-const Loader = ({visible}) => {
+const {width} = Dimensions.get('window');
+
+const CurvedArrowLoader = ({visible = true, size = 60}) => {
   const rotateAnim = useRef(new Animated.Value(0)).current;
   const animationRef = useRef(null);
 
@@ -11,8 +14,7 @@ const Loader = ({visible}) => {
       animationRef.current = Animated.loop(
         Animated.timing(rotateAnim, {
           toValue: 1,
-          duration: 1000,
-          easing: Easing.linear,
+          duration: 1200,
           useNativeDriver: true,
         }),
       );
@@ -20,7 +22,7 @@ const Loader = ({visible}) => {
     } else {
       if (animationRef.current) {
         animationRef.current.stop();
-        rotateAnim.setValue(0); // Reset the animation
+        rotateAnim.setValue(0);
       }
     }
 
@@ -41,29 +43,110 @@ const Loader = ({visible}) => {
 
   return (
     <View style={styles.container}>
-      <Animated.View style={[styles.spinner, {transform: [{rotate: spin}]}]}>
-        {Array.from({length: 12}).map((_, i) => (
-          <View
-            key={i}
-            style={[
-              styles.segment,
-              {
-                transform: [
-                  {rotate: `${i * 30}deg`},
-                  {translateY: -moderateScale(16)},
-                ],
-                opacity: (i + 1) / 12,
-              },
-            ]}
-          />
-        ))}
-      </Animated.View>
-      <Text style={styles.text}>Loading...</Text>
+      <View style={[styles.loaderCard, {width: size + 80, height: size + 80}]}>
+        <Animated.View
+          style={[
+            styles.spinnerContainer,
+            {
+              width: size,
+              height: size,
+              transform: [{rotate: spin}],
+            },
+          ]}>
+          <LoaderIcon width={size} height={size} color={Colors.PRIMARY} />
+        </Animated.View>
+
+        <Text style={styles.loadingText}>Loading</Text>
+      </View>
     </View>
   );
 };
 
-export default Loader;
+// Alternative with custom size and styling props
+const CustomCurvedArrowLoader = ({
+  visible = true,
+  size = 60,
+  iconColor = Colors.PRIMARY,
+  backgroundColor = '#FFFFFF',
+  textColor = '#374151',
+  loadingText = 'Loading',
+  animationDuration = 1200,
+}) => {
+  const rotateAnim = useRef(new Animated.Value(0)).current;
+  const animationRef = useRef(null);
+
+  useEffect(() => {
+    if (visible) {
+      animationRef.current = Animated.loop(
+        Animated.timing(rotateAnim, {
+          toValue: 1,
+          duration: animationDuration,
+          useNativeDriver: true,
+        }),
+      );
+      animationRef.current.start();
+    } else {
+      if (animationRef.current) {
+        animationRef.current.stop();
+        rotateAnim.setValue(0);
+      }
+    }
+
+    return () => {
+      if (animationRef.current) {
+        animationRef.current.stop();
+        rotateAnim.setValue(0);
+      }
+    };
+  }, [visible, animationDuration]);
+
+  const spin = rotateAnim.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0deg', '360deg'],
+  });
+
+  if (!visible) return null;
+
+  return (
+    <View style={styles.container}>
+      <View
+        style={[
+          styles.loaderCard,
+          {
+            width: size + 80,
+            height: size + 80,
+            backgroundColor: backgroundColor,
+          },
+        ]}>
+        <Animated.View
+          style={[
+            styles.spinnerContainer,
+            {
+              width: size,
+              height: size,
+              transform: [{rotate: spin}],
+            },
+          ]}>
+          <LoaderIcon
+            width={size}
+            height={size}
+            color={iconColor}
+            fill={iconColor}
+          />
+        </Animated.View>
+
+        {loadingText && (
+          <Text style={[styles.loadingText, {color: textColor}]}>
+            {loadingText}
+          </Text>
+        )}
+      </View>
+    </View>
+  );
+};
+
+export default CurvedArrowLoader;
+export {CustomCurvedArrowLoader};
 
 const styles = StyleSheet.create({
   container: {
@@ -77,23 +160,29 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     zIndex: 1000,
   },
-  spinner: {
-    width: moderateScale(40),
-    height: moderateScale(40),
+  loaderCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    padding: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 8,
+    },
+    shadowOpacity: 0.15,
+    shadowRadius: 16,
+    elevation: 12,
+  },
+  spinnerContainer: {
     justifyContent: 'center',
     alignItems: 'center',
   },
-  segment: {
-    position: 'absolute',
-    width: moderateScale(4),
-    height: moderateScale(10),
-    borderRadius: 4,
-    backgroundColor: '#FFF',
-  },
-  text: {
-    color: '#FFF',
+  loadingText: {
+    fontSize: 16,
     fontWeight: '600',
-    fontSize: moderateScale(16),
-    marginTop: moderateScale(10),
+    color: '#374151',
+    letterSpacing: 0.5,
   },
 });

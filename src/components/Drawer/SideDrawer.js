@@ -56,6 +56,7 @@ const CustomDrawerContent = props => {
   const menuItems = [
     {title: 'Home', route: 'Home'},
     {title: 'Products', route: 'products'},
+    {title: 'Account Ledger', route: ROUTES.LEDGER},
     {title: 'Order History', route: ROUTES.HISTORY},
     {title: 'My Profile', route: ROUTES.PROFILE},
     {title: 'Logout', action: handleLogout},

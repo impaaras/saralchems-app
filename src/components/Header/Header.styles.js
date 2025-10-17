@@ -104,6 +104,43 @@ const styles = StyleSheet.create({
     shadowRadius: 1,
     elevation: 2,
   },
+  // Add these to your existing styles
+  backButton: {
+    borderWidth: 1,
+    marginLeft: scale(3),
+    borderColor: '#FCFCFC33',
+    padding: moderateScale(5),
+    borderRadius: 100,
+  },
+  titleContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    position: 'relative',
+    zIndex: 9999999,
+  },
+  searchInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    marginLeft: 5,
+    paddingLeft: 10,
+    backgroundColor: '#FFF',
+    borderRadius: 100,
+  },
+  searchInput: {
+    paddingVertical: 10,
+    height: 40,
+    flex: 1,
+  },
+  clearButton: {
+    paddingHorizontal: 10,
+  },
+  clearText: {
+    fontSize: 22,
+    color: '#555',
+  },
 });
 
 export default styles;

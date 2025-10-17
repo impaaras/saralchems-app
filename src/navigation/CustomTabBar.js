@@ -21,6 +21,10 @@ import {
   moderateScale,
 } from '../utils/Responsive/responsive';
 import {triggerHaptic} from '../utils/function/function';
+import HomeIcon from '../assets/icons/svg/home.svg';
+import GridIcon from '../assets/icons/svg/gridicon.svg';
+import CartPlus from '../assets/icons/svg/cartplus.svg';
+import BoxCheck from '../assets/icons/svg/boxcheck.svg';
 
 const windowWidth = Dimensions.get('window').width;
 
@@ -101,10 +105,10 @@ const CustomTabBar = ({state, descriptors, navigation, translateY}) => {
       <View style={styles.tabBar}>
         <TabButton
           iconComponent={
-            <Home
-              name="home"
-              size={scale(20)}
-              color={index === 0 ? '#FFF' : '#5A5A5A'}
+            <HomeIcon
+              width={22}
+              height={22}
+              style={{color: index === 0 ? '#FFF' : '#5A5A5A'}}
             />
           }
           label="Home"
@@ -113,10 +117,10 @@ const CustomTabBar = ({state, descriptors, navigation, translateY}) => {
         />
         <TabButton
           iconComponent={
-            <Ionicons
-              name="view-dashboard"
-              size={scale(20)}
-              color={index === 1 ? '#FFF' : '#5A5A5A'}
+            <GridIcon
+              width={20}
+              height={20}
+              style={{color: index === 1 ? '#FFF' : '#5A5A5A'}}
             />
           }
           label="Products"
@@ -125,10 +129,10 @@ const CustomTabBar = ({state, descriptors, navigation, translateY}) => {
         />
         <TabButton
           iconComponent={
-            <FontAwesome
-              name="cart-plus"
-              size={scale(20)}
-              color={index === 2 ? '#FFF' : '#5A5A5A'}
+            <CartPlus
+              width={26}
+              height={26}
+              style={{color: index === 2 ? '#FFF' : '#5A5A5A'}}
             />
           }
           label="Cart"
@@ -137,9 +141,10 @@ const CustomTabBar = ({state, descriptors, navigation, translateY}) => {
         />
         <TabButton
           iconComponent={
-            <PackageCheck
-              color={index === 3 ? '#FFF' : '#5A5A5A'}
-              size={scale(20)}
+            <BoxCheck
+              width={28}
+              height={28}
+              style={{color: index === 3 ? '#FFF' : '#5A5A5A'}}
             />
           }
           label="Order History"
