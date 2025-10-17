@@ -7,7 +7,7 @@ import searchReducer from './slices/searchSlice';
 import sortSlice from './slices/sortSlice';
 import modalReducer from './slices/modalSlice';
 import addCartReducer from './slices/addToCartSlice';
-import productReducer, {categorySlice} from './slices/productSlice';
+import productReducer from './slices/productSlice';
 import searchHistoryReducer from './slices/searchHistory';
 import newCart from './slices/newCart';
 import invoice from './slices/orderHistory';
