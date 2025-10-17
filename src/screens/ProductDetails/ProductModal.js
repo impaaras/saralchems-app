@@ -7,9 +7,8 @@ import {
   ScrollView,
   TextInput,
   Dimensions,
-  Image,
-  Platform,
-  FlatList,
+  Animated,
+  Easing,
 } from 'react-native';
 import React, {useState, useEffect, useRef} from 'react';
 import LinearGradient from 'react-native-linear-gradient';
@@ -18,56 +17,168 @@ import {ROUTES} from '../../constants/routes';
 import {useDispatch, useSelector} from 'react-redux';
 import {addToCart, getCart} from '../../redux/slices/addToCartSlice';
 import {closeModal, openModal} from '../../redux/slices/modalSlice';
-import Icon from 'react-native-vector-icons/Fontisto';
 import {setSelectedVariant} from '../../redux/slices/newCart';
 import {PackageCheck, RotateCw, X} from 'lucide-react-native';
 import {setVariants} from '../../redux/slices/cartSlice';
 import {toggleShowVariants} from '../../redux/slices/authSlice';
-import {selectVariant} from '../../utils/function/function';
+import {selectVariant, triggerHaptic} from '../../utils/function/function';
 import {extractQuantityPrefix} from '../../utils/function/removeVariantCharacter';
 import {fallbackImg} from '../../utils/images';
 import ScrollImage from '../../components/ScrollImage/Index';
+import {
+  moderateScale,
+  verticalScale,
+  scale,
+} from '../../utils/Responsive/responsive';
+import Toast from 'react-native-toast-message';
 
-// Custom dropdown component
+// Enhanced Custom dropdown component with animations
 const Dropdown = ({options, selectedValue, onSelect, label}) => {
   const [isOpen, setIsOpen] = useState(false);
+  const animatedHeight = useRef(new Animated.Value(0)).current;
+  const animatedOpacity = useRef(new Animated.Value(0)).current;
+  const animatedScale = useRef(new Animated.Value(0.95)).current;
+
+  const toggleDropdown = () => {
+    triggerHaptic('medium');
+    setIsOpen(!isOpen);
+
+    if (!isOpen) {
+      // Opening animation
+      Animated.parallel([
+        Animated.spring(animatedHeight, {
+          toValue: options.length * 45,
+          useNativeDriver: false,
+          tension: 100,
+          friction: 8,
+        }),
+        Animated.spring(animatedOpacity, {
+          toValue: 1,
+          useNativeDriver: false,
+          tension: 120,
+          friction: 7,
+        }),
+        Animated.spring(animatedScale, {
+          toValue: 1,
+          useNativeDriver: false,
+          tension: 120,
+          friction: 7,
+        }),
+      ]).start();
+    } else {
+      // Closing animation
+      Animated.parallel([
+        Animated.timing(animatedHeight, {
+          toValue: 0,
+          duration: 200,
+          easing: Easing.out(Easing.quad),
+          useNativeDriver: false,
+        }),
+        Animated.timing(animatedOpacity, {
+          toValue: 0,
+          duration: 150,
+          useNativeDriver: false,
+        }),
+        Animated.timing(animatedScale, {
+          toValue: 0.95,
+          duration: 150,
+          useNativeDriver: false,
+        }),
+      ]).start();
+    }
+  };
 
   return (
     <View style={styles.dropdownContainer}>
       <Text style={styles.dropdownLabel}>{label}</Text>
       <TouchableOpacity
         style={styles.dropdown}
-        onPress={() => setIsOpen(!isOpen)}>
+        onPress={toggleDropdown}
+        activeOpacity={0.8}>
         <Text style={styles.dropdownText}>{selectedValue}</Text>
-        <Text style={styles.dropdownIcon}>▼</Text>
+        <Animated.Text
+          style={[
+            styles.dropdownIcon,
+            {
+              transform: [
+                {
+                  rotate: animatedOpacity.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: ['0deg', '180deg'],
+                  }),
+                },
+              ],
+            },
+          ]}>
+          ▼
+        </Animated.Text>
       </TouchableOpacity>
       {isOpen && (
-        <View style={styles.dropdownOptions}>
+        <Animated.View
+          style={[
+            styles.dropdownOptions,
+            {
+              height: animatedHeight,
+              opacity: animatedOpacity,
+              transform: [{scale: animatedScale}],
+            },
+          ]}>
           {options.map((option, index) => (
             <TouchableOpacity
               key={index}
               style={styles.dropdownOption}
               onPress={() => {
+                triggerHaptic('medium');
                 onSelect(option);
                 setIsOpen(false);
-              }}>
+              }}
+              activeOpacity={0.7}>
               <Text style={styles.dropdownOptionText}>{option}</Text>
             </TouchableOpacity>
           ))}
-        </View>
+        </Animated.View>
       )}
     </View>
   );
 };
 
-// Quantity selector component
-
+// Enhanced Quantity selector component with animations
 const QuantitySelector = ({quantity, setQuantity, unit, enabled}) => {
-  // const selectedVariant = useSelector(state => state.product.selectedVariant);
   const activeProduct = useSelector(state => state.newCart.activeProduct);
-  const increment = () => setQuantity(prev => prev + 1);
-  const decrement = () => setQuantity(prev => (prev > 1 ? prev - 1 : 1));
-  // const trueValue = !(selectedVariant && enabled === '');
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+  const incrementAnim = useRef(new Animated.Value(1)).current;
+  const decrementAnim = useRef(new Animated.Value(1)).current;
+
+  const animateButton = animValue => {
+    Animated.sequence([
+      Animated.timing(animValue, {
+        toValue: 0.9,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+      Animated.spring(animValue, {
+        toValue: 1,
+        tension: 300,
+        friction: 10,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  };
+
+  const increment = () => {
+    triggerHaptic('medium');
+    animateButton(incrementAnim);
+    setQuantity(prev => prev + 1);
+  };
+
+  const decrement = () => {
+    if (quantity > 1) {
+      triggerHaptic('medium');
+      animateButton(decrementAnim);
+      setQuantity(prev => prev - 1);
+    }
+  };
+
   let trueValue = !(
     activeProduct?.selectedVariant &&
     (!enabled || enabled === '')
@@ -76,47 +187,132 @@ const QuantitySelector = ({quantity, setQuantity, unit, enabled}) => {
   return (
     <View style={styles.quantityContainer}>
       <View style={styles.quantityControls}>
-        <TouchableOpacity
-          style={styles.quantityButton}
-          disabled={trueValue}
-          onPress={decrement}>
-          <Text style={styles.quantityButtonText}>−</Text>
-        </TouchableOpacity>
-        <View style={styles.quantityValueContainer}>
+        <Animated.View style={{transform: [{scale: decrementAnim}]}}>
+          <TouchableOpacity
+            style={[styles.quantityButton, trueValue && styles.disabledButton]}
+            disabled={trueValue}
+            onPress={decrement}
+            activeOpacity={0.8}>
+            <Text
+              style={[
+                styles.quantityButtonText,
+                trueValue && styles.disabledText,
+              ]}>
+              −
+            </Text>
+          </TouchableOpacity>
+        </Animated.View>
+        <Animated.View
+          style={[
+            styles.quantityValueContainer,
+            {transform: [{scale: scaleAnim}]},
+          ]}>
           <Text style={styles.quantityValue}>{quantity}</Text>
-        </View>
-        <TouchableOpacity
-          style={styles.quantityButton}
-          disabled={trueValue}
-          onPress={increment}>
-          <Text style={styles.quantityButtonText}>+</Text>
-        </TouchableOpacity>
+        </Animated.View>
+        <Animated.View style={{transform: [{scale: incrementAnim}]}}>
+          <TouchableOpacity
+            style={[styles.quantityButton, trueValue && styles.disabledButton]}
+            disabled={trueValue}
+            onPress={increment}
+            activeOpacity={0.8}>
+            <Text
+              style={[
+                styles.quantityButtonText,
+                trueValue && styles.disabledText,
+              ]}>
+              +
+            </Text>
+          </TouchableOpacity>
+        </Animated.View>
       </View>
     </View>
   );
 };
+
+// Enhanced Option Button with animations
 const OptionButton = ({label, selected, onPress, idx, item}) => {
   const activeProduct = useSelector(state => state.newCart.activeProduct);
-  let newSelected = `${label}AFTER${idx}${item.parentId}${item._id}`;
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+  const opacityAnim = useRef(new Animated.Value(1)).current;
 
+  let newSelected = `${label}AFTER${idx}${item.parentId}${item._id}`;
   const selectedVariantTrimmed =
     activeProduct?.selectedVariant?.length > newSelected.length
       ? activeProduct?.selectedVariant.slice(0, -1)
       : activeProduct?.selectedVariant;
 
+  const isSelected = selectedVariantTrimmed === newSelected;
+
+  const handlePress = () => {
+    triggerHaptic('selection');
+    // Button press animation
+    Animated.parallel([
+      Animated.timing(scaleAnim, {
+        toValue: 0.95,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+      Animated.timing(opacityAnim, {
+        toValue: 0.8,
+        duration: 100,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      Animated.parallel([
+        Animated.spring(scaleAnim, {
+          toValue: 1,
+          tension: 300,
+          friction: 10,
+          useNativeDriver: true,
+        }),
+        Animated.timing(opacityAnim, {
+          toValue: 1,
+          duration: 100,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    });
+
+    onPress();
+  };
+
+  useEffect(() => {
+    if (isSelected) {
+      Animated.spring(scaleAnim, {
+        toValue: 1.05,
+        tension: 150,
+        friction: 8,
+        useNativeDriver: true,
+      }).start(() => {
+        Animated.spring(scaleAnim, {
+          toValue: 1,
+          tension: 200,
+          friction: 10,
+          useNativeDriver: true,
+        }).start();
+      });
+    }
+  }, [isSelected]);
+
   return (
-    <TouchableOpacity
-      style={[
-        styles.optionButton,
-        selectedVariantTrimmed === newSelected && styles.selectedOption,
-      ]}
-      onPress={onPress}>
-      {selectedVariantTrimmed !== newSelected ? (
-        <Text style={styles.optionButtonText}>{label}</Text>
-      ) : (
-        <Text style={styles.selectedOptionText}>{label}</Text>
-      )}
-    </TouchableOpacity>
+    <Animated.View
+      style={{
+        transform: [{scale: scaleAnim}],
+        opacity: opacityAnim,
+      }}>
+      <TouchableOpacity
+        style={[styles.optionButton, isSelected && styles.selectedOption]}
+        onPress={handlePress}
+        activeOpacity={0.8}>
+        <Text
+          style={[
+            styles.optionButtonText,
+            isSelected && styles.selectedOptionText,
+          ]}>
+          {label}
+        </Text>
+      </TouchableOpacity>
+    </Animated.View>
   );
 };
 
@@ -129,35 +325,89 @@ const ProductModal = ({product}) => {
   const [selectedSize, setSelectedSize] = useState(null);
   const selectedProductItem = useSelector(state => state.cart.selectedProduct);
 
-  const productData = product;
-
-  // Handle screen dimension changes for responsiveness
-  useEffect(() => {
-    const subscription = Dimensions.addEventListener('change', ({window}) => {
-      setDimensions(window);
-    });
-    return () => subscription?.remove();
-  }, []);
-
+  // Animation refs
+  const slideAnim = useRef(new Animated.Value(dimensions.height)).current;
+  const backgroundOpacity = useRef(new Animated.Value(0)).current;
+  const scaleAnim = useRef(new Animated.Value(0.9)).current;
+  const fadeAnim = useRef(new Animated.Value(0)).current;
+  const bounceAnim = useRef(new Animated.Value(0)).current;
   const navigation = useNavigation();
-
-  const handleShowMore = product => {
-    // dispatch(openScreen(product));
-    dispatch(closeModal());
-    navigation.navigate(ROUTES.PRODUCT_DETAILS, {product});
-  };
-
   const dispatch = useDispatch();
   const {items, loading, error} = useSelector(state => state.addToCart);
 
+  const productData = product;
+
+  // Initialize modal entrance animation
   useEffect(() => {
-    dispatch(getCart());
-  }, [dispatch]);
+    // Entrance animation sequence
+    Animated.parallel([
+      Animated.spring(slideAnim, {
+        toValue: 0,
+        tension: 80,
+        friction: 10,
+        useNativeDriver: true,
+      }),
+      Animated.timing(backgroundOpacity, {
+        toValue: 1,
+        duration: 300,
+        easing: Easing.out(Easing.quad),
+        useNativeDriver: true,
+      }),
+      Animated.spring(scaleAnim, {
+        toValue: 1,
+        tension: 100,
+        friction: 8,
+        delay: 100,
+        useNativeDriver: true,
+      }),
+      Animated.timing(fadeAnim, {
+        toValue: 1,
+        duration: 400,
+        delay: 150,
+        easing: Easing.out(Easing.quad),
+        useNativeDriver: true,
+      }),
+    ]).start();
+
+    // Subtle bounce animation for attention
+    setTimeout(() => {
+      Animated.spring(bounceAnim, {
+        toValue: 1,
+        tension: 150,
+        friction: 8,
+        useNativeDriver: true,
+      }).start();
+    }, 500);
+  }, []);
+
+  // Handle screen dimension changes for responsiveness
+  // useEffect(() => {
+  //   const subscription = Dimensions.addEventListener('change', ({window}) => {
+  //     setDimensions(window);
+  //   });
+  //   return () => subscription?.remove();
+  // }, []);
+
+  // useEffect(() => {
+  //   dispatch(getCart());
+  // }, [dispatch]);
 
   const categoryName = useSelector(state => state.product.categoryName);
   const selectedVariant = useSelector(state => state.product.selectedVariant);
 
+  const handleShowMore = product => {
+    triggerHaptic('light');
+    dispatch(closeModal());
+    navigation.navigate(ROUTES.PRODUCT_DETAILS, {product});
+  };
+
   const handleAddToCart = (productId, variant, quantity, itemId) => {
+    if (!variant) {
+      Toast.show({type: 'error', text1: 'Variant is required'});
+      return;
+    }
+
+    triggerHaptic('medium');
     const last8 = variant.slice(-8);
     const last8OfItemId = itemId.slice(-8);
 
@@ -196,7 +446,14 @@ const ProductModal = ({product}) => {
     );
     dispatch(setSelectedVariant(null));
   };
+
   const handleAddToCartMachineProduct = (productId, quantity) => {
+    if (!variant) {
+      Toast.show({type: 'error', text1: 'Variant is required'});
+      return;
+    }
+
+    triggerHaptic('medium');
     let variant = 'no variant';
     dispatch(addToCart({productId, variant, quantity}))
       .unwrap()
@@ -206,7 +463,6 @@ const ProductModal = ({product}) => {
           message: err.message,
           acceptText: 'OK',
         });
-        // Alert.alert('Error', err.message || 'Failed to add to cart');
       });
     dispatch(
       openModal({
@@ -218,33 +474,56 @@ const ProductModal = ({product}) => {
   };
 
   const handleClose = () => {
-    dispatch(
-      closeModal({
-        modalType: 'VARIANT_MODAL',
-        callbackId: '123', // optional
+    triggerHaptic('light');
+
+    // Exit animation
+    Animated.parallel([
+      Animated.timing(slideAnim, {
+        toValue: dimensions.height,
+        duration: 250,
+        easing: Easing.in(Easing.quad),
+        useNativeDriver: true,
       }),
-    );
+      Animated.timing(backgroundOpacity, {
+        toValue: 0,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+      Animated.timing(scaleAnim, {
+        toValue: 0.9,
+        duration: 200,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      dispatch(
+        closeModal({
+          modalType: 'VARIANT_MODAL',
+          callbackId: '123',
+        }),
+      );
+    });
   };
+
   const handleShowVariants = (variantArray, parentIndex, parentId) => {
+    triggerHaptic('selection');
+
     const updatedVariants = variantArray.map(v => ({
       label: v,
       parentIndex,
       parentId,
     }));
     dispatch(setVariants(updatedVariants));
-    // dispatch(setVariants(variantArray));
-
     dispatch(toggleShowVariants());
     dispatch(
       openModal({
         modalType: 'VARIANT_MODAL',
-
-        callbackId: '123', // optional
+        callbackId: '123',
       }),
     );
   };
 
   const handleVariantSelect = (variant, index, parentId, productId) => {
+    triggerHaptic('selection');
     selectVariant(dispatch, variant, index, parentId, productId);
     setCustomValue('');
   };
@@ -277,7 +556,6 @@ const ProductModal = ({product}) => {
       return namePart ? `${namePart} ${formattedTotal}` : formattedTotal;
     }
 
-    // fallback if no match
     return cleanVariant;
   };
 
@@ -291,249 +569,378 @@ const ProductModal = ({product}) => {
   ];
 
   const activeProduct = useSelector(state => state.newCart.activeProduct);
-  console.log(product, 'my dat');
 
   return (
-    <View style={{backgroundColor: '#E0EBF9', borderRadius: 25}}>
-      <View style={[styles.modalContent, {maxHeight: dimensions.height * 0.8}]}>
-        <ScrollView
-          contentContainerStyle={styles.contentContainer}
-          showsVerticalScrollIndicator={false}>
-          {!product?.image || product?.item?.length === 0 ? (
-            <ScrollImage product={images} />
-          ) : (
-            <ScrollImage product={product} />
-          )}
-          <View style={{marginHorizontal: 10}}>
-            <Text style={styles.title}>{selectedProductItem.name}</Text>
-          </View>
-          <View
-            style={{
-              backgroundColor: '#E5F1FF',
-              paddingTop: 10,
-              margin: 10,
-              borderRadius: 10,
-              paddingHorizontal: 10,
-            }}>
-            <View
+    <Animated.View
+      style={[
+        {
+          justifyContent: 'flex-end',
+        },
+        {
+          opacity: backgroundOpacity,
+        },
+      ]}>
+      <Animated.View
+        style={[
+          {
+            backgroundColor: '#E0EBF9',
+            borderTopLeftRadius: 25,
+            borderTopRightRadius: 25,
+            borderBottomLeftRadius: 25,
+            borderBottomRightRadius: 25,
+            maxHeight: dimensions.height * 0.9,
+          },
+          {
+            transform: [{translateY: slideAnim}, {scale: scaleAnim}],
+            opacity: fadeAnim,
+          },
+        ]}>
+        <View
+          style={[styles.modalContent, {maxHeight: dimensions.height * 0.8}]}>
+          <Animated.ScrollView
+            contentContainerStyle={styles.contentContainer}
+            showsVerticalScrollIndicator={false}
+            style={{opacity: fadeAnim}}>
+            <Animated.View
               style={{
-                display: 'flex',
-                flexDirection: 'row',
-                justifyContent: 'space-between',
-                alignItems: 'center',
+                transform: [{scale: bounceAnim}],
+                marginLeft: -23,
+              }}>
+              {!product?.image ||
+              product.image.length === 0 ||
+              product?.item?.length === 0 ? (
+                <ScrollImage image={images} />
+              ) : (
+                <ScrollImage image={product?.image} />
+              )}
+            </Animated.View>
+            <Animated.View
+              style={{
+                marginHorizontal: scale(10),
+                marginTop: scale(10),
+                opacity: fadeAnim,
+                transform: [
+                  {
+                    translateY: fadeAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [20, 0],
+                    }),
+                  },
+                ],
+              }}>
+              <Text style={styles.title}>{selectedProductItem.name}</Text>
+            </Animated.View>
+            <Toast position="top" />
+            <Animated.View
+              style={{
+                backgroundColor: '#E5F1FF',
+                paddingTop: 10,
+                margin: 10,
+                borderRadius: 10,
+                paddingHorizontal: 10,
+                opacity: fadeAnim,
+                transform: [
+                  {
+                    translateY: fadeAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [30, 0],
+                    }),
+                  },
+                ],
               }}>
               <View
                 style={{
                   display: 'flex',
-                  marginBottom: 10,
                   flexDirection: 'row',
-                }}>
-                <Text style={styles.infoLabel}>Category :</Text>
-                {/* <Text style={{}} numberOfLines={1} ellipsizeMode="tail">
-                  {(categoryName || 'Texttile Auxlier').length > 20
-                    ? `${categoryName.substring(0, 20)}...`
-                    : categoryName}
-                </Text> */}
-                <Text>
-                  {product?.categorySubcategoryPairs[0]?.categoryId.name}
-                </Text>
-              </View>
-              <View
-                style={{
-                  display: 'flex',
-                  marginBottom: 10,
-                  flexDirection: 'row',
-                }}>
-                <Text style={styles.infoLabel}>Brand :</Text>
-                <Text style={styles.infoValue}>
-                  {(selectedProductItem.brand || 'Kayson').length > 8
-                    ? `${(selectedProductItem.brand || 'Kayson').substring(
-                        0,
-                        8,
-                      )}...`
-                    : selectedProductItem.brand || 'Kayson'}
-                </Text>
-              </View>
-            </View>
-            <View style={styles.optionsSection}>
-              <View
-                style={{
-                  width: '80%',
-                  display: 'flex',
-                  flexDirection: 'row',
-                  alignItems: 'center',
                   justifyContent: 'space-between',
+                  alignItems: 'flex-start',
                 }}>
-                <ScrollView
-                  horizontal={true}
-                  showsHorizontalScrollIndicator={false}
-                  contentContainerStyle={{
+                <View
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'row',
+                    width: '65%',
+                    alignItems: 'center',
+                  }}>
+                  <Text style={styles.infoLabel}>Category :</Text>
+                  {/* <Text style={{fontSize: moderateScale(12), flex: 1}}>
+                    {product &&
+                      product?.categorySubcategoryPairs[0]?.categoryId.name}
+                  </Text> */}
+                </View>
+                <View
+                  style={{
+                    display: 'flex',
+                    marginBottom: 10,
+                    width: '40%',
+                    flexDirection: 'row',
+                    alignItems: 'right',
+                  }}>
+                  <Text style={styles.infoLabel}>Brand :</Text>
+                  <Text style={styles.infoValue}>
+                    {selectedProductItem.brand || 'None'}
+                  </Text>
+                </View>
+              </View>
+
+              <View style={styles.optionsSection}>
+                <View
+                  style={{
+                    width: '80%',
                     display: 'flex',
                     flexDirection: 'row',
                     alignItems: 'center',
+                    justifyContent: 'space-between',
                   }}>
-                  {selectedProductItem &&
-                    selectedProductItem?.variants
-                      .slice(0, 3)
-                      .map((size, index) => (
-                        <View key={index}>
-                          {size === 'loose' || size === 'losse' ? (
-                            <TextInput
-                              style={styles.customInput}
-                              placeholder="Enter your Value"
-                              value={customValue}
-                              onChangeText={setCustomValue}
-                            />
-                          ) : (
-                            <OptionButton
-                              key={`${index}`}
-                              label={size}
-                              selected={selectedSize === size}
-                              onPress={() =>
-                                handleVariantSelect(
-                                  size,
-                                  index,
-                                  selectedProductItem.parentId,
-                                  selectedProductItem._id,
-                                )
-                              }
-                              idx={index}
-                              item={selectedProductItem}
-                            />
-                          )}
-                        </View>
-                      ))}
-                </ScrollView>
-                {selectedProductItem.variants?.length > 3 && (
-                  <TouchableOpacity
-                    style={styles.moreButton}
-                    onPress={
-                      () =>
-                        handleShowVariants(
-                          selectedProductItem.variants,
-                          selectedProductItem.parentId,
-                          selectedProductItem._id,
-                        )
-                      // handleShowVariants(selectedProductItem.variants)
-                    }>
-                    <Text style={styles.moreButtonText}>+</Text>
-                  </TouchableOpacity>
-                )}
+                  <ScrollView
+                    horizontal={true}
+                    showsHorizontalScrollIndicator={false}
+                    contentContainerStyle={{
+                      display: 'flex',
+                      flexDirection: 'row',
+                      alignItems: 'center',
+                    }}>
+                    {selectedProductItem &&
+                      selectedProductItem?.variants
+                        .slice(0, 3)
+                        .map((size, index) => (
+                          <View key={index}>
+                            {size === 'loose' ||
+                            size === 'losse' ||
+                            size === 'Custom' ||
+                            size === 'Custom (Kg)' ||
+                            size === 'custom (kg)' ? (
+                              <Animated.View
+                                style={{
+                                  opacity: fadeAnim,
+                                  transform: [
+                                    {
+                                      translateX: fadeAnim.interpolate({
+                                        inputRange: [0, 1],
+                                        outputRange: [20, 0],
+                                      }),
+                                    },
+                                  ],
+                                }}>
+                                <TextInput
+                                  style={styles.customInput}
+                                  placeholder="Enter your Value"
+                                  value={customValue}
+                                  onChangeText={text => {
+                                    triggerHaptic('light');
+                                    setCustomValue(text);
+                                  }}
+                                />
+                              </Animated.View>
+                            ) : (
+                              <OptionButton
+                                key={`${index}`}
+                                label={size}
+                                selected={selectedSize === size}
+                                onPress={() =>
+                                  handleVariantSelect(
+                                    size,
+                                    index,
+                                    selectedProductItem.parentId,
+                                    selectedProductItem._id,
+                                  )
+                                }
+                                idx={index}
+                                item={selectedProductItem}
+                              />
+                            )}
+                          </View>
+                        ))}
+                  </ScrollView>
+                  {selectedProductItem.variants?.length > 3 && (
+                    <Animated.View
+                      style={{
+                        opacity: fadeAnim,
+                        transform: [
+                          {
+                            scale: fadeAnim.interpolate({
+                              inputRange: [0, 1],
+                              outputRange: [0.8, 1],
+                            }),
+                          },
+                        ],
+                      }}>
+                      <TouchableOpacity
+                        style={styles.moreButton}
+                        onPress={() => {
+                          triggerHaptic('selection');
+                          handleShowVariants(
+                            selectedProductItem.variants,
+                            selectedProductItem.parentId,
+                            selectedProductItem._id,
+                          );
+                        }}
+                        activeOpacity={0.8}>
+                        <Text style={styles.moreButtonText}>+</Text>
+                      </TouchableOpacity>
+                    </Animated.View>
+                  )}
+                </View>
+                <View style={{flexDirection: 'row', alignItems: 'center'}}>
+                  <Text style={{fontWeight: 'bold', fontSize: 12}}>Unit: </Text>
+                  <Text style={{fontSize: 12}}>ltr</Text>
+                </View>
               </View>
-              <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                <Text style={{fontWeight: 'bold', fontSize: 12}}>Unit: </Text>
-                <Text style={{fontSize: 12}}>ltr</Text>
-              </View>
-            </View>
-          </View>
-          <View style={styles.descriptionContainer}>
-            <Text style={styles.descriptionTitle}>Product Description:</Text>
-            <Text
-              style={styles.descriptionText}
-              numberOfLines={showMore ? undefined : 3}>
-              Our Nylon (12 No. 54" (NxM)) is a high-quality, durable synthetic
-              fabric designed for multiple industrial and commercial
-              applications. Made from premium-grade nylon fibers, this fabric
-              offers excellent strength, flexibility, and resistance to wear and
-              tear.
-              {/* {selectedProductItem?.description || productData.description} */}
-            </Text>
-            <TouchableOpacity
-              style={styles.showMoreButton}
-              onPress={() => handleShowMore(product)}>
-              <Text style={styles.showMoreText}>
-                {showMore ? 'Show Less' : 'Show More'}
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </ScrollView>
-        <View
-          style={{
-            backgroundColor: '#FFF',
-            paddingBottom: 10,
-            paddingTop: 10,
-            borderRadius: 20,
-          }}>
-          {/* Total Quantity */}
-          <View style={styles.totalQtyContainer}>
-            <Text style={styles.totalQtyText}>
-              Total Qty:{' '}
-              {customValue ||
-                calculateTotal(activeProduct?.selectedVariant, quantity) ||
-                ''}
-            </Text>
-          </View>
+            </Animated.View>
 
-          {/* Quantity and Add to Cart */}
-          <View style={styles.actionContainer}>
-            <QuantitySelector
-              quantity={quantity}
-              setQuantity={setQuantity}
-              unit={productData.unit}
-              enabled={customValue}
-            />
-            {categoryName === 'Textile Printing Machines' ||
-            !activeProduct?.selectVariant ||
-            categoryName === 'Machines' ? (
-              <LinearGradient
-                colors={['#38587F', '#101924']} // Left to right gradient colors
-                start={{x: 0, y: 0}}
-                end={{x: 1, y: 0}}
-                style={styles.receiptButton} // Make sure the gradient covers the button
-              >
-                <TouchableOpacity
-                  style={styles.addToCartButton}
-                  // disabled={activeProduct?.selectedVariant === null}
-                  onPress={() =>
-                    handleAddToCartMachineProduct(
-                      selectedProductItem._id,
-                      quantity,
-                    )
-                  }>
-                  <Text style={styles.addToCartText}>Add To Cart</Text>
-                </TouchableOpacity>
-              </LinearGradient>
-            ) : (
-              <LinearGradient
-                colors={['#38587F', '#101924']} // Left to right gradient colors
-                start={{x: 0, y: 0}}
-                end={{x: 1, y: 0}}
-                style={styles.receiptButton} // Make sure the gradient covers the button
-              >
-                <TouchableOpacity
-                  style={styles.addToCartButton}
-                  disabled={activeProduct?.selectedVariant === null}
-                  onPress={() =>
-                    handleAddToCart(
-                      selectedProductItem._id,
-                      activeProduct?.selectedVariant,
-                      quantity,
-                      selectedProductItem._id,
-                    )
-                  }>
-                  <Text style={styles.addToCartText}>Add To Cart</Text>
-                </TouchableOpacity>
-              </LinearGradient>
-            )}
-          </View>
+            <Animated.View
+              style={[
+                styles.descriptionContainer,
+                {
+                  opacity: fadeAnim,
+                  transform: [
+                    {
+                      translateY: fadeAnim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [40, 0],
+                      }),
+                    },
+                  ],
+                },
+              ]}>
+              <Text style={styles.descriptionTitle}>Product Description:</Text>
+              <Text
+                style={styles.descriptionText}
+                numberOfLines={showMore ? undefined : 3}>
+                Our Nylon (12 No. 54" (NxM)) is a high-quality, durable
+                synthetic fabric designed for multiple industrial and commercial
+                applications. Made from premium-grade nylon fibers, this fabric
+                offers excellent strength, flexibility, and resistance to wear
+                and tear.
+              </Text>
+              <TouchableOpacity
+                style={styles.showMoreButton}
+                onPress={() => handleShowMore(product)}
+                activeOpacity={0.8}>
+                <Text style={styles.showMoreText}>
+                  {showMore ? 'Show Less' : 'Show More'}
+                </Text>
+              </TouchableOpacity>
+            </Animated.View>
+          </Animated.ScrollView>
+
+          <Animated.View
+            style={{
+              backgroundColor: '#FFF',
+              paddingBottom: 10,
+              paddingTop: 10,
+              borderRadius: 20,
+              opacity: fadeAnim,
+              transform: [
+                {
+                  translateY: fadeAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [50, 0],
+                  }),
+                },
+              ],
+            }}>
+            {/* Total Quantity */}
+            <View style={styles.totalQtyContainer}>
+              <Text style={styles.totalQtyText}>
+                Total Qty:{' '}
+                {customValue ||
+                  calculateTotal(activeProduct?.selectedVariant, quantity) ||
+                  ''}
+              </Text>
+            </View>
+
+            {/* Quantity and Add to Cart */}
+            <View style={styles.actionContainer}>
+              <QuantitySelector
+                quantity={quantity}
+                setQuantity={setQuantity}
+                unit={productData.unit}
+                enabled={customValue}
+              />
+
+              {categoryName === 'Textile Printing Machines' ||
+              !selectedProductItem?.variants.length ||
+              activeProduct?.selectVariant ||
+              categoryName === 'Machines' ? (
+                <LinearGradient
+                  colors={['#38587F', '#101924']}
+                  start={{x: 0, y: 0}}
+                  end={{x: 1, y: 0}}
+                  style={styles.receiptButton}>
+                  <TouchableOpacity
+                    style={styles.addToCartButton}
+                    onPress={() =>
+                      handleAddToCartMachineProduct(
+                        selectedProductItem._id,
+                        quantity,
+                      )
+                    }
+                    activeOpacity={0.8}>
+                    <Text style={styles.addToCartText}>Add To Cart</Text>
+                  </TouchableOpacity>
+                </LinearGradient>
+              ) : (
+                <LinearGradient
+                  colors={['#38587F', '#101924']}
+                  start={{x: 0, y: 0}}
+                  end={{x: 1, y: 0}}
+                  style={styles.receiptButton}>
+                  <TouchableOpacity
+                    style={styles.addToCartButton}
+                    // disabled={activeProduct?.selectedVariant === null}
+                    onPress={() =>
+                      handleAddToCart(
+                        selectedProductItem._id,
+                        activeProduct?.selectedVariant,
+                        quantity,
+                        selectedProductItem._id,
+                      )
+                    }
+                    activeOpacity={0.8}>
+                    <Text style={styles.addToCartText}>Add To Cart</Text>
+                  </TouchableOpacity>
+                </LinearGradient>
+              )}
+            </View>
+          </Animated.View>
         </View>
-      </View>
-      <TouchableOpacity
-        style={{
-          display: 'flex',
-          flexDirection: 'row',
-          alignSelf: 'center',
-          paddingTop: 8,
-          paddingBottom: 2,
-          alignItems: 'center',
-        }}
-        onPress={handleClose}>
-        <X size={18} />
-        <Text style={{marginLeft: 0, fontSize: 16, fontWeight: '500'}}>
-          Close
-        </Text>
-      </TouchableOpacity>
-    </View>
+
+        <Animated.View
+          style={{
+            opacity: fadeAnim,
+            transform: [
+              {
+                translateY: fadeAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [20, 0],
+                }),
+              },
+            ],
+          }}>
+          <TouchableOpacity
+            style={{
+              display: 'flex',
+              flexDirection: 'row',
+              alignSelf: 'center',
+              paddingVertical: verticalScale(4),
+              alignItems: 'center',
+            }}
+            onPress={handleClose}
+            activeOpacity={0.8}>
+            <X size={moderateScale(18)} />
+            <Text
+              style={{
+                marginLeft: 0,
+                fontSize: moderateScale(14),
+                fontWeight: '500',
+              }}>
+              Close
+            </Text>
+          </TouchableOpacity>
+        </Animated.View>
+      </Animated.View>
+    </Animated.View>
   );
 };
 
@@ -542,12 +949,10 @@ const styles = StyleSheet.create({
   modalContainer: {
     flex: 1,
     justifyContent: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.8)',
     paddingHorizontal: 20,
   },
   modalContent: {
     backgroundColor: '#FFF',
-
     borderRadius: 25,
     paddingTop: 5,
     overflow: 'hidden',
@@ -561,7 +966,7 @@ const styles = StyleSheet.create({
     position: 'relative',
   },
   title: {
-    fontSize: 20,
+    fontSize: scale(16),
     fontWeight: '600',
     color: '#000',
   },
@@ -591,6 +996,7 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     // marginHorizontal: 10,
   },
+
   productImage: {
     width: '100%',
     height: 150,
@@ -608,14 +1014,15 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   infoLabel: {
-    fontSize: 14,
+    fontSize: moderateScale(12),
     fontWeight: '500',
     color: '#000',
     marginRight: 5,
   },
   infoValue: {
-    fontSize: 14,
+    fontSize: moderateScale(12),
     color: '#000',
+    flex: 1,
   },
   optionsSection: {
     flexDirection: 'row',
@@ -640,11 +1047,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#3C5D86',
   },
   optionButtonText: {
-    fontSize: 14,
+    fontSize: moderateScale(12),
     color: '#000',
     fontWeight: '500',
   },
   selectedOptionText: {
+    fontSize: moderateScale(12),
     color: 'white',
   },
   addButton: {
@@ -748,22 +1156,22 @@ const styles = StyleSheet.create({
     marginBottom: 15,
   },
   descriptionTitle: {
-    fontSize: 16,
+    fontSize: moderateScale(16),
     fontWeight: '600',
     color: '#000',
     marginBottom: 5,
   },
   descriptionText: {
-    fontSize: 14,
+    fontSize: moderateScale(12),
     color: '#555',
-    lineHeight: 20,
+    // lineHeight: 20,
   },
   showMoreButton: {
     marginTop: 10,
     alignSelf: 'flex-end',
   },
   showMoreText: {
-    fontSize: 14,
+    fontSize: moderateScale(14),
     color: '#3C5D86',
     fontWeight: '500',
   },
@@ -772,7 +1180,8 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   totalQtyText: {
-    fontSize: 14,
+    fontSize: moderateScale(14),
+
     fontWeight: '500',
     color: '#333',
     textAlign: 'center',
@@ -790,7 +1199,7 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   quantityLabel: {
-    fontSize: 14,
+    fontSize: scale(10),
     color: '#333',
     marginRight: 10,
   },
@@ -801,12 +1210,11 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     overflow: 'hidden',
     borderWidth: 1,
-
     borderColor: '#CCC',
   },
   quantityButton: {
-    width: 36,
-    height: 36,
+    width: scale(30),
+    height: scale(30),
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'white',
@@ -816,40 +1224,39 @@ const styles = StyleSheet.create({
     borderRightColor: '#CCC',
   },
   quantityButtonText: {
-    fontSize: 18,
+    fontSize: moderateScale(15),
     fontWeight: 'bold',
     color: '#3C5D86',
   },
   quantityValueContainer: {
-    paddingHorizontal: 15,
+    paddingHorizontal: moderateScale(12),
   },
   quantityValue: {
-    fontSize: 16,
+    fontSize: moderateScale(14),
     fontWeight: '500',
     color: '#333',
   },
   unitText: {
-    fontSize: 14,
+    fontSize: moderateScale(14),
     color: '#555',
     marginLeft: 10,
   },
   addToCartButton: {
-    borderRadius: 20,
-    paddingVertical: 0,
-    paddingHorizontal: 10,
+    paddingVertical: verticalScale(5),
+    paddingHorizontal: scale(7),
   },
   addToCartText: {
-    fontSize: 16,
+    fontSize: moderateScale(14),
     fontWeight: '600',
+    // marginLeft: -10,
+    // paddingRight: 10,
     color: 'white',
   },
   receiptButton: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#3C5D87',
-    paddingVertical: 8,
-
-    paddingHorizontal: 10,
+    paddingHorizontal: 6,
     borderRadius: 100,
   },
   moreButtonText: {

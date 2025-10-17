@@ -3,8 +3,14 @@ import {MMKV} from 'react-native-mmkv';
 
 export const storage = new MMKV();
 
+// export const StorageKeys = {
+//   AUTH_TOKEN: 'auth_token',
+//   USER_DATA: 'user_data',
+//   IS_AUTHENTICATED: 'is_authenticated',
+// };
 export const StorageKeys = {
-  AUTH_TOKEN: 'auth_token',
+  AUTH_TOKEN: 'auth_token', // access token
+  REFRESH_TOKEN: 'refresh_token', // refresh token
   USER_DATA: 'user_data',
   IS_AUTHENTICATED: 'is_authenticated',
 };

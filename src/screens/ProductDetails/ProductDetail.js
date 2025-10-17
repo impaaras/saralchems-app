@@ -30,6 +30,9 @@ import {extractQuantityPrefix} from '../../utils/function/removeVariantCharacter
 import {useAlert} from '../../context/CustomAlertContext';
 import ImageZoomModal from '../../components/ImageZoom/ImageZoom';
 import ScrollImage from '../../components/ScrollImage/Index';
+import {moderateScale, scale} from '../../utils/Responsive/responsive';
+import {BlurView} from '@react-native-community/blur';
+import Toast from 'react-native-toast-message';
 
 const {width: screenWidth} = Dimensions.get('window');
 
@@ -118,6 +121,11 @@ const ProductDetail = () => {
   const {items, loading, error} = useSelector(state => state.addToCart);
 
   useEffect(() => {
+    setQuantity(1);
+    setCustomValue('');
+  }, [product?._id]); // Reset when product ID changes
+
+  useEffect(() => {
     dispatch(getCart());
   }, [dispatch]);
 
@@ -125,6 +133,10 @@ const ProductDetail = () => {
 
   const {showAlert} = useAlert();
   const handleAddToCart = (productId, variant, quantity) => {
+    if (!variant) {
+      Toast.show({type: 'info', text1: 'Variant is required'});
+      return;
+    }
     let newVariant;
     if (customValue && customValue.trim() !== '') {
       newVariant = customValue.trim();
@@ -243,13 +255,17 @@ const ProductDetail = () => {
   return (
     <SafeAreaView style={styles.container}>
       <DashboardHeader name={product?.name} />
+
+      <View style={{flex: 1, zIndex: 9}}>
+        <Toast position="bottom" />
+      </View>
       <ScrollView
         style={styles.productContent}
         showsVerticalScrollIndicator={false}>
         {!product?.image || product?.item?.length === 0 ? (
-          <ScrollImage product={images} />
+          <ScrollImage image={images} />
         ) : (
-          <ScrollImage product={product} />
+          <ScrollImage image={product?.image} />
         )}
 
         {/* Product Info */}
@@ -286,7 +302,11 @@ const ProductDetail = () => {
                       style={{
                         marginRight: 0,
                       }}>
-                      {size === 'loose' || size === 'losse' ? (
+                      {size === 'loose' ||
+                      size === 'losse' ||
+                      size === 'custom (kg)' ||
+                      size === 'Custom (kg)' ||
+                      size === 'Custom (Kg)' ? (
                         <View style={styles.customInputContainer}>
                           <TextInput
                             style={styles.customInput}
@@ -325,7 +345,7 @@ const ProductDetail = () => {
                 <TouchableOpacity
                   style={styles.plusButton}
                   onPress={() => handleShowVariants(product.variants)}>
-                  <Icon name="add" size={20} color="#FFF" />
+                  <Icon name="add" size={scale(20)} color="#FFF" />
                 </TouchableOpacity>
               )}
             </View>
@@ -338,7 +358,6 @@ const ProductDetail = () => {
                   ? customValue
                   : calculateTotal(activeProduct?.selectedVariant, quantity)}
               </Text>
-              {/* <Text style={styles.totalQtyText}>Total Qty: {customValue}</Text> */}
             </View>
             <View style={{flexDirection: 'row', alignItems: 'center'}}>
               <View style={styles.quantityContainer}>
@@ -356,8 +375,14 @@ const ProductDetail = () => {
                   <Text style={styles.quantityBtnText}>+</Text>
                 </TouchableOpacity>
               </View>
+              {categoryName === 'Machines' ||
+              !product?.variants?.length ||
+              categoryName === 'Textile Printing Machines' ? (
+                // {categoryName === 'Textile Printing Machines' ||
+                // !selectedProductItem?.variants.length ||
+                // activeProduct?.selectVariant ||
+                // categoryName === 'Machines' ? (
 
-              {categoryName === 'Machines' ? (
                 <LinearGradient
                   colors={['#1B2B48', '#2D4565']}
                   start={{x: 0, y: 0}}
@@ -379,10 +404,10 @@ const ProductDetail = () => {
                   style={{borderRadius: 100}}>
                   <TouchableOpacity
                     style={styles.addToCartButton}
-                    disabled={
-                      customValue === '' &&
-                      activeProduct?.selectedVariant === null
-                    }
+                    // disabled={
+                    //   customValue === '' &&
+                    //   activeProduct?.selectedVariant === null
+                    // }
                     onPress={() =>
                       handleAddToCart(
                         product._id,
@@ -399,88 +424,87 @@ const ProductDetail = () => {
             </View>
           </View>
 
-          {/* Product Type */}
-          <Text style={styles.productType}>NYLON (12 No. 54" (NAM))</Text>
+          <View>
+            <Text style={styles.productType}>{product?.name}</Text>
+            <ExpandableSection title="Product Description:">
+              <Text style={styles.sectionText}>
+                Our Nylon (12 No. 54" (NAM)) is a high-quality, durable
+                synthetic fabric designed for multiple industrial and commercial
+                applications. Made from premium-grade nylon fibers, this fabric
+                offers excellent strength and abrasion resistance to wear and
+                tear.
+              </Text>
+            </ExpandableSection>
+            <ExpandableSection title="Key Features:">
+              <View style={styles.featureItem}>
+                <Icon name="circle" size={14} color="#5A5A5A" />
+                <Text style={styles.featureText}>
+                  <Text style={styles.featureHighlight}>Durable & Strong:</Text>{' '}
+                  High tensile strength ensures longevity and reliability.
+                </Text>
+              </View>
+              <View style={styles.featureItem}>
+                <Icon name="circle" size={14} color="#5A5A5A" />
+                <Text style={styles.featureText}>
+                  <Text style={styles.featureHighlight}>
+                    Lightweight & Flexible:
+                  </Text>{' '}
+                  Easy to handle and adaptable to various applications.
+                </Text>
+              </View>
+              <View style={styles.featureItem}>
+                <Icon name="circle" size={14} color="#5A5A5A" />
+                <Text style={styles.featureText}>
+                  <Text style={styles.featureHighlight}>
+                    Weather & Moisture Resistant:
+                  </Text>{' '}
+                  Performs well in outdoor and humid conditions.
+                </Text>
+              </View>
+              <View style={styles.featureItem}>
+                <Icon name="circle" size={14} color="#5A5A5A" />
+                <Text style={styles.featureText}>
+                  <Text style={styles.featureHighlight}>Versatile Use:</Text>{' '}
+                  Suitable for netting, filtration, protective covers, and
+                  industrial purposes.
+                </Text>
+              </View>
+              <View style={styles.featureItem}>
+                <Icon name="circle" size={14} color="#5A5A5A" />
+                <Text style={styles.featureText}>
+                  <Text style={styles.featureHighlight}>Standard Width:</Text>{' '}
+                  54-inch width provides ample coverage for different projects.
+                </Text>
+              </View>
+            </ExpandableSection>
 
-          {/* Product Description */}
-          <ExpandableSection title="Product Description:">
-            <Text style={styles.sectionText}>
-              Our Nylon (12 No. 54" (NAM)) is a high-quality, durable synthetic
-              fabric designed for multiple industrial and commercial
-              applications. Made from premium-grade nylon fibers, this fabric
-              offers excellent strength and abrasion resistance to wear and
-              tear.
-            </Text>
-          </ExpandableSection>
-          <ExpandableSection title="Key Features:">
-            <View style={styles.featureItem}>
-              <Icon name="circle" size={14} color="#5A5A5A" />
-              <Text style={styles.featureText}>
-                <Text style={styles.featureHighlight}>Durable & Strong:</Text>{' '}
-                High tensile strength ensures longevity and reliability.
-              </Text>
-            </View>
-            <View style={styles.featureItem}>
-              <Icon name="circle" size={14} color="#5A5A5A" />
-              <Text style={styles.featureText}>
-                <Text style={styles.featureHighlight}>
-                  Lightweight & Flexible:
-                </Text>{' '}
-                Easy to handle and adaptable to various applications.
-              </Text>
-            </View>
-            <View style={styles.featureItem}>
-              <Icon name="circle" size={14} color="#5A5A5A" />
-              <Text style={styles.featureText}>
-                <Text style={styles.featureHighlight}>
-                  Weather & Moisture Resistant:
-                </Text>{' '}
-                Performs well in outdoor and humid conditions.
-              </Text>
-            </View>
-            <View style={styles.featureItem}>
-              <Icon name="circle" size={14} color="#5A5A5A" />
-              <Text style={styles.featureText}>
-                <Text style={styles.featureHighlight}>Versatile Use:</Text>{' '}
-                Suitable for netting, filtration, protective covers, and
-                industrial purposes.
-              </Text>
-            </View>
-            <View style={styles.featureItem}>
-              <Icon name="circle" size={14} color="#5A5A5A" />
-              <Text style={styles.featureText}>
-                <Text style={styles.featureHighlight}>Standard Width:</Text>{' '}
-                54-inch width provides ample coverage for different projects.
-              </Text>
-            </View>
-          </ExpandableSection>
-
-          <ExpandableSection title="Specifications:">
-            <View style={styles.specItem}>
-              <Text style={styles.specLabel}>Material:</Text>
-              <Text style={styles.specValue}>100% Nylon</Text>
-            </View>
-            <View style={styles.specItem}>
-              <Text style={styles.specLabel}>Mesh/Thread Size:</Text>
-              <Text style={styles.specValue}>12 No. (NAM)</Text>
-            </View>
-            <View style={styles.specItem}>
-              <Text style={styles.specLabel}>Width:</Text>
-              <Text style={styles.specValue}>54 inches</Text>
-            </View>
-            <View style={styles.specItem}>
-              <Text style={styles.specLabel}>Color Options:</Text>
-              <Text style={styles.specValue}>
-                Available in various colors upon request
-              </Text>
-            </View>
-            <View style={styles.specItem}>
-              <Text style={styles.specLabel}>Customization:</Text>
-              <Text style={styles.specValue}>
-                Can be tailored to specific requirements
-              </Text>
-            </View>
-          </ExpandableSection>
+            <ExpandableSection title="Specifications:">
+              <View style={styles.specItem}>
+                <Text style={styles.specLabel}>Material:</Text>
+                <Text style={styles.specValue}>100% Nylon</Text>
+              </View>
+              <View style={styles.specItem}>
+                <Text style={styles.specLabel}>Mesh/Thread Size:</Text>
+                <Text style={styles.specValue}>12 No. (NAM)</Text>
+              </View>
+              <View style={styles.specItem}>
+                <Text style={styles.specLabel}>Width:</Text>
+                <Text style={styles.specValue}>54 inches</Text>
+              </View>
+              <View style={styles.specItem}>
+                <Text style={styles.specLabel}>Color Options:</Text>
+                <Text style={styles.specValue}>
+                  Available in various colors upon request
+                </Text>
+              </View>
+              <View style={styles.specItem}>
+                <Text style={styles.specLabel}>Customization:</Text>
+                <Text style={styles.specValue}>
+                  Can be tailored to specific requirements
+                </Text>
+              </View>
+            </ExpandableSection>
+          </View>
         </View>
       </ScrollView>
     </SafeAreaView>

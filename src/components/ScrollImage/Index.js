@@ -10,12 +10,16 @@ import {
 import React, {useRef, useState} from 'react';
 import {useDispatch} from 'react-redux';
 import {openModal} from '../../redux/slices/modalSlice';
+import Icon from 'react-native-vector-icons/Entypo';
+import {scale} from '../../utils/Responsive/responsive';
 
-const Index = ({product, reffer}) => {
+const Index = React.memo(({image, reffer}) => {
   const dispatch = useDispatch();
   const flatListRef = useRef(null);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [imageLoadError, setImageLoadError] = useState(false);
   const handleImageZoom = (imageList, currentIndex) => {
+    console.log('click');
     dispatch(
       openModal({
         modalType: 'ImageZoomModal',
@@ -29,10 +33,10 @@ const Index = ({product, reffer}) => {
   };
 
   const renderDots = () => {
-    if (product?.image?.length <= 1) return null;
+    if (image?.length <= 1) return null;
     return (
-      <View style={styles.dotsContainer}>
-        {product?.image?.map((_, index) => (
+      <View>
+        {image?.map((_, index) => (
           <TouchableOpacity
             key={index}
             style={[
@@ -67,33 +71,55 @@ const Index = ({product, reffer}) => {
     '683568b8a45bd79a89b93bd3',
   ];
 
+  const ImageWithPlaceholder = ({uri, customStyle, resizeMode}) => {
+    const handleLoadError = () => {
+      setImageLoadError(true);
+    };
+
+    if (imageLoadError || !uri) {
+      return (
+        <View style={[customStyle, styles.container]}>
+          <Icon name="images" color="#AAA" size={scale(24)} />
+        </View>
+      );
+    } else {
+      return (
+        <Image
+          source={{uri: uri}}
+          style={customStyle}
+          resizeMode={resizeMode}
+          onError={handleLoadError}
+        />
+      );
+    }
+  };
+
   const renderImageItem = ({item, index}) => {
+    const imageUrl = `https://api.saraldyechems.com/upload/image/${item}`;
     if (reffer === 'cart') {
       return (
         <TouchableOpacity
-          onPress={() => handleImageZoom(product?.image, index)}
+          onPress={() => handleImageZoom(image, index)}
+          disabled={!item || imageLoadError}
           activeOpacity={0.9}>
-          <Image
-            source={{
-              uri: `https://api.saraldyechems.com/upload/image/${item}`,
-            }}
-            style={styles.cartItemImage}
-            resizeMode="contain"
+          <ImageWithPlaceholder
+            uri={imageUrl}
+            customStyle={styles.cartItemImage}
+            resizeMode="contain" // Original resizeMode
           />
         </TouchableOpacity>
       );
     } else {
       return (
         <TouchableOpacity
-          onPress={() => handleImageZoom(product?.image, index)}
+          onPress={() => handleImageZoom(image, index)}
+          disabled={!item || imageLoadError}
           activeOpacity={0.9}>
           <View style={styles.imageSlideContainer}>
-            <Image
-              source={{
-                uri: `https://api.saraldyechems.com/upload/image/${item}`,
-              }}
-              style={styles.productImage}
-              resizeMode="contain"
+            <ImageWithPlaceholder
+              uri={imageUrl}
+              customStyle={styles.productImage}
+              resizeMode="contain" // Original resizeMode
             />
           </View>
         </TouchableOpacity>
@@ -102,17 +128,16 @@ const Index = ({product, reffer}) => {
   };
 
   const renderImageItemWithDummyData = ({item, index}) => {
+    const imageUrl = `https://api.saraldyechems.com/upload/image/${item}`;
     if (reffer === 'cart') {
       return (
         <TouchableOpacity
           onPress={() => handleImageZoom(images, index)}
           activeOpacity={0.9}>
-          <Image
-            source={{
-              uri: `https://api.saraldyechems.com/upload/image/${item}`,
-            }}
-            style={styles.cartItemImage}
-            resizeMode="cover"
+          <ImageWithPlaceholder
+            uri={imageUrl}
+            customStyle={styles.cartItemImage}
+            resizeMode="cover" // Original resizeMode
           />
         </TouchableOpacity>
       );
@@ -122,12 +147,10 @@ const Index = ({product, reffer}) => {
           onPress={() => handleImageZoom(images, index)}
           activeOpacity={0.9}>
           <View style={styles.imageSlideContainer}>
-            <Image
-              source={{
-                uri: `https://api.saraldyechems.com/upload/image/${item}`,
-              }}
-              style={styles.productImage}
-              resizeMode="contain"
+            <ImageWithPlaceholder
+              uri={imageUrl}
+              customStyle={styles.productImage}
+              resizeMode="contain" // Original resizeMode
             />
           </View>
         </TouchableOpacity>
@@ -137,13 +160,13 @@ const Index = ({product, reffer}) => {
 
   return (
     <>
-      {!product?.image || product?.item?.length === 0 ? (
+      {!image ? (
         <View style={styles.imageContainer}>
           <FlatList
             ref={flatListRef}
             data={reffer === 'cart' ? [images[0]] : images}
             renderItem={renderImageItemWithDummyData}
-            keyExtractor={(product, index) => index.toString()}
+            keyExtractor={(image, index) => index.toString()}
             horizontal
             pagingEnabled
             showsHorizontalScrollIndicator={false}
@@ -159,8 +182,7 @@ const Index = ({product, reffer}) => {
         <View style={styles.imageContainer}>
           <FlatList
             ref={flatListRef}
-            // data={product?.image}
-            data={reffer === 'cart' ? [product?.image?.[0]] : product?.image}
+            data={reffer === 'cart' ? [image?.[0]] : image}
             renderItem={renderImageItem}
             keyExtractor={(premium, index) => index.toString()}
             horizontal
@@ -177,12 +199,25 @@ const Index = ({product, reffer}) => {
       )}
     </>
   );
-};
+});
 
 export default Index;
 
 const {width} = Dimensions.get('window');
 const styles = StyleSheet.create({
+  container: {
+    backgroundColor: '#e0e0e0',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 5,
+  },
+  text: {
+    color: '#888', // Darker grey text
+    fontSize: 14,
+    textAlign: 'center',
+  },
   modalContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -230,10 +265,7 @@ const styles = StyleSheet.create({
   imageContainer: {
     alignItems: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.04)',
-    // padding: 10,
-    marginBottom: 10,
-
-    borderRadius: 15,
+    borderRadius: 8,
   },
   productImage: {
     width: '100%',
@@ -244,7 +276,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-
     marginBottom: 10,
   },
   infoRow: {
@@ -265,9 +296,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     alignItems: 'center',
-
     justifyContent: 'space-between',
-    // marginHorizontal: 7,
     marginBottom: 5,
   },
   optionButton: {
@@ -516,8 +545,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   cartItemImage: {
-    width: 80,
-    height: 80,
+    width: scale(70),
+    height: scale(70),
     // backgroundColor: '#F0F0F0',
   },
 });

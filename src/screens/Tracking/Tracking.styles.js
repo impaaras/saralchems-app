@@ -1,4 +1,19 @@
-import {StyleSheet} from 'react-native';
+import {Dimensions, StyleSheet} from 'react-native';
+import {moderateScale, scale} from '../../utils/Responsive/responsive';
+const {width: screenWidth, height: screenHeight} = Dimensions.get('window');
+
+// Responsive helper functions
+const wp = percentage => {
+  return (percentage * screenWidth) / 100;
+};
+
+const hp = percentage => {
+  return (percentage * screenHeight) / 100;
+};
+
+// Device type detection
+const isTablet = screenWidth >= 768;
+const isSmallScreen = screenWidth < 380;
 
 const styles = StyleSheet.create({
   container: {
@@ -17,12 +32,17 @@ const styles = StyleSheet.create({
 
     zIndex: 1,
   },
+
+  orderCard: {
+    margin: wp(3),
+    backgroundColor: '#FFF',
+    borderRadius: wp(3),
+    marginBottom: hp(2),
+    overflow: 'hidden',
+  },
   orderHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    padding: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    paddingHorizontal: wp(2.5),
+    paddingBottom: hp(1.2),
   },
   orderInfo: {
     justifyContent: 'center',
@@ -108,7 +128,7 @@ const styles = StyleSheet.create({
     color: '#E0E0E0',
   },
   trackingContainer: {
-    padding: 16,
+    paddingHorizontal: 15,
     backgroundColor: '#fff',
     borderBottomLeftRadius: 12,
     borderBottomRightRadius: 12,
@@ -124,7 +144,7 @@ const styles = StyleSheet.create({
   },
   trackingTitle: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: '500',
     color: '#000',
   },
   expandText: {
@@ -159,8 +179,7 @@ const styles = StyleSheet.create({
   },
   stepContent: {
     flex: 1,
-
-    marginLeft: 12,
+    marginLeft: 30,
   },
   stepTitle: {
     fontSize: 16,
@@ -188,10 +207,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#3C5D87',
-    paddingVertical: 8,
-
-    paddingHorizontal: 16,
-    borderRadius: 20,
+    borderRadius: 40,
   },
   receiptIcon: {
     marginRight: 8,
@@ -202,115 +218,130 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   supportContainer: {
-    marginTop: 24,
+    marginTop: scale(32),
+    marginBottom: scale(16),
+    flexDirection: 'row',
+    paddingHorizontal: scale(15),
+    alignItems: 'center',
   },
   supportText: {
-    fontSize: 16,
+    flex: 1,
+    fontSize: moderateScale(14),
     color: '#666',
-
     textAlign: 'center',
   },
   supportButtons: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    gap: 16,
+    gap: scale(16),
   },
   callButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    // paddingVertical: 8,
-    // paddingHorizontal: 16,
-    borderRadius: 4,
+    paddingVertical: scale(8),
+    paddingHorizontal: scale(16),
+    borderRadius: scale(30),
     gap: 8,
   },
   whatsappButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: 4,
-    gap: 8,
+    paddingVertical: scale(8),
+    paddingHorizontal: scale(16),
+    borderRadius: scale(30),
+    gap: scale(8),
   },
   buttonText: {
     color: '#fff',
-    fontSize: 14,
+    fontSize: moderateScale(14),
     fontWeight: '500',
   },
-
+  orderStatus: {
+    fontSize: isTablet ? scale(15) : isSmallScreen ? scale(8) : scale(10),
+    color: '#757575',
+  },
   orderDetails: {
-    // marginTop: 8,
-
+    marginTop: scale(4),
     flexDirection: 'row',
-    alignItems: 'center',
-
     justifyContent: 'space-between',
   },
   orderIdText: {
-    fontSize: 15,
+    fontSize: isTablet ? scale(15) : isSmallScreen ? scale(8) : scale(11),
     fontWeight: '600',
     color: '#212121',
   },
-
   orderDateText: {
-    fontSize: 13,
+    fontSize: isTablet ? scale(15) : isSmallScreen ? scale(8) : scale(10),
     color: '#001',
-    textAlign: 'right',
     fontWeight: '500',
   },
   orderValueText: {
-    fontSize: 13,
-    textAlign: 'right',
+    fontSize: isTablet ? 15 : isSmallScreen ? 11 : 13,
     fontWeight: '500',
     color: '#001',
   },
-  ratingContainer: {
-    backgroundColor: '#1E3A8A',
-    height: 24,
-    width: 24,
-    borderRadius: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-    alignSelf: 'flex-start',
+  expandIconContainer: {
+    position: 'absolute',
+    right: wp(4),
+    top: wp(4),
   },
-  productImage: {
-    width: 70,
-    height: 70,
-    borderRadius: 8,
-    backgroundColor: '#E0E0E0',
+  expandIcon: {
+    fontSize: isTablet ? scale(16) : scale(14),
+    color: '#757575',
   },
   orderItem: {
     borderWidth: 1,
-    // backgroundColor: 'white',
-    // borderRadius: 10,
-    padding: 10,
-
-    borderRadius: 8,
+    borderRadius: wp(2.5),
     borderColor: '#CCC',
     flexDirection: 'row',
+    marginTop: hp(1.2),
+    padding: wp(3.8),
+  },
+  productImage: {
+    width: wp(17.5),
+    height: wp(17.5),
+    borderRadius: wp(2),
+    backgroundColor: '#E0E0E0',
+  },
+  productDetails: {
+    flex: 1,
+    marginLeft: wp(4),
+    justifyContent: 'space-around',
   },
   productName: {
-    fontSize: 15,
+    fontSize: isTablet ? scale(15) : isSmallScreen ? scale(10) : scale(11),
     fontWeight: '500',
     color: '#212121',
   },
   productSize: {
-    fontSize: 13,
+    fontSize: isTablet ? scale(12) : isSmallScreen ? scale(7) : scale(9),
     color: '#757575',
-    marginTop: 4,
+    marginTop: hp(0.5),
   },
   productQuantity: {
-    fontSize: 13,
+    fontSize: isTablet ? scale(13) : isSmallScreen ? scale(8) : scale(9),
     color: '#757575',
+    marginTop: hp(0.5),
   },
   productPrice: {
-    fontSize: 15,
+    fontSize: isTablet ? 17 : isSmallScreen ? 13 : 15,
     fontWeight: '600',
     color: '#212121',
-    marginTop: 4,
+    marginTop: hp(0.5),
   },
-  productDetails: {
-    flex: 1,
-    marginLeft: 16,
+  ratingContainer: {
+    height: hp(2.5),
+    width: wp(7.5),
+    borderRadius: wp(3),
     justifyContent: 'center',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+  },
+  ratingText: {
+    color: 'white',
+    fontSize: isTablet ? 14 : isSmallScreen ? 10 : 12,
+    fontWeight: '600',
   },
 });
 export default styles;

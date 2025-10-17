@@ -8,7 +8,7 @@ import ProductsScreen from '../screens/Product/ProductsScreen';
 import OrderHistory from '../screens/History/OrderHistory';
 import OrderTrackingScreen from '../screens/Tracking/OrderTrackingScreen';
 import ProductDetail from '../screens/ProductDetails/ProductDetail';
-import {Cart, ItemScreen, Profile, Search} from '../screens';
+import {Cart, ItemScreen, Profile, Search, AccountLedger} from '../screens';
 
 const Tab = createBottomTabNavigator();
 
@@ -67,20 +67,13 @@ const BottomNavigator = () => {
     },
   );
 
-  useEffect(() => {
-    return () => {
-      if (scrollTimeout.current) {
-        clearTimeout(scrollTimeout.current);
-      }
-    };
-  }, []);
-
   const wrapScreen = ScreenComponent => {
     return props => {
       const routeName = props.route.name;
       if (
         routeName === ROUTES.SEARCH ||
         routeName === 'products' ||
+        routeName === ROUTES.HISTORY ||
         routeName === ROUTES.CART ||
         routeName === 'Home'
       ) {
@@ -106,20 +99,23 @@ const BottomNavigator = () => {
     <Tab.Navigator
       tabBar={props => <CustomTabBar {...props} translateY={tabBarOffset} />}
       screenOptions={{headerShown: false}}>
-      <Tab.Screen name="Home">
+      <Tab.Screen name={ROUTES.HOME}>
         {props => wrapScreen(HomeScreen)(props)}
       </Tab.Screen>
-      <Tab.Screen name="products">
+      <Tab.Screen name={ROUTES.PRODUCT_SCREEN}>
         {props => wrapScreen(ProductsScreen)(props)}
       </Tab.Screen>
       <Tab.Screen name={ROUTES.CART}>
         {props => wrapScreen(Cart)(props)}
       </Tab.Screen>
+      <Tab.Screen name={ROUTES.HISTORY}>
+        {props => wrapScreen(OrderHistory)(props)}
+      </Tab.Screen>
       <Tab.Screen name={ROUTES.TRACKING}>
         {props => wrapScreen(OrderTrackingScreen)(props)}
       </Tab.Screen>
-      <Tab.Screen name={ROUTES.HISTORY}>
-        {props => wrapScreen(OrderHistory)(props)}
+      <Tab.Screen name={ROUTES.LEDGER}>
+        {props => wrapScreen(AccountLedger)(props)}
       </Tab.Screen>
       <Tab.Screen name={ROUTES.PROFILE}>
         {props => wrapScreen(Profile)(props)}

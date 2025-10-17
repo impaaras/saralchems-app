@@ -1,5 +1,3 @@
-'use client';
-
 import {useState} from 'react';
 import {
   View,
@@ -15,6 +13,7 @@ import {
   BookmarkCheck,
   Phone,
   MessageCircle,
+  Truck,
 } from 'lucide-react-native';
 import {LinearGradient} from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -22,13 +21,43 @@ import OrderTrackModal from '../../components/OrderTrackModal';
 import ProductModal from '../ProductDetails/ProductModal';
 import DashboardHeader from '../../components/Header/DashBoardHeader';
 import {fallbackImg} from '../../utils/images';
+import InfoIcon from 'react-native-vector-icons/Entypo';
 import styles from './Tracking.styles';
+import OrderTrackingSteps from './OrderTrackingComponent';
+import TrackingCard from '../../components/TrackingCard/TrackingCard';
+import {scale} from '../../utils/Responsive/responsive';
 
 const {width} = Dimensions.get('window');
 
-const OrderTracking = ({order = sampleOrder}) => {
+// Get screen dimensions
+const {width: screenWidth, height: screenHeight} = Dimensions.get('window');
+
+// Responsive helper functions
+const wp = percentage => {
+  return (percentage * screenWidth) / 100;
+};
+
+const hp = percentage => {
+  return (percentage * screenHeight) / 100;
+};
+
+const formatDate = dateString => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  });
+};
+
+const isTablet = screenWidth >= 768;
+const isSmallScreen = screenWidth < 380;
+
+const OrderTracking = ({route}) => {
   const [expanded, setExpanded] = useState(false);
   const [visible, setVisible] = useState(false);
+
+  let {orders: order} = route.params;
 
   // Determine the current step based on status
   const getCurrentStep = () => {
@@ -41,6 +70,7 @@ const OrderTracking = ({order = sampleOrder}) => {
       delivered: 3,
     };
 
+    // return 0;
     return statusMap[order.status.toLowerCase()] || 0;
   };
 
@@ -62,163 +92,47 @@ const OrderTracking = ({order = sampleOrder}) => {
         return '#757575';
     }
   };
+  const [expandedOrders, setExpandedOrders] = useState([]);
+
+  const toggleOrderExpand = orderId => {
+    setExpandedOrders(prev =>
+      prev.includes(orderId)
+        ? prev.filter(id => id !== orderId)
+        : [...prev, orderId],
+    );
+  };
+
+  const sampleTrackingData = {
+    placed: [
+      {time: 'Tue, 17 Jan 2023 02:32 PM', status: 'Pending'},
+      {time: 'Tue, 17 Jan 2023 02:38 PM', status: 'Generated'},
+    ],
+    packing: [
+      {time: 'Tue, 17 Jan 2023 02:38 PM', status: 'Ready'},
+      {time: 'Tue, 17 Jan 2023 02:38 PM', status: 'Packing'},
+    ],
+    shipping: [{time: 'Tue, 18 Jan 2023 02:38 PM', status: 'Ready to deliver'}],
+    delivered: [],
+  };
 
   return (
     <>
       <DashboardHeader />
-
       <View style={styles.container}>
-        <View
-          style={{
-            borderWidth: 1,
-            borderColor: '#CCC',
-            margin: 15,
-            borderRadius: 8,
-          }}>
-          <View style={styles.orderItemContainer}>
-            <View>
-              <Text style={styles.orderIdText}>Order #{order.id}</Text>
-              <View style={{flexDirection: 'row', alignItems: 'center'}}>
-                <View
-                  style={[
-                    styles.statusDot,
-                    {backgroundColor: getStatusColor(order.status)},
-                  ]}
-                />
-                <Text style={styles.orderStatus}>{order.status}</Text>
-              </View>
-            </View>
-            <View>
-              <Text style={styles.orderDateText}>Placed on {order.date}</Text>
-              <Text style={styles.orderValueText}>Total Bill Value: $299</Text>
-            </View>
-          </View>
-          <View
-            style={{
-              backgroundColor: '#3C5D87',
-              paddingBottom: 12,
-              margin: 10,
-              borderRadius: 8,
-            }}>
-            <View
-              style={{
-                backgroundColor: '#FFF',
-                borderBottomLeftRadius: 8,
-                borderBottomRightRadius: 8,
-              }}>
-              <View style={{}}>
-                <View style={styles.orderItem}>
-                  <Image
-                    source={{
-                      uri: fallbackImg(),
-                    }}
-                    style={styles.productImage}
-                  />
-                  <View style={styles.productDetails}>
-                    <Text style={styles.productName}>Nylon </Text>
-                    <Text style={styles.productSize}>70*020</Text>
-                    <Text style={styles.productQuantity}>Quantity: 200</Text>
-                  </View>
-                  {/* <View style={styles.ratingContainer}>
-                    <Text style={styles.ratingText}>
-                      {order.items.length > 1 ? '4+' : order.items.length}
-                    </Text>
-                  </View> */}
-                </View>
-              </View>
-            </View>
-          </View>
+        {/* Order Tracking */}
+        <View style={[styles.orderCard]}>
+          <TrackingCard order={order} />
         </View>
 
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{paddingBottom: '10%'}}
-          style={[
-            styles.trackingContainer,
-            expanded && styles.expandedTracking,
-          ]}>
-          <View style={styles.trackingHeader}>
-            <Text style={styles.trackingTitle}>Order Tracking</Text>
-          </View>
-          <View style={styles.timeline}>
-            {/* Placed Order */}
-            <TrackingStep
-              title="Placed Order"
-              dates={order.tracking.placed}
-              isActive={currentStep >= 0}
-              isCompleted={currentStep > 0}
-              isFirst={true}
-              expanded={expanded}
-            />
-
-            {/* Packing */}
-            <TrackingStep
-              title="Packing"
-              dates={order.tracking.packing}
-              isActive={currentStep >= 1}
-              isCompleted={currentStep > 1}
-              expanded={expanded}
-            />
-
-            {/* Shipping */}
-            <TrackingStep
-              title="Shipping"
-              dates={order.tracking.shipping}
-              isActive={currentStep >= 2}
-              isCompleted={currentStep > 2}
-              expanded={expanded}
-            />
-
-            {/* Delivered */}
-            <TrackingStep
-              title="Delivered"
-              dates={order.tracking.delivered}
-              isActive={currentStep >= 3}
-              isCompleted={currentStep > 3}
-              isLast={true}
-              expanded={expanded}
-            />
-          </View>
-
-          {/* Delivery Receipt Button */}
-          {(currentStep >= 1 || expanded) && (
-            <View style={styles.receiptContainer}>
-              <LinearGradient
-                colors={['#38587F', '#101924']} // Left to right gradient colors
-                start={{x: 0, y: 0}}
-                end={{x: 1, y: 0}}
-                style={styles.receiptButton} // Make sure the gradient covers the button
-              >
-                <TouchableOpacity
-                  style={{flexDirection: 'row', alignItems: 'center'}}>
-                  <BookmarkCheck
-                    size={22}
-                    color="#fff"
-                    style={styles.receiptIcon}
-                  />
-                  <Text style={styles.receiptText}>Delivery Receipt</Text>
-                </TouchableOpacity>
-              </LinearGradient>
-            </View>
-          )}
-
-          {visible && (
-            <OrderTrackModal
-              visible={visible}
-              onClose={() => setVisible(!visible)}
-            />
-          )}
-
-          {/* {visible && (
-          <ProductModal
-            visible={visible}
-            onClose={() => setVisible(!visible)}
+        <View>
+          <OrderTrackingSteps
+            orderStatus={order.status}
+            trackingData={sampleTrackingData}
           />
-        )} */}
 
           <View style={styles.supportContainer}>
+            <Text style={styles.supportText}>Need Support?</Text>
             <View style={styles.supportButtons}>
-              <Text style={styles.supportText}>Need Support?</Text>
               <LinearGradient
                 colors={['#38587F', '#101924']} // Left to right gradient colors
                 start={{x: 0, y: 0}}
@@ -226,7 +140,7 @@ const OrderTracking = ({order = sampleOrder}) => {
                 style={styles.receiptButton} // Make sure the gradient covers the button
               >
                 <TouchableOpacity style={styles.callButton}>
-                  <Phone size={16} color="#fff" />
+                  <Phone size={scale(22)} color="#fff" />
                   <Text style={styles.buttonText}>Call</Text>
                 </TouchableOpacity>
               </LinearGradient>
@@ -237,13 +151,13 @@ const OrderTracking = ({order = sampleOrder}) => {
                 style={styles.receiptButton} // Make sure the gradient covers the button
               >
                 <TouchableOpacity style={styles.whatsappButton}>
-                  <Icon name="whatsapp" size={16} color="#fff" />
+                  <Icon name="whatsapp" size={scale(22)} color="#fff" />
                   <Text style={styles.buttonText}>Whatsapp</Text>
                 </TouchableOpacity>
               </LinearGradient>
             </View>
           </View>
-        </ScrollView>
+        </View>
       </View>
     </>
   );
@@ -302,7 +216,8 @@ const TrackingStep = ({
             styles.stepIconContainer,
             {backgroundColor: getIconBgColor()},
           ]}>
-          <Package size={30} color="#fff" />
+          <Truck size={30} color="#fff" />
+          {/* <Package size={30} color="#fff" /> */}
         </View>
 
         {!isLast && (

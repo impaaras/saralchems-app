@@ -1,61 +1,34 @@
-// import React from 'react';
-// import {StatusBar, StyleSheet, View} from 'react-native';
-// import Navigation from './navigation';
-
-// const App = () => {
-//   return (
-//     <View style={styles.container}>
-//       <Navigation />
-
-//     </View>
-//   );
-// };
-
-// export default App;
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     backgroundColor: '#F4F9FF',
-//   },
-// });
-
-// import React, {useState} from 'react';
-// import {StatusBar, StyleSheet, View} from 'react-native';
-// import Navigation from './navigation';
-// import Loader from './utils/Loader';
-
-// const App = () => {
-//   const [loading, setLoading] = useState(true);
-
-//   return (
-//     <View style={styles.container}>
-//       <StatusBar barStyle="dark-content" backgroundColor="#F4F9FF" />
-//       <Navigation />
-//       <Loader visible={loading} />
-//     </View>
-//   );
-// };
-
-// export default App;
-
-// const styles = StyleSheet.create({
-//   container: {
-//     flex: 1,
-//     backgroundColor: '#F4F9FF',
-//   },
-// });
-
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {StatusBar, StyleSheet, View} from 'react-native';
+import NetInfo from '@react-native-community/netinfo';
 import Navigation from './navigation';
 import Loader from './utils/Loader';
 import {LoaderProvider, useLoader} from './context/LoaderContext';
 import {AlertProvider} from './context/CustomAlertContext';
 import GlobalAlert from './utils/Modal/GlobalAlert';
+import NoInternetScreen from './screens/NoInternet/Index';
+import {RequestProvider} from './context/RequestContext';
 
 const AppContent = () => {
-  const {loading, alertVisible, alertConfig, hideAlert} = useLoader();
+  const {loading} = useLoader();
+  const [isConnected, setIsConnected] = useState(true);
+
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener(state => {
+      setIsConnected(state.isConnected);
+    });
+    return () => unsubscribe();
+  }, []);
+
+  if (!isConnected) {
+    return (
+      <NoInternetScreen
+        onRetry={() =>
+          NetInfo.fetch().then(state => setIsConnected(state.isConnected))
+        }
+      />
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -70,7 +43,9 @@ const App = () => {
   return (
     <LoaderProvider>
       <AlertProvider>
-        <AppContent />
+        <RequestProvider>
+          <AppContent />
+        </RequestProvider>
       </AlertProvider>
     </LoaderProvider>
   );

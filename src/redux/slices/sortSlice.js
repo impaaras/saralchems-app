@@ -1,6 +1,6 @@
 import {createSlice} from '@reduxjs/toolkit';
 const initialState = {
-  sortOption: 'name-asc', // Default sort option
+  sortOption: 'name-asc',
 };
 
 const sortSlice = createSlice({
@@ -8,7 +8,6 @@ const sortSlice = createSlice({
   initialState,
   reducers: {
     setSortOption: (state, action) => {
-      // Only accept string values
       state.sortOption = action.payload;
     },
   },

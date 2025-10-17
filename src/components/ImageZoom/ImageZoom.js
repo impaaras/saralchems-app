@@ -23,12 +23,18 @@ const ImageZoomModal = ({visible, imageList, currentIndex, onClose}) => {
   const [currentImageIndex, setCurrentImageIndex] = useState(currentIndex);
 
   const handleNext = () => {
+    if (currentImageIndex === imageList.length - 1) {
+      setCurrentImageIndex(0);
+    }
     if (currentImageIndex < imageList.length - 1) {
       setCurrentImageIndex(currentImageIndex + 1);
     }
   };
 
   const handlePrev = () => {
+    if (currentImageIndex === 0) {
+      setCurrentImageIndex(imageList.length - 1);
+    }
     if (currentImageIndex > 0) {
       setCurrentImageIndex(currentImageIndex - 1);
     }
@@ -241,23 +247,16 @@ const ImageZoomModal = ({visible, imageList, currentIndex, onClose}) => {
         </View>
         {imageList.length > 1 && (
           <>
-            {currentImageIndex !== 0 && (
-              <TouchableOpacity
-                style={[styles.navSideButton, styles.leftNav]}
-                onPress={handlePrev}
-                disabled={currentImageIndex === 0}>
-                <Icon name="keyboard-arrow-left" size={22} color="white" />
-              </TouchableOpacity>
-            )}
-
-            {currentImageIndex !== imageList.length - 1 && (
-              <TouchableOpacity
-                style={[styles.navSideButton, styles.rightNav]}
-                onPress={handleNext}
-                disabled={currentImageIndex === imageList.length - 1}>
-                <Icon name="keyboard-arrow-right" size={22} color="white" />
-              </TouchableOpacity>
-            )}
+            <TouchableOpacity
+              style={[styles.navSideButton, styles.leftNav]}
+              onPress={handlePrev}>
+              <Icon name="keyboard-arrow-left" size={22} color="white" />
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.navSideButton, styles.rightNav]}
+              onPress={handleNext}>
+              <Icon name="keyboard-arrow-right" size={22} color="white" />
+            </TouchableOpacity>
           </>
         )}
       </View>

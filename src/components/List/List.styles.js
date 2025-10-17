@@ -1,47 +1,54 @@
 import {StyleSheet} from 'react-native';
+import {
+  verticalScale,
+  scale,
+  moderateScale,
+} from '../../utils/Responsive/responsive';
 
 const styles = StyleSheet.create({
   container: {
-    marginVertical: 10,
-    paddingHorizontal: 15,
+    marginVertical: verticalScale(10),
+    paddingHorizontal: scale(15),
+  },
+  shimmerContainer: {
+    flexDirection: 'row',
+    marginVertical: verticalScale(10),
+    paddingHorizontal: scale(15),
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 10,
+    marginBottom: verticalScale(10),
   },
   title: {
-    fontSize: 16,
+    fontSize: moderateScale(16),
     fontWeight: '600',
     color: '#333',
   },
   viewAll: {
-    fontSize: 14,
+    fontSize: moderateScale(16),
     color: '#666',
   },
   productCard: {
     display: 'flex',
     flexDirection: 'column',
-    // justifyContent: 'center',
-    alignItems: 'center',
-    width: 100,
-
-    // marginRight: 10,
+    alignItems: 'flex-start',
+    width: scale(100),
   },
   productImage: {
-    width: 85,
-    height: 85,
-    borderRadius: 10,
+    width: scale(85),
+    height: scale(85),
+    borderRadius: scale(10),
   },
   productName: {
-    marginTop: 5,
-    fontSize: 11,
-    width: '77%',
-    // backgroundColor: 'red',
+    marginTop: verticalScale(5),
+    fontSize: moderateScale(11),
+    width: '90%',
     fontWeight: '500',
     color: '#333',
     textAlign: 'center',
   },
 });
+
 export default styles;

@@ -15,6 +15,7 @@ import logo from '../../assets/logo.png';
 import {ROUTES} from '../../constants/routes';
 import {useNavigation} from '@react-navigation/native';
 import styles from './Drawer.styles';
+import {useAlert} from '../../context/CustomAlertContext';
 
 const {width} = Dimensions.get('window');
 
@@ -32,9 +33,19 @@ const CustomDrawerContent = props => {
   const {navigation} = props;
   const navig = useNavigation();
 
+  const {showAlert} = useAlert();
+
   const handleLogout = () => {
-    dispatch(logout());
-    navigation.closeDrawer();
+    showAlert({
+      title: 'Are you sure?',
+      message: 'Do you want to logout?',
+      onConfirm: async () => {
+        dispatch(logout());
+        navigation.closeDrawer();
+      },
+      acceptText: 'Yes',
+      rejectText: 'Cancel',
+    });
   };
 
   const navigateTo = routeName => {
@@ -45,13 +56,9 @@ const CustomDrawerContent = props => {
   const menuItems = [
     {title: 'Home', route: 'Home'},
     {title: 'Products', route: 'products'},
+    {title: 'Account Ledger', route: ROUTES.LEDGER},
     {title: 'Order History', route: ROUTES.HISTORY},
-    {title: 'Order Tracking', route: ROUTES.TRACKING},
     {title: 'My Profile', route: ROUTES.PROFILE},
-    {title: 'Settings', route: 'Settings'},
-    {title: 'Help & Support', route: 'Support'},
-    {title: 'About Us', route: 'About'},
-    {title: 'Terms & Conditions', route: 'Terms'},
     {title: 'Logout', action: handleLogout},
   ];
 

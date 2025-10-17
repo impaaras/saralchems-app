@@ -1,0 +1,235 @@
+> Task :gradle-plugin:settings-plugin:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :gradle-plugin:shared:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :gradle-plugin:shared:compileKotlin UP-TO-DATE
+> Task :gradle-plugin:shared:compileJava NO-SOURCE
+> Task :gradle-plugin:shared:processResources NO-SOURCE
+> Task :gradle-plugin:shared:classes UP-TO-DATE
+> Task :gradle-plugin:shared:jar UP-TO-DATE
+> Task :gradle-plugin:settings-plugin:compileKotlin UP-TO-DATE
+> Task :gradle-plugin:settings-plugin:compileJava NO-SOURCE
+> Task :gradle-plugin:settings-plugin:pluginDescriptors UP-TO-DATE
+> Task :gradle-plugin:settings-plugin:processResources UP-TO-DATE
+> Task :gradle-plugin:settings-plugin:classes UP-TO-DATE
+> Task :gradle-plugin:settings-plugin:jar UP-TO-DATE
+> Task :gradle-plugin:react-native-gradle-plugin:checkKotlinGradlePluginConfigurationErrors SKIPPED
+> Task :gradle-plugin:react-native-gradle-plugin:compileKotlin UP-TO-DATE
+> Task :gradle-plugin:react-native-gradle-plugin:compileJava NO-SOURCE
+> Task :gradle-plugin:react-native-gradle-plugin:pluginDescriptors UP-TO-DATE
+> Task :gradle-plugin:react-native-gradle-plugin:processResources UP-TO-DATE
+> Task :gradle-plugin:react-native-gradle-plugin:classes UP-TO-DATE
+> Task :gradle-plugin:react-native-gradle-plugin:jar UP-TO-DATE
+
+> Configure project :react-native-mmkv
+[react-native-mmkv] Thank you for using react-native-mmkv ❤️
+[react-native-mmkv] If you enjoy using react-native-mmkv, please consider sponsoring this project: https://github.com/sponsors/mrousavy
+
+> Configure project :react-native-reanimated
+Android gradle plugin: 8.8.0
+Gradle: 8.10.2
+
+> Task :app:dependencies
+
+------------------------------------------------------------
+Project ':app'
+------------------------------------------------------------
+
+_internal-unified-test-platform-android-device-provider-ddmlib - A configuration to resolve the Unified Test Platform dependencies.
+\--- com.android.tools.utp:android-device-provider-ddmlib:31.8.0
+     +--- com.android.tools:common:31.8.0
+     |    +--- com.android.tools:annotations:31.8.0
+     |    +--- com.google.guava:guava:32.0.1-jre
+     |    |    +--- com.google.guava:failureaccess:1.0.1
+     |    |    +--- com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava
+     |    |    +--- com.google.code.findbugs:jsr305:3.0.2
+     |    |    +--- org.checkerframework:checker-qual:3.33.0
+     |    |    +--- com.google.errorprone:error_prone_annotations:2.18.0
+     |    |    \--- com.google.j2objc:j2objc-annotations:2.8
+     |    +--- net.java.dev.jna:jna-platform:5.6.0
+     |    |    \--- net.java.dev.jna:jna:5.6.0
+     |    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.0.21
+     |         +--- org.jetbrains.kotlin:kotlin-stdlib:2.0.21
+     |         |    +--- org.jetbrains:annotations:13.0 -> 23.0.0
+     |         |    +--- org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.0 -> 2.0.21 (c)
+     |         |    +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.0 -> 2.0.21 (c)
+     |         |    \--- org.jetbrains.kotlin:kotlin-stdlib-common:2.0.21 (c)
+     |         \--- org.jetbrains.kotlin:kotlin-stdlib-jdk7:2.0.21
+     |              \--- org.jetbrains.kotlin:kotlin-stdlib:2.0.21 (*)
+     +--- com.android.tools.ddms:ddmlib:31.8.0
+     |    +--- com.android.tools:common:31.8.0 (*)
+     |    +--- com.google.protobuf:protobuf-java:3.22.3
+     |    +--- net.sf.kxml:kxml2:2.3.0
+     |    \--- org.jetbrains:annotations:23.0.0
+     +--- com.google.protobuf:protobuf-java:3.22.3
+     +--- com.android.tools.utp:android-device-provider-ddmlib-proto:31.8.0
+     |    \--- com.google.protobuf:protobuf-java:3.22.3
+     +--- com.android.tools.utp:android-device-provider-profile:31.8.0
+     |    +--- com.android.tools:common:31.8.0 (*)
+     |    +--- com.google.protobuf:protobuf-java:3.22.3
+     |    +--- com.android.tools.utp:android-device-provider-profile-proto:31.8.0
+     |    |    \--- com.google.protobuf:protobuf-java:3.22.3
+     |    \--- org.jetbrains.kotlin:kotlin-stdlib:2.0.21 (*)
+     +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.0.21 (*)
+     +--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4
+     |    \--- org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.6.4
+     |         +--- org.jetbrains.kotlinx:kotlinx-coroutines-bom:1.6.4
+     |         |    +--- org.jetbrains.kotlinx:kotlinx-coroutines-core-jvm:1.6.4 (c)
+     |         |    \--- org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4 (c)
+     |         +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.6.21 -> 2.0.21 (*)
+     |         \--- org.jetbrains.kotlin:kotlin-stdlib-common:1.6.21 -> 2.0.21
+     |              \--- org.jetbrains.kotlin:kotlin-stdlib:2.0.21 (*)
+     +--- com.google.testing.platform:core-proto:0.0.9-alpha02
+     \--- com.google.testing.platform:android-device-provider-local:0.0.9-alpha02
+
+_internal-unified-test-platform-android-device-provider-gradle - A configuration to resolve the Unified Test Platform dependencies.
+\--- com.android.tools.utp:android-device-provider-gradle:31.8.0
+     +--- com.android.tools:common:31.8.0
+     |    +--- com.android.tools:annotations:31.8.0
+     |    +--- com.google.guava:guava:32.0.1-jre
+     |    |    +--- com.google.guava:failureaccess:1.0.1
+     |    |    +--- com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava
+     |    |    +--- com.google.code.findbugs:jsr305:3.0.2
+     |    |    +--- org.checkerframework:checker-qual:3.33.0
+     |    |    +--- com.google.errorprone:error_prone_annotations:2.18.0
+     |    |    \--- com.google.j2objc:j2objc-annotations:2.8
+     |    +--- net.java.dev.jna:jna-platform:5.6.0
+     |    |    \--- net.java.dev.jna:jna:5.6.0
+     |    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.0.21
+     |         +--- org.jetbrains.kotlin:kotlin-stdlib:2.0.21
+     |         |    +--- org.jetbrains:annotations:13.0
+     |         |    +--- org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.0 -> 2.0.21 (c)
+     |         |    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.0 -> 2.0.21 (c)
+     |         \--- org.jetbrains.kotlin:kotlin-stdlib-jdk7:2.0.21
+     |              \--- org.jetbrains.kotlin:kotlin-stdlib:2.0.21 (*)
+     +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.0.21 (*)
+     +--- com.google.protobuf:protobuf-java:3.22.3
+     +--- com.android.tools.utp:android-device-provider-gradle-proto:31.8.0
+     |    \--- com.google.protobuf:protobuf-java:3.22.3
+     +--- com.android.tools.utp:android-device-provider-profile:31.8.0
+     |    +--- com.android.tools:common:31.8.0 (*)
+     |    +--- com.google.protobuf:protobuf-java:3.22.3
+     |    +--- com.android.tools.utp:android-device-provider-profile-proto:31.8.0
+     |    |    \--- com.google.protobuf:protobuf-java:3.22.3
+     |    \--- org.jetbrains.kotlin:kotlin-stdlib:2.0.21 (*)
+     +--- com.google.testing.platform:core-proto:0.0.9-alpha02
+     \--- com.google.testing.platform:android-device-provider-local:0.0.9-alpha02
+
+_internal-unified-test-platform-android-driver-instrumentation - A configuration to resolve the Unified Test Platform dependencies.
+\--- com.google.testing.platform:android-driver-instrumentation:0.0.9-alpha02
+
+_internal-unified-test-platform-android-test-plugin - A configuration to resolve the Unified Test Platform dependencies.
+\--- com.google.testing.platform:android-test-plugin:0.0.9-alpha02
+
+_internal-unified-test-platform-android-test-plugin-host-additional-test-output - A configuration to resolve the Unified Test Platform dependencies.
+\--- com.android.tools.utp:android-test-plugin-host-additional-test-output:31.8.0
+     +--- com.android.tools:common:31.8.0
+     |    +--- com.android.tools:annotations:31.8.0
+     |    +--- com.google.guava:guava:32.0.1-jre
+     |    |    +--- com.google.guava:failureaccess:1.0.1
+     |    |    +--- com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava
+     |    |    +--- com.google.code.findbugs:jsr305:3.0.2
+     |    |    +--- org.checkerframework:checker-qual:3.33.0
+     |    |    +--- com.google.errorprone:error_prone_annotations:2.18.0
+     |    |    \--- com.google.j2objc:j2objc-annotations:2.8
+     |    +--- net.java.dev.jna:jna-platform:5.6.0
+     |    |    \--- net.java.dev.jna:jna:5.6.0
+     |    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.0.21
+     |         +--- org.jetbrains.kotlin:kotlin-stdlib:2.0.21
+     |         |    +--- org.jetbrains:annotations:13.0
+     |         |    +--- org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.0 -> 2.0.21 (c)
+     |         |    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.0 -> 2.0.21 (c)
+     |         \--- org.jetbrains.kotlin:kotlin-stdlib-jdk7:2.0.21
+     |              \--- org.jetbrains.kotlin:kotlin-stdlib:2.0.21 (*)
+     +--- com.android.tools.utp:utp-common:31.8.0
+     |    +--- com.android.tools:common:31.8.0 (*)
+     |    +--- com.google.testing.platform:launcher:0.0.9-alpha02
+     |    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.0.21 (*)
+     +--- com.android.tools.utp:android-test-plugin-host-additional-test-output-proto:31.8.0
+     |    \--- com.google.protobuf:protobuf-java:3.22.3
+     +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.0.21 (*)
+     +--- com.google.protobuf:protobuf-java:3.22.3
+     \--- com.google.testing.platform:android-device-provider-local:0.0.9-alpha02
+
+_internal-unified-test-platform-android-test-plugin-host-apk-installer - A configuration to resolve the Unified Test Platform dependencies.
+\--- com.android.tools.utp:android-test-plugin-host-apk-installer:31.8.0
+     +--- com.android.tools:common:31.8.0
+     |    +--- com.android.tools:annotations:31.8.0
+     |    +--- com.google.guava:guava:32.0.1-jre
+     |    |    +--- com.google.guava:failureaccess:1.0.1
+     |    |    +--- com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava
+     |    |    +--- com.google.code.findbugs:jsr305:3.0.2
+     |    |    +--- org.checkerframework:checker-qual:3.33.0
+     |    |    +--- com.google.errorprone:error_prone_annotations:2.18.0
+     |    |    \--- com.google.j2objc:j2objc-annotations:2.8
+     |    +--- net.java.dev.jna:jna-platform:5.6.0
+     |    |    \--- net.java.dev.jna:jna:5.6.0
+     |    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.0.21
+     |         +--- org.jetbrains.kotlin:kotlin-stdlib:2.0.21
+     |         |    +--- org.jetbrains:annotations:13.0
+     |         |    +--- org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.0 -> 2.0.21 (c)
+     |         |    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.0 -> 2.0.21 (c)
+     |         \--- org.jetbrains.kotlin:kotlin-stdlib-jdk7:2.0.21
+     |              \--- org.jetbrains.kotlin:kotlin-stdlib:2.0.21 (*)
+     +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.0.21 (*)
+     +--- com.google.protobuf:protobuf-java:3.22.3
+     +--- com.android.tools.utp:android-test-plugin-host-apk-installer-proto:31.8.0
+     |    \--- com.google.protobuf:protobuf-java:3.22.3
+     +--- com.google.testing.platform:android-device-provider-local:0.0.9-alpha02
+     \--- com.google.testing.platform:core-proto:0.0.9-alpha02
+
+_internal-unified-test-platform-android-test-plugin-host-coverage - A configuration to resolve the Unified Test Platform dependencies.
+\--- com.android.tools.utp:android-test-plugin-host-coverage:31.8.0
+     +--- com.android.tools:common:31.8.0
+     |    +--- com.android.tools:annotations:31.8.0
+     |    +--- com.google.guava:guava:32.0.1-jre
+     |    |    +--- com.google.guava:failureaccess:1.0.1
+     |    |    +--- com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava
+     |    |    +--- com.google.code.findbugs:jsr305:3.0.2
+     |    |    +--- org.checkerframework:checker-qual:3.33.0
+     |    |    +--- com.google.errorprone:error_prone_annotations:2.18.0
+     |    |    \--- com.google.j2objc:j2objc-annotations:2.8
+     |    +--- net.java.dev.jna:jna-platform:5.6.0
+     |    |    \--- net.java.dev.jna:jna:5.6.0
+     |    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.0.21
+     |         +--- org.jetbrains.kotlin:kotlin-stdlib:2.0.21
+     |         |    +--- org.jetbrains:annotations:13.0
+     |         |    +--- org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.0 -> 2.0.21 (c)
+     |         |    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.0 -> 2.0.21 (c)
+     |         \--- org.jetbrains.kotlin:kotlin-stdlib-jdk7:2.0.21
+     |              \--- org.jetbrains.kotlin:kotlin-stdlib:2.0.21 (*)
+     +--- com.android.tools.utp:android-test-plugin-host-coverage-proto:31.8.0
+     |    \--- com.google.protobuf:protobuf-java:3.22.3
+     +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.0.21 (*)
+     +--- com.google.protobuf:protobuf-java:3.22.3
+     \--- com.google.testing.platform:android-device-provider-local:0.0.9-alpha02
+
+_internal-unified-test-platform-android-test-plugin-host-device-info - A configuration to resolve the Unified Test Platform dependencies.
+\--- com.android.tools.utp:android-test-plugin-host-device-info:31.8.0
+     +--- com.android.tools:common:31.8.0
+     |    +--- com.android.tools:annotations:31.8.0
+     |    +--- com.google.guava:guava:32.0.1-jre
+     |    |    +--- com.google.guava:failureaccess:1.0.1
+     |    |    +--- com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava
+     |    |    +--- com.google.code.findbugs:jsr305:3.0.2
+     |    |    +--- org.checkerframework:checker-qual:3.33.0
+     |    |    +--- com.google.errorprone:error_prone_annotations:2.18.0
+     |    |    \--- com.google.j2objc:j2objc-annotations:2.8
+     |    +--- net.java.dev.jna:jna-platform:5.6.0
+     |    |    \--- net.java.dev.jna:jna:5.6.0
+     |    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.0.21
+     |         +--- org.jetbrains.kotlin:kotlin-stdlib:2.0.21
+     |         |    +--- org.jetbrains:annotations:13.0
+     |         |    +--- org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.0 -> 2.0.21 (c)
+     |         |    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.0 -> 2.0.21 (c)
+     |         \--- org.jetbrains.kotlin:kotlin-stdlib-jdk7:2.0.21
+     |              \--- org.jetbrains.kotlin:kotlin-stdlib:2.0.21 (*)
+     +--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.0.21 (*)
+     +--- com.google.protobuf:protobuf-java:3.22.3
+     +--- com.android.tools.utp:utp-common:31.8.0
+     |    +--- com.android.tools:common:31.8.0 (*)
+     |    +--- com.google.testing.platform:launcher:0.0.9-alpha02
+     |    \--- org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.0.21 (*)
+     +--- com.android.tools.utp:android-test-plugin-host-device-info-proto:31.8.0
+     |    \--- com.google.protobuf:protobuf-java:3.22.3
+     \--- com.google.testing.platform:android-device-provider-local:0.0.9-alpha02
+
+_internal-unified-test-platform-android-test-plugin-host-emulator-control - A configuration to resolve the Unified Test Platform dependencies.

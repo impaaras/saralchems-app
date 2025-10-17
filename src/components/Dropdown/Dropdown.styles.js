@@ -1,4 +1,5 @@
 import {StyleSheet} from 'react-native';
+import {moderateScale} from '../../utils/Responsive/responsive';
 
 const styles = StyleSheet.create({
   container: {
@@ -21,7 +22,7 @@ const styles = StyleSheet.create({
   },
   dropdownButtonText: {
     color: 'white',
-    fontSize: 14,
+    fontSize: moderateScale(12),
     fontWeight: '600',
   },
   dropdownListContainer: {
@@ -38,8 +39,7 @@ const styles = StyleSheet.create({
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
-
-    maxHeight: 300, // Added for scroll if many categories
+    // maxHeight: 300, // Added for scroll if many categories
   },
   dropdownItem: {
     paddingVertical: 10,
@@ -47,7 +47,7 @@ const styles = StyleSheet.create({
   },
   dropdownItemText: {
     color: 'white',
-    fontSize: 14,
+    fontSize: moderateScale(12),
   },
   activeItem: {
     backgroundColor: '#3C5D87',
@@ -56,6 +56,8 @@ const styles = StyleSheet.create({
     marginHorizontal: 6,
   },
   activeItemText: {
+    fontSize: moderateScale(12),
+
     fontWeight: '600',
   },
 });

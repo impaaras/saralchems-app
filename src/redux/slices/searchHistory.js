@@ -27,18 +27,11 @@ const searchHistorySlice = createSlice({
     addToHistory: (state, action) => {
       const newQuery = action.payload.trim();
       if (!newQuery) return;
-
-      // Remove if already exists
       const updatedHistory = state.history.filter(item => item !== newQuery);
-
-      // Add to beginning
       updatedHistory.unshift(newQuery);
-
-      // Limit to last 10 items
       if (updatedHistory.length > HISTORY_LIMIT) {
         updatedHistory.pop();
       }
-
       state.history = updatedHistory;
       storage.set(SEARCH_HISTORY_KEY, JSON.stringify(updatedHistory));
     },

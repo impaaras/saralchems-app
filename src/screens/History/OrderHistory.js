@@ -1,515 +1,449 @@
-import React, {useCallback, useEffect, useState} from 'react';
+// import React, {useCallback, useState, useMemo} from 'react';
+// import {
+//   View,
+//   Text,
+//   Image,
+//   TouchableOpacity,
+//   FlatList,
+//   TouchableWithoutFeedback,
+// } from 'react-native';
+// import LinearGradient from 'react-native-linear-gradient';
+// import {useFocusEffect, useNavigation} from '@react-navigation/native';
+// import DashboardHeader from '../../components/Header/DashBoardHeader';
+// import styles from './History.styles';
+// import {useLoader} from '../../context/LoaderContext';
+// import emptyImage from '../../assets/empty.png';
+// import TrackingCard from '../../components/TrackingCard/TrackingCard';
+// import {hp} from '../../utils/Responsive/responsive';
+// import OrderCardShimmer from './OrderCardShimmer';
+// import api from '../../redux/api';
+
+// const OrderHistory = () => {
+//   const [activeTab, setActiveTab] = useState('All Orders');
+//   const [orders, setOrders] = useState([]);
+//   const {setLoading} = useLoader();
+//   const navigation = useNavigation();
+//   const [isLoadingLocal, setIsLoadingLocal] = useState(true);
+
+//   const fetchOrders = useCallback(async (forceRefresh = false) => {
+//     setIsLoadingLocal(true);
+//     setLoading(true);
+
+//     try {
+//       const response = await api.get(`/order/user-orders`);
+//       setOrders(response.data);
+//     } catch (error) {
+//       console.log('Error fetching orders:', error.message);
+//     } finally {
+//       setLoading(false);
+//       setIsLoadingLocal(false);
+//     }
+//   }, []);
+
+//   useFocusEffect(
+//     useCallback(() => {
+//       let isActive = true;
+
+//       const load = async () => {
+//         if (isActive) {
+//           await fetchOrders();
+//         }
+//       };
+
+//       load();
+
+//       return () => {
+//         isActive = false;
+//       };
+//     }, [fetchOrders]),
+//   );
+
+//   const filterTabs = [
+//     'All Orders',
+//     'Quote Sent',
+//     'Invoice Uploaded',
+//     'Confirmed',
+//     'Rework',
+//     'Packing',
+//     'Dispatched',
+//     'Delivered',
+//   ];
+
+//   // Memoize filtered orders to prevent unnecessary recalculations
+//   const filteredOrders = useMemo(() => {
+//     return orders.filter(
+//       order => activeTab === 'All Orders' || order.status === activeTab,
+//     );
+//   }, [orders, activeTab]);
+
+//   const selectFilter = useCallback(filter => {
+//     setActiveTab(filter);
+//   }, []);
+
+//   const renderFilterTab = useCallback(
+//     ({item: filter, index}) => (
+//       <TouchableWithoutFeedback
+//         key={index}
+//         onPress={() => selectFilter(filter)}>
+//         <View
+//           style={[
+//             styles.tabButton,
+//             activeTab === filter && styles.activeTabButton,
+//           ]}>
+//           {activeTab === filter ? (
+//             <LinearGradient
+//               colors={['#2D4565', '#2D4565', '#1B2B48', '#1B2B48']}
+//               start={{x: 0, y: 0}}
+//               end={{x: 0, y: 1}}
+//               style={styles.activeGradient}>
+//               <Text style={styles.activeTabText}>{filter}</Text>
+//             </LinearGradient>
+//           ) : (
+//             <Text style={styles.inactiveTabText}>{filter}</Text>
+//           )}
+//         </View>
+//       </TouchableWithoutFeedback>
+//     ),
+//     [activeTab, selectFilter],
+//   );
+
+//   // Memoize the order card rendering
+//   const renderOrderCard = useCallback(
+//     ({item: order, index}) => (
+//       <TrackingCard
+//         key={order._id || index}
+//         index={index}
+//         order={order}
+//         fetchOrders={fetchOrders}
+//       />
+//     ),
+//     [],
+//   );
+
+//   // Memoize the shimmer rendering
+//   const renderShimmer = useCallback(
+//     ({item, index}) => <OrderCardShimmer key={index} />,
+//     [],
+//   );
+
+//   // Memoize the empty state component
+//   const renderEmptyState = useCallback(
+//     () => (
+//       <View style={styles.emptyContainer}>
+//         <Image
+//           source={emptyImage}
+//           style={styles.emptyImage}
+//           resizeMode="contain"
+//         />
+//         <Text style={styles.emptyTitle}>No Orders Yet</Text>
+//         <Text style={styles.emptySubtitle}>
+//           You haven't ordered any products yet. Start by exploring our dye &
+//           chemical range.
+//         </Text>
+//         <LinearGradient
+//           colors={['#38587F', '#101924']}
+//           start={{x: 0, y: 0}}
+//           end={{x: 1, y: 0}}
+//           style={{
+//             flexDirection: 'row',
+//             alignItems: 'center',
+//             paddingHorizontal: 6,
+//             borderRadius: 100,
+//           }}>
+//           <TouchableOpacity
+//             style={styles.goBackButton}
+//             onPress={() => navigation.goBack()}>
+//             <Text style={styles.goBackText}>GO BACK</Text>
+//           </TouchableOpacity>
+//         </LinearGradient>
+//       </View>
+//     ),
+//     [navigation],
+//   );
+
+//   // Key extractor for FlatList
+//   const keyExtractor = useCallback(
+//     (item, index) => item._id || index.toString(),
+//     [],
+//   );
+
+//   return (
+//     <View style={styles.container}>
+//       <DashboardHeader />
+//       <View style={[styles.headerContainer, {marginTop: hp(-10)}]}>
+//         <View style={styles.filterTabsContainer}>
+//           <FlatList
+//             data={filterTabs}
+//             renderItem={renderFilterTab}
+//             keyExtractor={(item, index) => item + index}
+//             horizontal
+//             showsHorizontalScrollIndicator={false}
+//             contentContainerStyle={styles.tabScrollContainer}
+//           />
+//         </View>
+
+//         {isLoadingLocal ? (
+//           <FlatList
+//             data={[1, 2, 3, 4, 5]}
+//             renderItem={renderShimmer}
+//             keyExtractor={(item, index) => `shimmer-${index}`}
+//             contentContainerStyle={styles.ordersContainer}
+//             showsVerticalScrollIndicator={false}
+//           />
+//         ) : (
+//           <FlatList
+//             data={filteredOrders}
+//             renderItem={renderOrderCard}
+//             keyExtractor={keyExtractor}
+//             contentContainerStyle={[
+//               styles.ordersContainer,
+//               filteredOrders.length === 0 && styles.emptyContainer,
+//             ]}
+//             showsVerticalScrollIndicator={false}
+//             ListEmptyComponent={renderEmptyState}
+//             removeClippedSubviews={true}
+//             maxToRenderPerBatch={10}
+//             windowSize={10}
+//             initialNumToRender={10}
+//             updateCellsBatchingPeriod={50}
+//             onRefresh={() => fetchOrders(true)}
+//             refreshing={isLoadingLocal}
+//           />
+//         )}
+//       </View>
+//     </View>
+//   );
+// };
+
+// export default React.memo(OrderHistory);
+
+import React, {useCallback, useState, useMemo} from 'react';
 import {
   View,
   Text,
   Image,
   TouchableOpacity,
-  ScrollView,
-  TextInput,
-  Modal,
+  FlatList,
+  TouchableWithoutFeedback,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
-import Icon from 'react-native-vector-icons/Entypo';
 import {useFocusEffect, useNavigation} from '@react-navigation/native';
-import axios from 'axios';
 import DashboardHeader from '../../components/Header/DashBoardHeader';
-import {fallbackImg} from '../../utils/images';
 import styles from './History.styles';
-import {StorageKeys, storage} from '../../utils/storage';
-import {API_URL} from '../../utils/ApiService';
-
-import {useDispatch, useSelector} from 'react-redux';
 import {useLoader} from '../../context/LoaderContext';
-import {useAlert} from '../../context/CustomAlertContext';
-import InfoIcon from 'react-native-vector-icons/Entypo';
-import {openModal} from '../../redux/slices/modalSlice';
-import ScrollImage from '../../components/ScrollImage/Index';
-
-// Helper to format the date
-const formatDate = dateString => {
-  const date = new Date(dateString);
-  return date.toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-  });
-};
+import emptyImage from '../../assets/empty.png';
+import TrackingCard from '../../components/TrackingCard/TrackingCard';
+import {hp} from '../../utils/Responsive/responsive';
+import OrderCardShimmer from './OrderCardShimmer';
+import api from '../../redux/api';
 
 const OrderHistory = () => {
   const [activeTab, setActiveTab] = useState('All Orders');
-  const [expandedOrders, setExpandedOrders] = useState([]);
   const [orders, setOrders] = useState([]);
   const {setLoading} = useLoader();
-
-  const [error, setError] = useState(null);
-  const [reworkModalVisible, setReworkModalVisible] = useState(false);
-  const [reworkReason, setReworkReason] = useState('');
-  const [selectedOrderId, setSelectedOrderId] = useState(null);
-  const [processing, setProcessing] = useState(false);
   const navigation = useNavigation();
-  const {showAlert} = useAlert();
+  const [isLoadingLocal, setIsLoadingLocal] = useState(true);
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
 
-  const fetchOrders = async () => {
-    setLoading(true);
-    setError(null);
-    const token = storage.getString(StorageKeys.AUTH_TOKEN);
-    try {
-      const response = await axios.get(`${API_URL}/order/user-orders`, {
-        headers: {Authorization: `Bearer ${token}`},
-      });
-      setOrders(response.data);
+  const fetchOrders = useCallback(
+    async (forceRefresh = false) => {
+      // Only show global loader on initial load
+      if (!hasLoadedOnce) {
+        setLoading(true);
+      }
+      setIsLoadingLocal(true);
 
-      setLoading(false);
-    } catch (error) {
-      console.log(error, 'error message');
-      setError('Failed to load orders. Please try again.');
-      setLoading(false);
-    }
-  };
+      console.log(`${api}/order/user-orders`);
+      try {
+        const response = await api.get(`/order/user-orders`);
+        console.log('response data', response.data);
+        setOrders(response.data);
+        setHasLoadedOnce(true);
+      } catch (error) {
+        console.log(error.response);
+        console.log('Error fetching orders:', error.message);
+      } finally {
+        setLoading(false);
+        setIsLoadingLocal(false);
+      }
+    },
+    [hasLoadedOnce],
+  );
 
   useFocusEffect(
     useCallback(() => {
-      fetchOrders();
-    }, []),
+      let isActive = true;
+
+      const load = async () => {
+        if (isActive) {
+          await fetchOrders();
+        }
+      };
+
+      load();
+
+      return () => {
+        isActive = false;
+      };
+    }, [fetchOrders]),
   );
 
-  const updateOrderStatus = async (orderId, status, reason = null) => {
-    setProcessing(true);
-    const token = storage.getString(StorageKeys.AUTH_TOKEN);
+  const filterTabs = [
+    'All Orders',
+    'Quote Sent',
+    'Invoice Uploaded',
+    'Confirmed',
+    'Rework',
+    'Packing',
+    'Dispatched',
+    'Delivered',
+  ];
 
-    try {
-      setLoading(true);
-      const payload = {status};
-      if (reason) {
-        payload.reason = reason;
-      }
-
-      const response = await axios.patch(
-        `${API_URL}/order/user-status/${orderId}`,
-        payload,
-        {
-          headers: {Authorization: `Bearer ${token}`},
-        },
-      );
-
-      // Show success message using custom alert instead of Alert.alert
-      showAlert({
-        title: status === 'Confirmed' ? 'Order Confirmed' : 'Rework Requested',
-        message:
-          status === 'Confirmed'
-            ? 'Your order has been confirmed and is being processed.'
-            : 'Your rework request has been submitted.',
-        onAccept: () => {
-          // Refresh orders after confirmation
-          fetchOrders();
-        },
-        acceptText: 'OK',
-        rejectText: '', // Hide cancel button by not providing rejectText
-      });
-
-      // Refresh orders
-      fetchOrders();
-    } catch (error) {
-      console.log('Update status error:', error.response?.data || error);
-
-      // Show error using custom alert instead of Alert.alert
-      showAlert({
-        title: 'Error',
-        message:
-          error.response?.data?.message || 'Failed to update order status.',
-        acceptText: 'OK',
-        rejectText: '', // Hide cancel button
-      });
-    } finally {
-      setProcessing(false);
-      setLoading(false);
-      if (status === 'Rework') {
-        setReworkModalVisible(false);
-        setReworkReason('');
-      }
-    }
-  };
-
-  // Handle confirm button press
-  const handleConfirmOrder = orderId => {
-    // Using custom alert instead of Alert.alert
-    showAlert({
-      title: 'Confirm Order',
-      message: 'Are you sure you want to confirm this order?',
-      onConfirm: () => updateOrderStatus(orderId, 'Confirmed'),
-      acceptText: 'Confirm',
-      rejectText: 'Cancel',
-    });
-  };
-
-  // Handle rework button press
-  const handleReworkOrder = orderId => {
-    setSelectedOrderId(orderId);
-    setReworkModalVisible(true);
-  };
-
-  // Submit rework request with reason
-  const submitReworkRequest = () => {
-    if (!reworkReason.trim()) {
-      // Using custom alert for validation error
-      showAlert({
-        title: 'Required',
-        message: 'Please provide a reason for the rework request.',
-        acceptText: 'OK',
-        rejectText: '', // Hide cancel button
-      });
-      return;
-    }
-    updateOrderStatus(selectedOrderId, 'Rework', reworkReason);
-  };
-
-  const toggleOrderExpand = orderId => {
-    setExpandedOrders(prev =>
-      prev.includes(orderId)
-        ? prev.filter(id => id !== orderId)
-        : [...prev, orderId],
+  // Memoize filtered orders to prevent unnecessary recalculations
+  const filteredOrders = useMemo(() => {
+    return orders.filter(
+      order => activeTab === 'All Orders' || order.status === activeTab,
     );
-  };
+  }, [orders, activeTab]);
 
-  const getStatusColor = status => {
-    switch (status) {
-      case 'Delivered':
-        return '#4CAF50';
-      case 'Quote Sent':
-        return '#FF9800';
-      case 'Confirmed':
-        return '#2196F3';
-      case 'Processing':
-        return '#FF9800';
-      case 'Shipped':
-        return '#2196F3';
-      case 'Rework':
-        return '#F44336';
-      default:
-        return '#757575';
-    }
-  };
+  const selectFilter = useCallback(filter => {
+    setActiveTab(filter);
+  }, []);
 
-  // Define filter tabs based on available status values in your data
-  const filterTabs = ['All Orders', 'Quote Sent', 'Confirmed', 'Delivered'];
-
-  // Filter orders based on active tab
-  const filteredOrders = orders.filter(
-    order => activeTab === 'All Orders' || order.status === activeTab,
+  const renderFilterTab = useCallback(
+    ({item: filter, index}) => (
+      <TouchableWithoutFeedback
+        key={index}
+        onPress={() => selectFilter(filter)}>
+        <View
+          style={[
+            styles.tabButton,
+            activeTab === filter && styles.activeTabButton,
+          ]}>
+          {activeTab === filter ? (
+            <LinearGradient
+              colors={['#2D4565', '#2D4565', '#1B2B48', '#1B2B48']}
+              start={{x: 0, y: 0}}
+              end={{x: 0, y: 1}}
+              style={styles.activeGradient}>
+              <Text style={styles.activeTabText}>{filter}</Text>
+            </LinearGradient>
+          ) : (
+            <Text style={styles.inactiveTabText}>{filter}</Text>
+          )}
+        </View>
+      </TouchableWithoutFeedback>
+    ),
+    [activeTab, selectFilter],
   );
 
-  const user = useSelector(state => state.auth.user);
+  // Memoize the order card rendering
+  const renderOrderCard = useCallback(
+    ({item: order, index}) => (
+      <TrackingCard
+        key={order._id || index}
+        index={index}
+        order={order}
+        fetchOrders={fetchOrders}
+      />
+    ),
+    [],
+  );
 
-  const dispatch = useDispatch();
+  // Memoize the shimmer rendering
+  const renderShimmer = useCallback(
+    ({item, index}) => <OrderCardShimmer key={index} />,
+    [],
+  );
 
-  const handleImageZoom = imageUri => {
-    dispatch(
-      openModal({
-        modalType: 'ImageZoomModal',
-        modalProps: {
-          visible: true,
-          imageUri,
-        },
-      }),
-    );
-  };
+  // Memoize the empty state component
+  const renderEmptyState = useCallback(
+    () => (
+      <View style={styles.emptyContainer}>
+        <Image
+          source={emptyImage}
+          style={styles.emptyImage}
+          resizeMode="contain"
+        />
+        <Text style={styles.emptyTitle}>No Orders Yet</Text>
+        <Text style={styles.emptySubtitle}>
+          You haven't ordered any products yet. Start by exploring our dye &
+          chemical range.
+        </Text>
+        <LinearGradient
+          colors={['#38587F', '#101924']}
+          start={{x: 0, y: 0}}
+          end={{x: 1, y: 0}}
+          style={{
+            flexDirection: 'row',
+            alignItems: 'center',
+            paddingHorizontal: 6,
+            borderRadius: 100,
+          }}>
+          <TouchableOpacity
+            style={styles.goBackButton}
+            onPress={() => navigation.goBack()}>
+            <Text style={styles.goBackText}>GO BACK</Text>
+          </TouchableOpacity>
+        </LinearGradient>
+      </View>
+    ),
+    [navigation],
+  );
+
+  // Key extractor for FlatList
+  const keyExtractor = useCallback(
+    (item, index) => item._id || index.toString(),
+    [],
+  );
 
   return (
     <View style={styles.container}>
       <DashboardHeader />
-      <View style={styles.headerContainer}>
-        <View style={styles.userInfoCard}>
-          <Image
-            source={{
-              uri: fallbackImg(),
-            }}
-            style={styles.userAvatar}
+      <View style={[styles.headerContainer, {marginTop: hp(-10)}]}>
+        <View style={styles.filterTabsContainer}>
+          <FlatList
+            data={filterTabs}
+            renderItem={renderFilterTab}
+            keyExtractor={(item, index) => item + index}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.tabScrollContainer}
           />
-          <View style={styles.userTextContainer}>
-            <Text style={styles.userName}>{user?.name}</Text>
-            <Text style={styles.userEmail}>{user?.email}</Text>
-          </View>
         </View>
 
-        <View
-          style={{
-            borderTopLeftRadius: 20,
-            borderTopRightRadius: 20,
-          }}>
-          <View style={styles.tabsContainer}>
-            {filterTabs.map(tab => (
-              <LinearGradient
-                key={tab}
-                colors={
-                  activeTab === tab ? ['#38587F', '#101924'] : ['#FFF', '#FFF']
-                }
-                start={{x: 0, y: 0}}
-                end={{x: 1, y: 0}}
-                style={[
-                  styles.tabButton,
-                  activeTab === tab && styles.activeTabButton,
-                ]}>
-                <TouchableOpacity onPress={() => setActiveTab(tab)}>
-                  <Text
-                    style={[
-                      styles.tabText,
-                      activeTab === tab && styles.activeTabText,
-                    ]}>
-                    {tab}
-                  </Text>
-                </TouchableOpacity>
-              </LinearGradient>
-            ))}
-          </View>
-        </View>
-
-        <ScrollView
-          style={styles.ordersContainer}
-          showsVerticalScrollIndicator={false}>
-          {error ? (
-            <Text style={styles.errorText}>{error}</Text>
-          ) : filteredOrders.length === 0 ? (
-            <Text style={styles.messageText}>No orders found</Text>
-          ) : (
-            filteredOrders.map((order, index) => (
-              <View key={index} style={styles.orderCard}>
-                <View style={styles.orderHeader}>
-                  <View style={styles.orderDetails}>
-                    <View>
-                      <Text style={styles.orderIdText}>
-                        Order #{order?._id.slice(-9)}
-                      </Text>
-                      <View
-                        style={{flexDirection: 'row', alignItems: 'center'}}>
-                        <View
-                          style={[
-                            styles.statusDot,
-                            {backgroundColor: getStatusColor(order.status)},
-                          ]}
-                        />
-                        <Text style={styles.orderStatus}>{order.status}</Text>
-                      </View>
-                    </View>
-                    <View>
-                      <Text style={styles.orderDateText}>
-                        Placed on {formatDate(order.createdAt)}
-                      </Text>
-                      {!order.isPartialOrder && (
-                        <View
-                          style={{flexDirection: 'row', alignItems: 'center'}}>
-                          <InfoIcon
-                            name="info-with-circle"
-                            size={18}
-                            color="#101924"
-                          />
-                          <Text
-                            style={{
-                              fontSize: 13,
-                              color: 'black',
-                              marginLeft: 3,
-                            }}>
-                            Partial Order
-                          </Text>
-                        </View>
-                      )}
-                    </View>
-                  </View>
-                  <View
-                    style={{
-                      backgroundColor: '#3C5D87',
-                      marginTop: 10,
-                      borderRadius: 10,
-                    }}>
-                    <View
-                      style={{
-                        backgroundColor: '#FFF',
-                        borderBottomLeftRadius: 10,
-                      }}>
-                      {!expandedOrders.includes(order._id) &&
-                        order.items.length > 0 && (
-                          <View style={styles.orderItemsContainer}>
-                            <View style={styles.orderItem}>
-                              <ScrollImage
-                                product={order.items[0]?.productId}
-                                reffer="cart"
-                              />
-                              <View style={styles.productDetails}>
-                                <Text style={styles.productName}>
-                                  {order.items[0].productId.name}
-                                </Text>
-                                <Text style={styles.productSize}>
-                                  <Text style={{fontWeight: '700'}}>
-                                    Variant
-                                  </Text>
-                                  : {order.items[0].variant}
-                                </Text>
-                                <Text style={styles.productQuantity}>
-                                  Quantity: {order.items[0].quantity}
-                                </Text>
-                              </View>
-                              {order.items.length > 1 && (
-                                <View>
-                                  <LinearGradient
-                                    colors={['#38587F', '#101924']}
-                                    start={{x: 0, y: 0}}
-                                    end={{x: 1, y: 0}}
-                                    style={styles.ratingContainer}>
-                                    <Text style={styles.ratingText}>
-                                      +{order.items.length - 1}
-                                    </Text>
-                                  </LinearGradient>
-                                </View>
-                              )}
-                            </View>
-                          </View>
-                        )}
-
-                      {expandedOrders.includes(order._id) && (
-                        <View style={styles.orderItemsContainer}>
-                          {order.items.map((item, itemIndex) => (
-                            <View key={itemIndex} style={styles.orderItem}>
-                              <ScrollImage
-                                product={order.items[itemIndex]?.productId}
-                                reffer="cart"
-                              />
-                              <View style={styles.productDetails}>
-                                <Text style={styles.productName}>
-                                  {item.productId.name}
-                                </Text>
-                                <Text style={styles.productSize}>
-                                  Variant: {item.variant}
-                                </Text>
-                                <Text style={styles.productQuantity}>
-                                  Quantity: {item.quantity}
-                                </Text>
-                              </View>
-                            </View>
-                          ))}
-                        </View>
-                      )}
-                    </View>
-                    {order.items.length > 1 && (
-                      <TouchableOpacity
-                        onPress={() => toggleOrderExpand(order._id)}
-                        style={{
-                          borderBottomLeftRadius: 10,
-                          borderBottomRightRadius: 10,
-                          marginTop: -10,
-                          paddingTop: 7,
-                        }}>
-                        <Icon
-                          name={
-                            expandedOrders.includes(order._id)
-                              ? 'chevron-up'
-                              : 'chevron-down'
-                          }
-                          style={{alignSelf: 'center'}}
-                          size={24}
-                          color="#fff"
-                        />
-                      </TouchableOpacity>
-                    )}
-                  </View>
-                  <View style={{marginTop: 10}}>
-                    {order.status === 'Invoice Uploaded' ||
-                    order.status === 'Quote Sent' ||
-                    order.status === 'Partially Fulfilled' ? (
-                      <View
-                        style={{
-                          flexDirection: 'row',
-                          justifyContent: 'space-between',
-                        }}>
-                        <LinearGradient
-                          colors={['#101924', '#38587F']}
-                          start={{x: 0, y: 0}}
-                          end={{x: 1, y: 0}}
-                          style={styles.confirmButton}>
-                          <TouchableOpacity
-                            style={styles.quoteButton}
-                            onPress={() => handleConfirmOrder(order._id)}
-                            disabled={processing}>
-                            <Text style={styles.quoteButtonText}>
-                              {processing ? 'Processing...' : 'Confirm'}
-                            </Text>
-                          </TouchableOpacity>
-                        </LinearGradient>
-                        <LinearGradient
-                          colors={['#FFF', '#FFF']}
-                          start={{x: 0, y: 0}}
-                          end={{x: 1, y: 0}}
-                          style={[
-                            styles.confirmButton,
-                            {borderColor: '#101924', borderWidth: 2},
-                          ]}>
-                          <TouchableOpacity
-                            style={[styles.quoteButton]}
-                            onPress={() => handleReworkOrder(order._id)}
-                            disabled={processing}>
-                            <Text
-                              style={[
-                                styles.quoteButtonText,
-                                {color: '#101924'},
-                              ]}>
-                              {processing ? 'Processing...' : 'Rework'}
-                            </Text>
-                          </TouchableOpacity>
-                        </LinearGradient>
-                      </View>
-                    ) : null}
-                  </View>
-                </View>
-              </View>
-            ))
-          )}
-        </ScrollView>
+        {/* Show shimmer only on initial load when we don't have data */}
+        {isLoadingLocal && !hasLoadedOnce ? (
+          <FlatList
+            data={[1, 2, 3, 4, 5]}
+            renderItem={renderShimmer}
+            keyExtractor={(item, index) => `shimmer-${index}`}
+            contentContainerStyle={styles.ordersContainer}
+            showsVerticalScrollIndicator={false}
+          />
+        ) : (
+          <FlatList
+            data={filteredOrders}
+            renderItem={renderOrderCard}
+            keyExtractor={keyExtractor}
+            contentContainerStyle={[
+              styles.ordersContainer,
+              filteredOrders.length === 0 && styles.emptyOrdersContainer,
+            ]}
+            showsVerticalScrollIndicator={false}
+            ListEmptyComponent={renderEmptyState}
+            removeClippedSubviews={true}
+            maxToRenderPerBatch={10}
+            windowSize={10}
+            initialNumToRender={10}
+            updateCellsBatchingPeriod={50}
+            onRefresh={() => fetchOrders(true)}
+            refreshing={isLoadingLocal && hasLoadedOnce} // Only show refresh indicator after initial load
+          />
+        )}
       </View>
-
-      {/* Rework Modal */}
-      <Modal
-        visible={reworkModalVisible}
-        transparent={true}
-        animationType="slide"
-        onRequestClose={() => {
-          setReworkModalVisible(false);
-          setReworkReason('');
-        }}>
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Request Rework</Text>
-            <Text style={styles.modalSubtitle}>
-              Please provide a reason for your rework request:
-            </Text>
-            <TextInput
-              style={styles.reasonInput}
-              placeholder="Enter reason for rework"
-              multiline={true}
-              numberOfLines={4}
-              value={reworkReason}
-              onChangeText={setReworkReason}
-            />
-            <View style={styles.modalButtons}>
-              <TouchableOpacity
-                style={[styles.modalButton, styles.cancelButton]}
-                onPress={() => {
-                  setReworkModalVisible(false);
-                  setReworkReason('');
-                }}>
-                <Text style={styles.cancelButtonText}>Cancel</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={[styles.modalButton, styles.submitButton]}
-                onPress={submitReworkRequest}
-                disabled={processing}>
-                <Text style={styles.submitButtonText}>
-                  {processing ? 'Submitting...' : 'Submit'}
-                </Text>
-              </TouchableOpacity>
-            </View>
-          </View>
-        </View>
-      </Modal>
     </View>
   );
 };
 
-export default OrderHistory;
+export default React.memo(OrderHistory);

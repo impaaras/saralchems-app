@@ -1,14 +1,16 @@
 import {StyleSheet} from 'react-native';
+import {
+  moderateScale,
+  scale,
+  verticalScale,
+} from '../../utils/Responsive/responsive';
 
 const styles = StyleSheet.create({
   headerContainer: {
-    // paddingHorizontal: 8,
-    // zIndex: 0,
     paddingVertical: 16,
     paddingBottom: 100,
     borderBottomEndRadius: 40,
     borderBottomLeftRadius: 40,
-
     backgroundColor: '#3C5D87',
   },
 
@@ -17,24 +19,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     borderRadius: 100,
     paddingHorizontal: 8,
-    height: 48,
+    height: scale(40),
   },
   menuContainer: {
-    width: 40,
-    height: 40,
+    borderWidth: 1,
+    borderColor: '#FCFCFC33',
+    padding: moderateScale(6),
+    borderRadius: 100,
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 100,
-    borderWidth: 0.8,
-    borderColor: '#617D9E',
-
     shadowOffset: {
       width: 0,
       height: 1,
     },
     shadowOpacity: 0.1,
     shadowRadius: 1,
-    // elevation: 2,
   },
   centerContainer: {
     flex: 1,
@@ -42,21 +41,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   title: {
-    fontSize: 17,
+    fontSize: moderateScale(16),
     fontWeight: '500',
     color: '#FFF',
     fontWeight: '500',
-    marginLeft: 10,
+    marginLeft: scale(10),
   },
   searchButton: {
-    width: 40,
-    height: 40,
-
+    borderWidth: 1,
+    borderColor: '#FCFCFC33',
+    padding: moderateScale(6),
+    borderRadius: 100,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 0.8,
-    borderColor: '#617D9E',
-    borderRadius: 100,
     marginRight: 10,
     marginLeft: 10,
   },
@@ -106,6 +103,43 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 1,
     elevation: 2,
+  },
+  // Add these to your existing styles
+  backButton: {
+    borderWidth: 1,
+    marginLeft: scale(3),
+    borderColor: '#FCFCFC33',
+    padding: moderateScale(5),
+    borderRadius: 100,
+  },
+  titleContainer: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    position: 'relative',
+    zIndex: 9999999,
+  },
+  searchInputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flex: 1,
+    marginLeft: 5,
+    paddingLeft: 10,
+    backgroundColor: '#FFF',
+    borderRadius: 100,
+  },
+  searchInput: {
+    paddingVertical: 10,
+    height: 40,
+    flex: 1,
+  },
+  clearButton: {
+    paddingHorizontal: 10,
+  },
+  clearText: {
+    fontSize: 22,
+    color: '#555',
   },
 });
 

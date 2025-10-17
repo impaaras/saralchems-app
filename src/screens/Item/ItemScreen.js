@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   Image,
   Text,
+  Pressable,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import axios from 'axios';
@@ -29,14 +30,18 @@ import {setSelectedVariant} from '../../redux/slices/newCart';
 import {API_URL} from '../../utils/ApiService';
 import styles from './Item.styles';
 import {fallbackImg} from '../../utils/images';
+import {useLoader} from '../../context/LoaderContext';
+import ShimmerCard from '../Product/SkeltonCard';
+import SafeImage from '../../components/SafeImage/SafeImage';
 
 const ItemScreen = ({route}) => {
   const navigation = useNavigation();
   const isFocused = useIsFocused();
   const [product, setProduct] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const {setLoading} = useLoader();
   const [errorMsg, setErrorMsg] = useState('');
   const [isOpen, setIsOpen] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   const dispatch = useDispatch();
 
@@ -52,24 +57,34 @@ const ItemScreen = ({route}) => {
   // Set initial category data when screen is focused
   useEffect(() => {
     if (isFocused && route.params) {
+      // Show loader immediately when screen focuses
+      setLoading(false);
+      setIsInitialized(false);
+
       dispatch(setSelectedCategory(route.params?.selectedItem));
       dispatch(setCurrentSubcategoryId(route.params?.subcategoryId));
       dispatch(setSubcategories(route.params?.subcategories));
       dispatch(setCategoryId(route.params?.categoryId));
+
+      setIsInitialized(true);
     }
   }, [isFocused, route.params]);
+
   const handleCategorySelection = category => {
+    // Show loader for category change
+    setLoading(false);
+    setProduct([]);
+    setErrorMsg('');
+
     dispatch(setSelectedCategory(category.name));
     dispatch(setSelectedVariant(null));
-
     dispatch(setCurrentSubcategoryId(category._id));
   };
 
   // Fetch products when subcategory changes
   useEffect(() => {
-    setProduct([]);
-    setErrorMsg('');
-    setLoading(true);
+    // Only proceed if we have initialized the screen
+    if (!isInitialized) return;
 
     if (!categoryId || !currentSubcategoryId) {
       setErrorMsg('No category or subcategory selected');
@@ -84,8 +99,7 @@ const ItemScreen = ({route}) => {
           `${API_URL}/product/category/${categoryId}/subcategory/${currentSubcategoryId}`,
           {headers: {Authorization: `Bearer ${token}`}},
         );
-
-        setProduct(response.data);
+        setProduct(response.data.products);
       } catch (error) {
         setErrorMsg(
           error.response?.data?.message || 'Failed to fetch products',
@@ -96,7 +110,7 @@ const ItemScreen = ({route}) => {
     };
 
     fetchProducts();
-  }, [currentSubcategoryId, categoryId]);
+  }, [currentSubcategoryId, categoryId, isInitialized]);
 
   // Sort products when sortOption changes
   const sortedProducts = React.useMemo(() => {
@@ -133,23 +147,28 @@ const ItemScreen = ({route}) => {
           showsHorizontalScrollIndicator={false}
           contentContainerStyle={styles.container}>
           {subcategories &&
-            subcategories.map(category => (
+            subcategories.map((category, index) => (
               <TouchableOpacity
-                key={category._id}
+                key={`${category._id}-${index}`}
                 style={[
                   styles.itemContainer,
                   selectedCategory === category.name && styles.selectedItem,
                 ]}
                 onPress={() => handleCategorySelection(category)}>
-                <Image
-                  source={{
-                    uri: category.image
+                <SafeImage
+                  sourceUri={
+                    category.image
                       ? `https://api.saraldyechems.com/upload/image/${category.image}`
-                      : fallbackImg(),
-                  }}
+                      : null
+                  }
                   style={styles.image}
                 />
-                <Text style={styles.itemTitle}>{category.name}</Text>
+                {selectedCategory === category.name ? (
+                  <Text style={styles.bolditemTitle}>{category.name}</Text>
+                ) : (
+                  <Text style={styles.itemTitle}>{category.name}</Text>
+                )}
+
                 {selectedCategory === category.name && (
                   <View style={styles.borderBottom} />
                 )}
@@ -166,24 +185,13 @@ const ItemScreen = ({route}) => {
       <ScrollView
         style={styles.productsContainer}
         showsVerticalScrollIndicator={false}>
-        {loading ? (
-          <View style={{alignItems: 'center', marginTop: 20}}>
-            <Text style={{fontSize: 16, color: 'gray'}}>Loading...</Text>
-          </View>
-        ) : errorMsg ? (
-          <View style={{alignItems: 'center', marginTop: 20}}>
-            <Text style={{fontSize: 16, color: 'red'}}>{errorMsg}</Text>
-          </View>
-        ) : sortedProducts.length > 0 ? (
-          <View
-            style={{
-              flexDirection: 'row',
-              flexWrap: 'wrap',
-            }}>
+        {sortedProducts && sortedProducts.length > 0 ? (
+          <View style={styles.productInnerContainer}>
             {sortedProducts &&
               sortedProducts.map((product, index) => (
                 <ProductCard
-                  key={product._id}
+                  // key={product._id}
+                  key={`product-${product._id || index}`}
                   item={product}
                   onAddPress={handleAddPress}
                   idx={index}
@@ -192,10 +200,15 @@ const ItemScreen = ({route}) => {
               ))}
           </View>
         ) : (
-          <View style={{alignItems: 'center', marginTop: 20}}>
-            <Text style={{fontSize: 16, color: 'gray'}}>
-              No items available
-            </Text>
+          <View
+            style={{
+              flexDirection: 'row',
+              flexWrap: 'wrap',
+              justifyContent: 'center',
+            }}>
+            {Array.from({length: 9}).map((_, index) => (
+              <ShimmerCard key={`shimmer-${index}`} />
+            ))}
           </View>
         )}
       </ScrollView>

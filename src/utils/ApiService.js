@@ -1,6 +1,6 @@
-const localUrl = 'http://172.20.10.3:4000';
+const localUrl = 'http://192.168.1.5:3000';
 const prodUrl = `https://api.saraldyechems.com`;
 
-let isProduction = true;
+let isProduction = false;
 
 export const API_URL = isProduction ? prodUrl : localUrl;

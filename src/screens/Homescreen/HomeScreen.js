@@ -1,81 +1,92 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef} from 'react';
 import {
   View,
-  StyleSheet,
   SafeAreaView,
-  ScrollView,
   Text,
-  ActivityIndicator,
+  Animated,
+  TouchableOpacity,
+  Easing,
 } from 'react-native';
-import {useSelector} from 'react-redux';
-
+import {useDispatch, useSelector} from 'react-redux';
+import HapticFeedback from 'react-native-haptic-feedback';
 import ProductList from '../../components/List/ProductList';
-import axios from 'axios';
 import TrendingProducts from '../../components/Trending/TrendingProducts';
 import DashboardHeader from '../../components/Header/DashBoardHeader';
-import {ROUTES} from '../../constants/routes';
-import {useNavigation} from '@react-navigation/native';
-import {API_URL} from '../../utils/ApiService';
-import {getRouteName} from '../../utils/function/routeName';
 import styles from './Homescreen.styles';
-import {useLoader} from '../../context/LoaderContext';
+import RepeatOrder from '../../components/RepeatCard.js/RepeatOrder';
+import {fetchCategories} from '../../redux/slices/homeSlice';
+
+const hapticOptions = {
+  enableVibrateFallback: true,
+  ignoreAndroidSystemSettings: false,
+};
 
 const HomeScreen = () => {
-  const [categories, setCategories] = useState([]);
-  const [subCategories, setSubCategories] = useState({});
-  const {setLoading} = useLoader();
-  const [error, setError] = useState(null);
+  const dispatch = useDispatch();
+  const {categories, subCategories, loading, error} = useSelector(
+    state => state.home,
+  );
 
-  const token = useSelector(state => state.auth.token);
-  const getCategoryData = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await axios.get(`${API_URL}/category`, {
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-      });
+  // Animations
+  const headerAnim = useRef(new Animated.Value(0)).current;
+  const categoriesListAnim = useRef(new Animated.Value(0)).current;
+  const sectionAnims = useRef([]).current;
+  const scrollY = useRef(new Animated.Value(0)).current; // Add scrollY ref
 
-      const categoriesData = response.data;
-
-      const subCategoriesMap = {};
-      categoriesData.forEach(category => {
-        const subcats = category.subcategories.map(subcat => ({
-          ...subcat,
-          parentCategoryId: category._id,
-          parentCategoryName: category.name,
-          subCategories: category.subcategories,
-        }));
-        subCategoriesMap[category._id] = subcats || [];
-      });
-
-      setCategories(categoriesData);
-      setSubCategories(subCategoriesMap);
-      setLoading(false);
-    } catch (error) {
-      setLoading(false);
-      if (
-        error.response &&
-        (error.response.status === 401 || error.response.status === 403)
-      ) {
-        setError('Session expired. Please login again.');
-      } else {
-        setError('Failed to load categories');
-        console.log(
-          'Category Fetch Error:',
-          error.response?.data?.message || error.message,
-        );
-      }
+  const startAnimations = categoriesData => {
+    sectionAnims.length = 0;
+    for (let i = 0; i < categoriesData.length; i++) {
+      sectionAnims.push(new Animated.Value(0));
     }
+
+    Animated.stagger(120, [
+      Animated.timing(headerAnim, {
+        toValue: 1,
+        duration: 600,
+        easing: Easing.out(Easing.ease),
+        useNativeDriver: true,
+      }),
+      Animated.timing(categoriesListAnim, {
+        toValue: 1,
+        duration: 600,
+        easing: Easing.out(Easing.ease),
+        delay: 100,
+        useNativeDriver: true,
+      }),
+      ...categoriesData.map((_, i) =>
+        Animated.spring(sectionAnims[i], {
+          toValue: 1,
+          friction: 8,
+          tension: 40,
+          delay: 150 * (i + 1),
+          useNativeDriver: true,
+        }),
+      ),
+    ]).start();
   };
 
   useEffect(() => {
-    if (token) {
-      getCategoryData();
+    dispatch(fetchCategories());
+  }, [dispatch]);
+
+  useEffect(() => {
+    if (categories.length > 0) {
+      sectionAnims.length = 0;
+      categories.forEach(() => {
+        sectionAnims.push(new Animated.Value(0));
+      });
+
+      // now safe to run animations
+      startAnimations(categories);
     }
-  }, [token]);
+  }, [categories]);
+
+  // Handle scroll event
+  const handleScroll = Animated.event(
+    [{nativeEvent: {contentOffset: {y: scrollY}}}],
+    {useNativeDriver: true},
+  );
+
   if (error) {
     return (
       <>
@@ -89,23 +100,84 @@ const HomeScreen = () => {
 
   return (
     <SafeAreaView style={styles.container}>
-      <DashboardHeader />
-      <TrendingProducts categories={categories} />
-      <ScrollView
+      <Animated.View
+        style={{
+          opacity: headerAnim,
+          transform: [
+            {
+              translateY: headerAnim.interpolate({
+                inputRange: [0, 1],
+                outputRange: [-50, 0],
+              }),
+            },
+          ],
+        }}>
+        <DashboardHeader />
+        <TrendingProducts categories={categories} scrollY={scrollY} />
+      </Animated.View>
+
+      <Animated.FlatList
+        data={categories}
+        keyExtractor={item => item._id.toString()}
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollHomescreen}>
-        <View style={styles.sectionContainer}>
-          <ProductList title="Shop By Category" products={categories} />
-        </View>
-        {categories.map((category, index) => (
-          <View key={category._id}>
-            <ProductList
-              title={`${category.name}`}
-              products={subCategories[category._id] || []}
-            />
-          </View>
-        ))}
-      </ScrollView>
+        contentContainerStyle={styles.scrollHomescreen}
+        onScroll={handleScroll} // Add scroll handler
+        scrollEventThrottle={16} // 60fps
+        ListHeaderComponent={
+          <>
+            <RepeatOrder />
+            <Animated.View
+              style={{
+                opacity: categoriesListAnim,
+                transform: [
+                  {
+                    scale: categoriesListAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [0.95, 1],
+                    }),
+                  },
+                  {
+                    translateY: categoriesListAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [20, 0],
+                    }),
+                  },
+                ],
+              }}>
+              <ProductList title="Shop By Category" products={categories} />
+            </Animated.View>
+          </>
+        }
+        renderItem={({item, index}) => {
+          const anim = sectionAnims[index] || new Animated.Value(1); // fallback
+          return (
+            <Animated.View
+              key={`category-section-${item._id}`} // Add unique key
+              style={{
+                opacity: anim,
+                transform: [
+                  {
+                    translateY: anim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [30, 0],
+                    }),
+                  },
+                ],
+              }}>
+              <TouchableOpacity
+                activeOpacity={0.95}
+                onPress={() =>
+                  HapticFeedback.trigger('impactLight', hapticOptions)
+                }>
+                <ProductList
+                  title={item.name}
+                  products={subCategories[item._id] || []}
+                />
+              </TouchableOpacity>
+            </Animated.View>
+          );
+        }}
+      />
     </SafeAreaView>
   );
 };

@@ -1,4 +1,5 @@
 import {StyleSheet} from 'react-native';
+import {scale} from '../../utils/Responsive/responsive';
 
 const styles = StyleSheet.create({
   container: {
@@ -6,7 +7,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFF',
   },
   flatListContainer: {
-    paddingBottom: 20,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-around',
   },
   loadingText: {
     textAlign: 'center',
@@ -18,6 +21,23 @@ const styles = StyleSheet.create({
     marginTop: 20,
     fontSize: 16,
     color: 'red',
+  },
+  productContainer: {
+    zIndex: 9999,
+    // marginBottom: scale(200),
+    paddingBottom: scale(220),
+    backgroundColor: '#FFF',
+    borderTopLeftRadius: 15,
+    borderTopRightRadius: 15,
+    paddingVertical: scale(10),
+    marginTop: -80,
+  },
+  footerShimmerWrapper: {
+    flex: 1,
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    paddingVertical: 16,
   },
 });
 

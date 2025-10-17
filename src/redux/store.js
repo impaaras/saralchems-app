@@ -7,15 +7,20 @@ import searchReducer from './slices/searchSlice';
 import sortSlice from './slices/sortSlice';
 import modalReducer from './slices/modalSlice';
 import addCartReducer from './slices/addToCartSlice';
-import productReducer from './slices/productSlice';
+import productReducer, {categorySlice} from './slices/productSlice';
 import searchHistoryReducer from './slices/searchHistory';
 import newCart from './slices/newCart';
+import invoice from './slices/orderHistory';
+import categoryReducer from './slices/categoriesSlice';
+import homeReducer from './slices/homeSlice';
 
 export const store = configureStore({
   reducer: {
     auth: authReducer,
-    drawer: drawerReducer, // Add drawer reducer
+    drawer: drawerReducer,
     cart: cartReducer,
+    home: homeReducer,
+    categories: categoryReducer,
     search: searchReducer,
     sort: sortSlice,
     modal: modalReducer,
@@ -23,5 +28,6 @@ export const store = configureStore({
     product: productReducer,
     searchHistory: searchHistoryReducer,
     newCart: newCart,
+    invoiceSlice: invoice,
   },
 });

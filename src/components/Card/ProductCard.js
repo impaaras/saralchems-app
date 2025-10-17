@@ -9,12 +9,7 @@ import {
 import React, {useEffect, useRef, useState} from 'react';
 import {toggleShowVariants} from '../../redux/slices/authSlice';
 import {useDispatch, useSelector} from 'react-redux';
-import {
-  openScreen,
-  setVariants,
-  addItem,
-  // closeModal,
-} from '../../redux/slices/cartSlice'; // Import the action
+import {openScreen, setVariants, addItem} from '../../redux/slices/cartSlice'; // Import the action
 import {useNavigation} from '@react-navigation/native';
 import {ROUTES} from '../../constants/routes';
 import {ProductModal} from '../../screens';
@@ -25,6 +20,8 @@ import {fallbackImg} from '../../utils/images';
 import {selectVariant} from '../../utils/function/function';
 import styles from './Card.styles';
 import {setActiveProduct, setSelectedVariant} from '../../redux/slices/newCart';
+import {Plus} from 'lucide-react-native';
+import SafeImage from '../SafeImage/SafeImage';
 
 const ProductCard = ({item, onAddPress, idx, ParentCategoryId}) => {
   const dispatch = useDispatch();
@@ -42,7 +39,7 @@ const ProductCard = ({item, onAddPress, idx, ParentCategoryId}) => {
       parentId,
     }));
     dispatch(setVariants(updatedVariants));
-    dispatch(toggleShowVariants());
+    // dispatch(toggleShowVariants());
     dispatch(
       openModal({
         modalType: 'VARIANT_MODAL',
@@ -52,6 +49,7 @@ const ProductCard = ({item, onAddPress, idx, ParentCategoryId}) => {
   };
 
   const openAddModal = (product, index, currentIndex) => {
+    console.log(product);
     if (
       activeProduct?.selectedVariant === null ||
       activeProduct?._id !== currentIndex
@@ -130,31 +128,29 @@ const ProductCard = ({item, onAddPress, idx, ParentCategoryId}) => {
       <View style={styles.imageContainer}>
         {!item.image || item.image.length === 0 ? (
           <TouchableOpacity>
-            <Image
-              source={{
-                uri:
-                  Array.isArray(item.image) && item.image.length > 0
-                    ? `https://api.saraldyechems.com/upload/image/${item.image[0]}`
-                    : fallbackImg(),
-              }}
+            <SafeImage
+              sourceUri={
+                Array.isArray(item.image) && item.image.length > 0
+                  ? `https://api.saraldyechems.com/upload/image/${item.image[0]}`
+                  : null
+              }
               style={styles.productImage}
             />
           </TouchableOpacity>
         ) : (
           <TouchableOpacity
             onPress={() => handleImageZoom(item, item?.image, 0)}>
-            <Image
-              source={{
-                uri:
-                  Array.isArray(item.image) && item.image.length > 0
-                    ? `https://api.saraldyechems.com/upload/image/${item.image[0]}`
-                    : fallbackImg(),
-              }}
-              resizeMode="contain"
+            <SafeImage
+              sourceUri={
+                Array.isArray(item.image) && item.image.length > 0
+                  ? `https://api.saraldyechems.com/upload/image/${item.image[0]}`
+                  : null
+              }
               style={styles.productImage}
             />
           </TouchableOpacity>
         )}
+
         <TouchableOpacity
           style={styles.addButton}
           onPress={() => openAddModal(item, idx, item?._id)}>
@@ -165,7 +161,6 @@ const ProductCard = ({item, onAddPress, idx, ParentCategoryId}) => {
         <View
           style={{
             flexDirection: 'row',
-            justifyContent: 'space-between',
           }}>
           {item.variants.length > 0 && (
             <View style={styles.variantsContainer}>
@@ -176,34 +171,51 @@ const ProductCard = ({item, onAddPress, idx, ParentCategoryId}) => {
                   display: 'flex',
                   flexDirection: 'row',
                 }}>
-                {item.variants.slice(0, 3).map((variant, index) => (
-                  <TouchableOpacity
-                    key={index}
-                    style={
-                      activeProduct?.selectedVariant !==
-                      `${variant}AFTER${index}${idx}${item._id}`
-                        ? styles.variantItem
-                        : styles.selectedVariantItem
-                    }
-                    onPress={() =>
-                      handleVariantSelect(item, variant, index, idx, item?._id)
-                    }>
-                    <Text
+                {item.variants
+                  .filter(
+                    v =>
+                      v.toLowerCase() !== 'loose' &&
+                      v.toLowerCase() !== 'custom (kg)',
+                  )
+                  .slice(0, 3)
+                  .map((variant, index) => (
+                    <TouchableOpacity
+                      key={index}
                       style={
                         activeProduct?.selectedVariant !==
                         `${variant}AFTER${index}${idx}${item._id}`
-                          ? styles.variantText
-                          : styles.selectedVariantText
+                          ? styles.variantItem
+                          : styles.selectedVariantItem
+                      }
+                      onPress={() =>
+                        handleVariantSelect(
+                          item,
+                          variant,
+                          index,
+                          idx,
+                          item?._id,
+                        )
                       }>
-                      {variant.length > 50
-                        ? `${variant.substring(0, 50)}...`
-                        : variant}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
+                      <Text
+                        style={
+                          activeProduct?.selectedVariant !==
+                          `${variant}AFTER${index}${idx}${item._id}`
+                            ? styles.variantText
+                            : styles.selectedVariantText
+                        }>
+                        {variant.length > 50
+                          ? `${variant.substring(0, 50)}...`
+                          : variant}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
               </ScrollView>
 
-              {item.variants.length > 1 && (
+              {item.variants.filter(
+                v =>
+                  v.toLowerCase() !== 'loose' &&
+                  v.toLowerCase() !== 'custom (kg)',
+              ).length > 1 && (
                 <TouchableOpacity
                   style={styles.moreButton}
                   onPress={() =>
@@ -220,7 +232,7 @@ const ProductCard = ({item, onAddPress, idx, ParentCategoryId}) => {
         </TouchableOpacity>
         <View style={styles.brandInfo}>
           <Text style={styles.brandText}>
-            Brand:{' '}
+            Brand:
             {item.brand
               ? item.brand.length > 8
                 ? `${item.brand.substring(0, 8)}...`
