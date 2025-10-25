@@ -113,71 +113,73 @@ const HomeScreen = () => {
           ],
         }}>
         <DashboardHeader />
-        <TrendingProducts categories={categories} scrollY={scrollY} />
       </Animated.View>
 
-      <Animated.FlatList
-        data={categories}
-        keyExtractor={item => item._id.toString()}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={styles.scrollHomescreen}
-        onScroll={handleScroll} // Add scroll handler
-        scrollEventThrottle={16} // 60fps
-        ListHeaderComponent={
-          <>
-            <RepeatOrder />
-            <Animated.View
-              style={{
-                opacity: categoriesListAnim,
-                transform: [
-                  {
-                    scale: categoriesListAnim.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: [0.95, 1],
-                    }),
-                  },
-                  {
-                    translateY: categoriesListAnim.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: [20, 0],
-                    }),
-                  },
-                ],
-              }}>
-              <ProductList title="Shop By Category" products={categories} />
-            </Animated.View>
-          </>
-        }
-        renderItem={({item, index}) => {
-          const anim = sectionAnims[index] || new Animated.Value(1); // fallback
-          return (
-            <Animated.View
-              key={`category-section-${item._id}`} // Add unique key
-              style={{
-                opacity: anim,
-                transform: [
-                  {
-                    translateY: anim.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: [30, 0],
-                    }),
-                  },
-                ],
-              }}>
-              <TouchableOpacity
-                activeOpacity={0.95}
-                onPress={() =>
-                  HapticFeedback.trigger('impactLight', hapticOptions)
-                }>
-                <ProductList
-                  title={item.name}
-                  products={subCategories[item._id] || []}
-                />
-              </TouchableOpacity>
-            </Animated.View>
-          );
-        }}
-      />
+      <View style={{marginTop: -90, paddingBottom: 120}}>
+        <Animated.FlatList
+          data={categories}
+          keyExtractor={item => item._id.toString()}
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={styles.scrollHomescreen}
+          onScroll={handleScroll} // Add scroll handler
+          scrollEventThrottle={16} // 60fps
+          ListHeaderComponent={
+            <>
+              <TrendingProducts categories={categories} scrollY={scrollY} />
+              <RepeatOrder />
+              <Animated.View
+                style={{
+                  opacity: categoriesListAnim,
+                  transform: [
+                    {
+                      scale: categoriesListAnim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [0.95, 1],
+                      }),
+                    },
+                    {
+                      translateY: categoriesListAnim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [20, 0],
+                      }),
+                    },
+                  ],
+                }}>
+                <ProductList title="Shop By Category" products={categories} />
+              </Animated.View>
+            </>
+          }
+          renderItem={({item, index}) => {
+            const anim = sectionAnims[index] || new Animated.Value(1); // fallback
+            return (
+              <Animated.View
+                key={`category-section-${item._id}`} // Add unique key
+                style={{
+                  opacity: anim,
+                  transform: [
+                    {
+                      translateY: anim.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [30, 0],
+                      }),
+                    },
+                  ],
+                }}>
+                <TouchableOpacity
+                  activeOpacity={0.95}
+                  onPress={() =>
+                    HapticFeedback.trigger('impactLight', hapticOptions)
+                  }>
+                  <ProductList
+                    title={item.name}
+                    products={subCategories[item._id] || []}
+                  />
+                </TouchableOpacity>
+              </Animated.View>
+            );
+          }}
+        />
+      </View>
     </SafeAreaView>
   );
 };

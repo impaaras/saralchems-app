@@ -25,6 +25,7 @@ import {selectVariant, triggerHaptic} from '../../utils/function/function';
 import {extractQuantityPrefix} from '../../utils/function/removeVariantCharacter';
 import {fallbackImg} from '../../utils/images';
 import ScrollImage from '../../components/ScrollImage/Index';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 import {
   moderateScale,
   verticalScale,
@@ -143,7 +144,13 @@ const Dropdown = ({options, selectedValue, onSelect, label}) => {
 };
 
 // Enhanced Quantity selector component with animations
-const QuantitySelector = ({quantity, setQuantity, unit, enabled}) => {
+const QuantitySelector = ({
+  quantity,
+  setQuantity,
+  unit,
+  enabled,
+  setShowErrorMessage,
+}) => {
   const activeProduct = useSelector(state => state.newCart.activeProduct);
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const incrementAnim = useRef(new Animated.Value(1)).current;
@@ -166,6 +173,10 @@ const QuantitySelector = ({quantity, setQuantity, unit, enabled}) => {
   };
 
   const increment = () => {
+    if (trueValue) {
+      setShowErrorMessage('Variant is required');
+      return;
+    }
     triggerHaptic('medium');
     animateButton(incrementAnim);
     setQuantity(prev => prev + 1);
@@ -212,7 +223,7 @@ const QuantitySelector = ({quantity, setQuantity, unit, enabled}) => {
         <Animated.View style={{transform: [{scale: incrementAnim}]}}>
           <TouchableOpacity
             style={[styles.quantityButton, trueValue && styles.disabledButton]}
-            disabled={trueValue}
+            // disabled={trueValue}
             onPress={increment}
             activeOpacity={0.8}>
             <Text
@@ -395,6 +406,8 @@ const ProductModal = ({product}) => {
   const categoryName = useSelector(state => state.product.categoryName);
   const selectedVariant = useSelector(state => state.product.selectedVariant);
 
+  const [showErrorMessage, setShowErrorMessage] = useState('');
+
   const handleShowMore = product => {
     triggerHaptic('light');
     dispatch(closeModal());
@@ -403,7 +416,8 @@ const ProductModal = ({product}) => {
 
   const handleAddToCart = (productId, variant, quantity, itemId) => {
     if (!variant) {
-      Toast.show({type: 'error', text1: 'Variant is required'});
+      setShowErrorMessage('Variant is required');
+      // Toast.show({type: 'error', text1: 'Variant is required'});
       return;
     }
 
@@ -534,6 +548,12 @@ const ProductModal = ({product}) => {
     }
   }, [customValue]);
 
+  useEffect(() => {
+    if (activeProduct?.variant !== null) {
+      setShowErrorMessage('');
+    }
+  }, [activeProduct]);
+
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
   const calculateTotal = (variant, quantity) => {
@@ -569,6 +589,16 @@ const ProductModal = ({product}) => {
   ];
 
   const activeProduct = useSelector(state => state.newCart.activeProduct);
+
+  useEffect(() => {
+    if (showErrorMessage) {
+      const timer = setTimeout(() => {
+        setShowErrorMessage('');
+      }, 5000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [showErrorMessage]);
 
   return (
     <Animated.View
@@ -630,7 +660,6 @@ const ProductModal = ({product}) => {
               }}>
               <Text style={styles.title}>{selectedProductItem.name}</Text>
             </Animated.View>
-            <Toast position="top" />
             <Animated.View
               style={{
                 backgroundColor: '#E5F1FF',
@@ -737,14 +766,15 @@ const ProductModal = ({product}) => {
                                 key={`${index}`}
                                 label={size}
                                 selected={selectedSize === size}
-                                onPress={() =>
+                                onPress={() => {
                                   handleVariantSelect(
                                     size,
                                     index,
                                     selectedProductItem.parentId,
                                     selectedProductItem._id,
-                                  )
-                                }
+                                  );
+                                  setShowErrorMessage('');
+                                }}
                                 idx={index}
                                 item={selectedProductItem}
                               />
@@ -824,6 +854,43 @@ const ProductModal = ({product}) => {
             </Animated.View>
           </Animated.ScrollView>
 
+          {showErrorMessage && (
+            <Animated.View
+              style={{
+                position: 'absolute',
+                right: 10,
+                top: 20,
+                backgroundColor: '#FF3B30',
+                paddingHorizontal: 10,
+                paddingVertical: 6,
+                borderRadius: 8,
+                shadowColor: '#000',
+                shadowOffset: {width: 0, height: 2},
+                shadowOpacity: 0.25,
+                shadowRadius: 3.84,
+                elevation: 5,
+                flexDirection: 'row',
+                alignItems: 'center',
+                maxWidth: '60%',
+              }}>
+              <Icon
+                name="error-outline"
+                size={20}
+                color="#FFF"
+                style={{marginRight: 8}}
+              />
+              <Text
+                style={{
+                  color: 'white',
+                  fontSize: 14,
+                  fontWeight: '500',
+                  flex: 1,
+                }}>
+                {showErrorMessage}
+              </Text>
+            </Animated.View>
+          )}
+
           <Animated.View
             style={{
               backgroundColor: '#FFF',
@@ -857,6 +924,7 @@ const ProductModal = ({product}) => {
                 setQuantity={setQuantity}
                 unit={productData.unit}
                 enabled={customValue}
+                setShowErrorMessage={setShowErrorMessage}
               />
 
               {categoryName === 'Textile Printing Machines' ||

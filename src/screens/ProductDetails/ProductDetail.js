@@ -10,6 +10,7 @@ import {
   TextInput,
   FlatList,
   Dimensions,
+  Animated,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {useNavigation, useRoute} from '@react-navigation/native';
@@ -113,7 +114,11 @@ const ProductDetail = () => {
     }
   };
 
-  const incrementQuantity = () => {
+  const incrementQuantity = variant => {
+    if (!variant) {
+      setShowErrMsg('Variant is required');
+      return;
+    }
     setQuantity(quantity + 1);
   };
 
@@ -131,10 +136,12 @@ const ProductDetail = () => {
 
   const categoryName = useSelector(state => state.product.categoryName);
 
+  const [showErrMsg, setShowErrMsg] = useState('');
+
   const {showAlert} = useAlert();
   const handleAddToCart = (productId, variant, quantity) => {
     if (!variant) {
-      Toast.show({type: 'info', text1: 'Variant is required'});
+      setShowErrMsg('Variant is required');
       return;
     }
     let newVariant;
@@ -252,6 +259,16 @@ const ProductDetail = () => {
 
   const activeProduct = useSelector(state => state.newCart.activeProduct);
 
+  useEffect(() => {
+    if (showErrMsg) {
+      const timer = setTimeout(() => {
+        setShowErrMsg('');
+      }, 5000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [showErrMsg]);
+
   return (
     <SafeAreaView style={styles.container}>
       <DashboardHeader name={product?.name} />
@@ -323,14 +340,15 @@ const ProductDetail = () => {
                         <OptionButton
                           label={size}
                           selected={selectedSize === size}
-                          onPress={() =>
+                          onPress={() => {
                             selectVariant(
                               size,
                               sizeIndex,
                               parentIndex,
                               product?._id,
-                            )
-                          }
+                            );
+                            setShowErrMsg('');
+                          }}
                           idx={sizeIndex}
                           parentId={parentIndex}
                           productId={product?._id}
@@ -350,6 +368,43 @@ const ProductDetail = () => {
               )}
             </View>
           </View>
+
+          {showErrMsg && (
+            <Animated.View
+              style={{
+                position: 'absolute',
+                right: 10,
+                top: -100,
+                backgroundColor: '#FF3B30',
+                paddingHorizontal: 16,
+                paddingVertical: 12,
+                borderRadius: 8,
+                shadowColor: '#000',
+                shadowOffset: {width: 0, height: 2},
+                shadowOpacity: 0.25,
+                shadowRadius: 3.84,
+                elevation: 5,
+                flexDirection: 'row',
+                alignItems: 'center',
+                maxWidth: '60%',
+              }}>
+              <Icon
+                name="error-outline"
+                size={20}
+                color="#FFF"
+                style={{marginRight: 8}}
+              />
+              <Text
+                style={{
+                  color: 'white',
+                  fontSize: 14,
+                  fontWeight: '500',
+                  flex: 1,
+                }}>
+                {showErrMsg}
+              </Text>
+            </Animated.View>
+          )}
           <View style={styles.bottomActions}>
             <View style={styles.totalQty}>
               <Text style={styles.totalQtyText}>
@@ -370,19 +425,16 @@ const ProductDetail = () => {
                 <Text style={styles.quantityText}>{quantity}</Text>
                 <TouchableOpacity
                   style={styles.quantityBtn2}
-                  disabled={checkVariantsValue()}
-                  onPress={incrementQuantity}>
+                  // disabled={checkVariantsValue()}
+                  onPress={() =>
+                    incrementQuantity(activeProduct?.selectedVariant)
+                  }>
                   <Text style={styles.quantityBtnText}>+</Text>
                 </TouchableOpacity>
               </View>
               {categoryName === 'Machines' ||
               !product?.variants?.length ||
               categoryName === 'Textile Printing Machines' ? (
-                // {categoryName === 'Textile Printing Machines' ||
-                // !selectedProductItem?.variants.length ||
-                // activeProduct?.selectVariant ||
-                // categoryName === 'Machines' ? (
-
                 <LinearGradient
                   colors={['#1B2B48', '#2D4565']}
                   start={{x: 0, y: 0}}

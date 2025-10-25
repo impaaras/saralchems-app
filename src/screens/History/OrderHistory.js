@@ -236,6 +236,7 @@ import TrackingCard from '../../components/TrackingCard/TrackingCard';
 import {hp} from '../../utils/Responsive/responsive';
 import OrderCardShimmer from './OrderCardShimmer';
 import api from '../../redux/api';
+import {useSelector} from 'react-redux';
 
 const OrderHistory = () => {
   const [activeTab, setActiveTab] = useState('All Orders');
@@ -244,6 +245,7 @@ const OrderHistory = () => {
   const navigation = useNavigation();
   const [isLoadingLocal, setIsLoadingLocal] = useState(true);
   const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
+  const {user} = useSelector(state => state.auth);
 
   const fetchOrders = useCallback(
     async (forceRefresh = false) => {
@@ -252,12 +254,9 @@ const OrderHistory = () => {
         setLoading(true);
       }
       setIsLoadingLocal(true);
-
-      console.log(`${api}/order/user-orders`);
       try {
-        const response = await api.get(`/order/user-orders`);
-        console.log('response data', response.data);
-        setOrders(response.data);
+        const response = await api.get(`/order/user-orders/${user?._id}`);
+        setOrders(response.data.data);
         setHasLoadedOnce(true);
       } catch (error) {
         console.log(error.response);

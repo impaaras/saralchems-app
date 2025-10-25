@@ -36,6 +36,7 @@ const styles = StyleSheet.create({
   scrollHomescreen: {
     paddingBottom: 80,
   },
+
   loadingOverlay: {
     position: 'absolute',
     top: 0,

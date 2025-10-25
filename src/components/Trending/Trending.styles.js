@@ -5,7 +5,6 @@ const styles = StyleSheet.create({
   container: {
     paddingTop: 14,
     paddingBottom: 4,
-    marginTop: -100,
     marginLeft: -5,
   },
 
@@ -19,9 +18,6 @@ const styles = StyleSheet.create({
     color: 'white',
   },
   scrollContent: {
-    // paddingHorizontal: 12,
-    // paddingBottom: 5,
-    // marginLeft: scale(5),
     paddingHorizontal: 12,
     paddingVertical: 8,
     alignItems: 'center',
